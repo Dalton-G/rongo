@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "331297986045",
+    "project_id": "rongo-8a4e5",
+    "storage_bucket": "rongo-8a4e5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:331297986045:android:b1cd710312c8f5bfabb594",
+        "android_client_info": {
+          "package_name": "com.example.rongo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeA_DdQsdensMdk6UYh9iv5w2RbwCU7-U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
