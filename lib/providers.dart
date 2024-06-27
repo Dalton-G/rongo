@@ -1,5 +1,5 @@
 import 'package:provider/provider.dart';
-import 'package:rongo/provider/onboarding.dart';
+import 'package:rongo/provider/onboarding_provider.dart';
 
 class Providers {
   Providers._();
