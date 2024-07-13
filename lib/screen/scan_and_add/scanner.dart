@@ -59,11 +59,11 @@ class _ScannerState extends State<Scanner> {
   Future<String?> _onItemFound() async {
     try {
       final image = await photoPicker.takePhoto();
-
+      _isFollowUp = !result.isEmpty;
       final itemFound = await validateImage(image);
       final response = itemFound.text!.replaceAll("```json", "").replaceAll("```", "");
       Map tempResponse = json.decode(response);
-      var tempResult = _isFollowUp? result.map((key, value) => value == tempResponse[key]? value:tempResponse[key]): tempResponse;
+      var tempResult = _isFollowUp? result.map((key, value) => value == tempResponse[key]? MapEntry(key, value): value=="Not visible"?MapEntry(key, tempResponse[key]):MapEntry(key, value)): tempResponse;
 
       setState(() {
         img = image;
@@ -206,15 +206,18 @@ class _ScannerState extends State<Scanner> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               CustomizedButton(
+                                tooltip: "Scan again to add on details to the item",
                                 func: _onItemFound,
                                 title: "Scan Again",
                               ),
                               CustomizedButton(
+                                tooltip: "Add to fridge",
                                 func: addToFridge,
                                 isRoundButton: true,
                                 icon: Icons.add,
                               ),
                               CustomizedButton(
+                                tooltip: "Discard this item",
                                 color: Colors.redAccent,
                                 func: remove,
                                 isRoundButton: true,

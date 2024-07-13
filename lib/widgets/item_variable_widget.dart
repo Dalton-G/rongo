@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:rongo/utils/theme/theme.dart';
 
@@ -16,51 +17,42 @@ class ItemVariableWidget extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(
           8.0, 20, 8, 0),
       child: Container(
-        height: 70,
+        padding: EdgeInsets.symmetric(vertical: 17, horizontal: 20),
+        decoration: AppTheme.widgetDeco(),
+
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(
-                  20.0),
-              child: Icon(
-                variableIcon[title],
-                color: AppTheme.mainGreen,
-              ),
+            Icon(
+              variableIcon[title],
+              color: AppTheme.mainGreen,
             ),
-            Column(
-              mainAxisAlignment:
-              MainAxisAlignment.start,
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets
-                      .fromLTRB(
-                      8.0, 10, 8, 0),
-                  child: Text(title,
+            SizedBox(width: 20,),
+            Flexible(
+              child: Column(
+                mainAxisAlignment:
+                MainAxisAlignment.start,
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
+                children: [
+                  Text(title,
                       style: TextStyle(
                           fontSize: 12)),
-                ),
-                Wrap(
-                  children: [Padding(
-                    padding: const EdgeInsets
-                        .fromLTRB(
-                        8.0, 4, 8, 0),
-                    child: Text(
-                      softWrap: true,
-                      toBeginningOfSentenceCase(output),
-                      style: TextStyle(
-                          fontWeight:
-                          FontWeight.w500,
-                          fontSize: 17),
-                    ),
-                  )],
-                )
-              ],
+                  SizedBox(height: 7,),
+                  Text(
+                    softWrap: true,
+                    toBeginningOfSentenceCase(output),
+                    style: TextStyle(
+                      color: Colors.black87,
+                        fontWeight:
+                        FontWeight.w500,
+                        fontSize: 17),
+                  )
+                ],
+              ),
             )
           ],
         ),
-        decoration: AppTheme.widgetDeco(),
       ),
     );
   }
