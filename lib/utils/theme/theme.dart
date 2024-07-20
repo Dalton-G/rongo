@@ -76,7 +76,6 @@ class AppTheme {
   //   textTheme: _lightTextTheme,
   // );
 
-
   // JL
   static const mainGreen = Color(0xff25995C);
   static const backgroundWhite = Color(0xffFAFAFA);
@@ -88,28 +87,43 @@ class AppTheme {
       border: Border.all(color: Colors.grey.withOpacity(0.30)),
       boxShadow: [
         BoxShadow(
-          color: Colors.grey
-              .withOpacity(0.2),
+          color: Colors.grey.withOpacity(0.2),
           spreadRadius: 2,
           blurRadius: 3,
-          offset: Offset(0,
-              3), // changes position of shadow
+          offset: Offset(0, 3), // changes position of shadow
         ),
       ],
     );
   }
 
+//suzanne
 
+  static TextStyle blackBodyText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 16,
+      color: Colors.grey[900],
+    ),
+  );
 
-  static TextStyle buttonText(){
-    return TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600);
+  static TextStyle whiteButtonText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 20,
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  static TextStyle buttonText() {
+    return TextStyle(
+        color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600);
   }
 
   static AppBarTheme _lightAppBarTheme = AppBarTheme(
     centerTitle: true,
     backgroundColor: backgroundWhite,
     surfaceTintColor: Colors.transparent,
-    titleTextStyle: GoogleFonts.nunito(fontSize: 20, color: Colors.black, fontWeight: FontWeight.w600),
+    titleTextStyle: GoogleFonts.nunito(
+        fontSize: 20, color: Colors.black, fontWeight: FontWeight.w600),
     elevation: 0,
     iconTheme: IconThemeData(color: mainGreen),
   );
@@ -120,31 +134,28 @@ class AppTheme {
 
   static final ThemeData lightTheme = ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: mainGreen),
-      primarySwatch:generateMaterialColor(mainGreen),
-    scaffoldBackgroundColor: backgroundWhite,
-    appBarTheme: _lightAppBarTheme,
-    iconTheme: _lightIconTheme,
-    textTheme: GoogleFonts.nunitoTextTheme()
-    //     .copyWith(
-    //   displayLarge: TextStyle(fontWeight: FontWeight.w500),
-    //   displayMedium: TextStyle(fontWeight: FontWeight.w500),
-    //   displaySmall: TextStyle(fontWeight: FontWeight.w500),
-    //   headlineMedium: TextStyle(fontWeight: FontWeight.w500),
-    //   headlineSmall: TextStyle(fontWeight: FontWeight.w500),
-    //   titleLarge: TextStyle(fontWeight: FontWeight.w500),
-    //   titleMedium: TextStyle(fontWeight: FontWeight.w500),
-    //   titleSmall: TextStyle(fontWeight: FontWeight.w500),
-    //   bodyLarge: TextStyle(fontWeight: FontWeight.w500),
-    //   bodyMedium: TextStyle(fontWeight: FontWeight.w500),
-    //   bodySmall: TextStyle(fontWeight: FontWeight.w500),
-    //   labelLarge: TextStyle(fontWeight: FontWeight.w500),
-    //   labelSmall: TextStyle(fontWeight: FontWeight.w500),
-    // ),
-  );
-
-
+      primarySwatch: generateMaterialColor(mainGreen),
+      scaffoldBackgroundColor: backgroundWhite,
+      appBarTheme: _lightAppBarTheme,
+      iconTheme: _lightIconTheme,
+      textTheme: GoogleFonts.nunitoTextTheme()
+      //     .copyWith(
+      //   displayLarge: TextStyle(fontWeight: FontWeight.w500),
+      //   displayMedium: TextStyle(fontWeight: FontWeight.w500),
+      //   displaySmall: TextStyle(fontWeight: FontWeight.w500),
+      //   headlineMedium: TextStyle(fontWeight: FontWeight.w500),
+      //   headlineSmall: TextStyle(fontWeight: FontWeight.w500),
+      //   titleLarge: TextStyle(fontWeight: FontWeight.w500),
+      //   titleMedium: TextStyle(fontWeight: FontWeight.w500),
+      //   titleSmall: TextStyle(fontWeight: FontWeight.w500),
+      //   bodyLarge: TextStyle(fontWeight: FontWeight.w500),
+      //   bodyMedium: TextStyle(fontWeight: FontWeight.w500),
+      //   bodySmall: TextStyle(fontWeight: FontWeight.w500),
+      //   labelLarge: TextStyle(fontWeight: FontWeight.w500),
+      //   labelSmall: TextStyle(fontWeight: FontWeight.w500),
+      // ),
+      );
 }
-
 
 MaterialColor generateMaterialColor(Color color) {
   return MaterialColor(color.value, {
@@ -174,6 +185,7 @@ int shadeValue(int value, double factor) =>
     max(0, min(value - (value * factor).round(), 255));
 
 Color shadeColor(Color color, double factor) => Color.fromRGBO(
-shadeValue(color.red, factor),
-shadeValue(color.green, factor),
-shadeValue(color.blue, factor) , 1);
+    shadeValue(color.red, factor),
+    shadeValue(color.green, factor),
+    shadeValue(color.blue, factor),
+    1);

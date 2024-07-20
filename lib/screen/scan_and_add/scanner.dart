@@ -28,7 +28,7 @@ class _ScannerState extends State<Scanner> {
   bool _isFollowUp = false;
 
   final model = GenerativeModel(
-    model: 'gemini-pro-vision',
+    model: 'gemini-1.5-flash',
     apiKey: "AIzaSyACPCSYzUuIZ96eU6rJDyf_EN551oVxxFU",
   );
 
@@ -61,9 +61,16 @@ class _ScannerState extends State<Scanner> {
       final image = await photoPicker.takePhoto();
       _isFollowUp = !result.isEmpty;
       final itemFound = await validateImage(image);
-      final response = itemFound.text!.replaceAll("```json", "").replaceAll("```", "");
+      final response =
+          itemFound.text!.replaceAll("```json", "").replaceAll("```", "");
       Map tempResponse = json.decode(response);
-      var tempResult = _isFollowUp? result.map((key, value) => value == tempResponse[key]? MapEntry(key, value): value=="Not visible"?MapEntry(key, tempResponse[key]):MapEntry(key, value)): tempResponse;
+      var tempResult = _isFollowUp
+          ? result.map((key, value) => value == tempResponse[key]
+              ? MapEntry(key, value)
+              : value == "Not visible"
+                  ? MapEntry(key, tempResponse[key])
+                  : MapEntry(key, value))
+          : tempResponse;
 
       setState(() {
         img = image;
@@ -75,8 +82,6 @@ class _ScannerState extends State<Scanner> {
     }
     return null;
   }
-
-
 
   List<Widget> generateOutput() {
     List<Widget> variableList = variableIcon.keys
@@ -206,7 +211,8 @@ class _ScannerState extends State<Scanner> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               CustomizedButton(
-                                tooltip: "Scan again to add on details to the item",
+                                tooltip:
+                                    "Scan again to add on details to the item",
                                 func: _onItemFound,
                                 title: "Scan Again",
                               ),
