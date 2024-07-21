@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
         home: const OnboardingPage(),
         theme: AppTheme.lightTheme,
         routes: Routes.routes,
+
       ),
     );
   }

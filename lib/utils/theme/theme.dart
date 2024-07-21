@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /*
 # README
@@ -73,22 +76,6 @@ class AppTheme {
   //   textTheme: _lightTextTheme,
   // );
 
-  // DG
-  static InputDecoration recipeDropdownMenu = InputDecoration(
-    fillColor: AppTheme.backgroundWhite,
-    filled: true,
-    prefixIcon: const Icon(Icons.soup_kitchen, color: mainGreen),
-    suffixIcon: const Icon(Icons.keyboard_arrow_down, color: mainGreen),
-    enabledBorder: OutlineInputBorder(
-      borderSide: const BorderSide(color: backgroundWhite),
-      borderRadius: BorderRadius.circular(15),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: const BorderSide(color: backgroundWhite),
-      borderRadius: BorderRadius.circular(15),
-    ),
-  );
-
   // JL
   static const mainGreen = Color(0xff25995C);
   static const backgroundWhite = Color(0xffFAFAFA);
@@ -109,6 +96,23 @@ class AppTheme {
     );
   }
 
+//suzanne
+
+  static TextStyle blackBodyText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 16,
+      color: Colors.grey[900],
+    ),
+  );
+
+  static TextStyle whiteButtonText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 20,
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
   static TextStyle buttonText() {
     return TextStyle(
         color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600);
@@ -121,29 +125,13 @@ class AppTheme {
     titleTextStyle: GoogleFonts.nunito(
         fontSize: 20, color: Colors.black, fontWeight: FontWeight.w600),
     elevation: 0,
-    iconTheme: IconThemeData(color: mercuryWhite),
+    iconTheme: IconThemeData(color: mainGreen),
   );
 
-  // Color Scheme
-  static const ColorScheme _lightColorScheme = ColorScheme.light(
-    primary: nordicGrey,
-    secondary: nordicGrey,
-    error: boldRed,
-  );
-
-  // Icon Theme
   static const IconThemeData _lightIconTheme = IconThemeData(
-    color: nordicGrey,
+    color: mainGreen,
   );
 
-  // Text Theme
-  static const TextTheme _lightTextTheme = TextTheme(
-    titleLarge: titleLarge,
-    bodyLarge: bodyLarge,
-    // titleMedium, titleSmall, bodyMedium, bodySmall, etc
-  );
-
-  // Themes 主题
   static final ThemeData lightTheme = ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: mainGreen),
       primarySwatch: generateMaterialColor(mainGreen),
