@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:image_picker/image_picker.dart';
@@ -28,24 +29,41 @@ class _ScannerState extends State<Scanner> {
   bool _isFollowUp = false;
 
   final model = GenerativeModel(
-    model: 'gemini-1.5-flash',
-    apiKey: "AIzaSyACPCSYzUuIZ96eU6rJDyf_EN551oVxxFU",
+    model: 'gemini-1.5-flash-001',
+    apiKey: dotenv.env['GEMINI_API_KEY']!,
   );
 
   Future<GenerateContentResponse> validateImage(Uint8List image) async {
     setState(() {
       _isLoading = true;
     });
-    const prompt =
-        'You are helping your mom to buy groceries, you need to recognize the name of item including the brand accurately and the ingredients of the item.'
-        'You have been given a photo of the item, read the name carefully and also try to spot the expiry date and ingredient table in the image if provided.'
-        'Identify the name as what name it should used when displayed on the rack in the groceries store'
-        'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or others.'
-        'All the cooked food shall be considered as leftovers'
-        'If the item scanned is not a food, simply return false for the isFood column in the response and leave the column as none'
-        'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return not visible'
-        'Provide your response as a JSON object with the following schema: {"isFood": true or false whether the item is a food, "Item name": name of item, "Categories": categories of item, "Ingredients": the ingredients in the ingredients table, "Expiry date": expiry date identified, return not visible if not found in photo}.'
-        'Do not return your result as Markdown.';
+    const prompt = 'You are helping your mom to buy groceries, you need to recognize the name of item including the brand accurately and the ingredients of the item.'
+    'You have been given a photo of the item, read the name carefully and also try to spot the expiry date and ingredient table in the image if provided.'
+    'Identify the name as what name it should used when displayed on the rack in the groceries store'
+    'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or others.'
+    'All the cooked food shall be considered as leftovers'
+    'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
+    'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
+    'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, so instead of expiry date return the days'
+    'Also recommend storage method to keep the food fresh for longer time.'
+    'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
+    '**For allergens and halal, if you cannot find the information, use "Unknown" as the value.**'
+    'Provide your response as a JSON object with the following keys: {"isFood": bool , "Item name": string, "Categories": string, "Ingredients": List of strings, "Expiry date": string(DD/MM/YYYY) or string(days to keep), "Storage method": string, "Allergens": List of strings, "Halal": String}.'
+    'Do not return your result as Markdown.';
+        // 'You are helping your mom to buy groceries, you need to recognize the name of item including the brand accurately and the ingredients of the item.'
+        // 'You have been given a photo of the item, read the name carefully and also try to spot the expiry date and ingredient table in the image if provided.'
+        // 'Identify the name as what name it should used when displayed on the rack in the groceries store'
+        // 'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or others.'
+        // 'All the cooked food shall be considered as leftovers'
+        // 'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
+        // 'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
+        // 'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, so instead of expiry date return the days'
+        // 'Also recommend storage method to keep the food fresh for longer time.'
+        // 'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
+        //
+        // 'Provide your response as a JSON object with the following keys: {"isFood": bool , "Item name": string, "Categories": string, "Ingredients": List of strings, "Expiry date": string(DD/MM/YYYY) or string(days to keep), "Storage method": string, "Allergens": List of strings, "Halal": String}.'
+        // 'Do not return not visible for allergens and halal.'
+        // 'Do not return your result as Markdown.';
 
     final response = await model.generateContent([
       Content.multi([TextPart(prompt), DataPart('image/jpeg', image)]),
@@ -53,6 +71,7 @@ class _ScannerState extends State<Scanner> {
     setState(() {
       _isLoading = false;
     });
+    print(response);
     return response;
   }
 
@@ -84,7 +103,9 @@ class _ScannerState extends State<Scanner> {
   }
 
   List<Widget> generateOutput() {
-    List<Widget> variableList = variableIcon.keys
+    List variableKeys =
+        result.keys.where((element) => element != "isFood").toList();
+    List<Widget> variableList = variableKeys
         .map((e) => ItemVariableWidget(
             output: (result[e] is String) ? result[e] : result[e].join(", "),
             title: e))

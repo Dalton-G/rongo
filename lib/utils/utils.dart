@@ -5,7 +5,11 @@ Map<String, IconData> variableIcon = {
   "Item name": Icons.image_rounded,
   "Categories": Icons.category_rounded,
   "Ingredients": Icons.incomplete_circle_rounded,
-  "Expiry date": Icons.date_range_rounded
+  "Expiry date": Icons.date_range_rounded,
+  "Storage method": Icons.food_bank_rounded,
+  "Freshness": Icons.browse_gallery_rounded,
+  "Allergens": Icons.sick,
+  "Halal" : Icons.restaurant,
 };
 
 showSnackBar(String message, context) {

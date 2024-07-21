@@ -31,7 +31,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   //functions
   void _navToHomePage() {
-    Navigator.pushNamed(context, Routes.homepage);
+    Navigator.pushNamed(context, Routes.scanner);
   }
 
   @override
