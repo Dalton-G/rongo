@@ -12,6 +12,10 @@ class FeaturePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             CustomizedButton(
+              title: "Onboarding",
+              func: () => Navigator.pushNamed(context, '/onboarding'),
+            ),
+            CustomizedButton(
               title: "Recipe",
               func: () => Navigator.pushNamed(context, '/recipe-homepage'),
             ),
