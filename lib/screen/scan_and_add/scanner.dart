@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:keyboard_detection/keyboard_detection.dart';
 import 'dart:convert';
 
 import 'package:rongo/utils/theme/theme.dart';
@@ -27,6 +28,8 @@ class _ScannerState extends State<Scanner> {
   Map result = {};
   Uint8List? img;
   bool _isFollowUp = false;
+  late KeyboardDetectionController _keyboardDetectionController;
+  bool _keyboard = false;
 
   final model = GenerativeModel(
     model: 'gemini-1.5-flash-001',
@@ -40,7 +43,7 @@ class _ScannerState extends State<Scanner> {
     const prompt = 'You are helping your mom to buy groceries, you need to recognize the name of item including the brand accurately and the ingredients of the item.'
     'You have been given a photo of the item, read the name carefully and also try to spot the expiry date and ingredient table in the image if provided.'
     'Identify the name as what name it should used when displayed on the rack in the groceries store'
-    'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or others.'
+    'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or Others.'
     'All the cooked food shall be considered as leftovers'
     'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
     'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
@@ -172,89 +175,117 @@ class _ScannerState extends State<Scanner> {
       }
     });
   }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _keyboardDetectionController = KeyboardDetectionController(
+      onChanged: (value) {
+        setState(() {
+          _keyboard = _keyboardDetectionController.stateAsBool()!;
+        });
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Food Scanner"),
-      ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: _isLoading
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 100.0),
-                              child: const SizedBox(
-                                height: 30,
-                                width: 30,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppTheme.mainGreen,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (bool didPop) {
+        if (didPop) {
+          return;
+        }
+        showBackDialog('Discard record and leave?', context);
+      },
+      child: KeyboardDetection(
+        controller: _keyboardDetectionController,
+        child: Scaffold(
+
+          appBar: AppBar(
+            title: const Text("Food Scanner"),
+          ),
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: SizedBox(
+                      width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: _isLoading
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 100.0),
+                                  child: const SizedBox(
+                                    height: 30,
+                                    width: 30,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        color: AppTheme.mainGreen,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          )
-                        : result.isEmpty
-                            ? displayMessages(
-                                "Tap on scan button to see the magic!")
-                            : result["isFood"]
-                                ? SingleChildScrollView(
-                                    child: Column(children: generateOutput()),
-                                  )
-                                : displayMessages(
-                                    "Item scanned is not a food!\nTry again by tapping on the scan button!"),
-                  )),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10.0, bottom: 20),
-                child: result.isEmpty
-                    ? CustomizedButton(
-                        func: _onItemFound,
-                        title: "Scan",
-                      )
-                    : !result["isFood"]
-                        ? CustomizedButton(
-                            func: _onItemFound,
-                            title: "Scan",
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              CustomizedButton(
-                                tooltip:
-                                    "Scan again to add on details to the item",
-                                func: _onItemFound,
-                                title: "Scan Again",
-                              ),
-                              CustomizedButton(
-                                tooltip: "Add to fridge",
-                                func: addToFridge,
-                                isRoundButton: true,
-                                icon: Icons.add,
-                              ),
-                              CustomizedButton(
-                                tooltip: "Discard this item",
-                                color: Colors.redAccent,
-                                func: remove,
-                                isRoundButton: true,
-                                icon: Icons.delete,
                               )
-                            ],
-                          ),
-              ),
+                            : result.isEmpty
+                                ? displayMessages(
+                                    "Tap on scan button to see the magic!")
+                                : result["isFood"]
+                                    ? SingleChildScrollView(
+                                        child: Column(children: generateOutput()),
+                                      )
+                                    : displayMessages(
+                                        "Item scanned is not a food!\nTry again by tapping on the scan button!"),
+                      )),
+                ),
+                Visibility(
+                  visible: !_keyboard,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 20),
+                      child: result.isEmpty
+                          ? CustomizedButton(
+                              func: _onItemFound,
+                              title: "Scan",
+                            )
+                          : !result["isFood"]
+                              ? CustomizedButton(
+                                  func: _onItemFound,
+                                  title: "Scan",
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    CustomizedButton(
+                                      tooltip:
+                                          "Scan again to add on details to the item",
+                                      func: _onItemFound,
+                                      title: "Scan Again",
+                                    ),
+                                    CustomizedButton(
+                                      tooltip: "Add to fridge",
+                                      func: addToFridge,
+                                      isRoundButton: true,
+                                      icon: Icons.add,
+                                    ),
+                                    CustomizedButton(
+                                      tooltip: "Discard this item",
+                                      color: Colors.redAccent,
+                                      func: remove,
+                                      isRoundButton: true,
+                                      icon: Icons.delete,
+                                    )
+                                  ],
+                                ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
