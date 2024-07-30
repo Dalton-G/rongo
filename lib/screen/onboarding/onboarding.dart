@@ -1,10 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rongo/screen/onboarding/onboardingpage1.dart';
 import 'package:rongo/screen/onboarding/onboardingpage2.dart';
 import 'package:rongo/screen/onboarding/onboardingpage3.dart';
 import 'package:rongo/utils/theme/theme.dart';
-import 'package:rongo/utils/utils.dart';
 import 'package:rongo/routes.dart';
 import 'package:rongo/widgets/button.dart';
 
