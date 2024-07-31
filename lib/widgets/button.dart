@@ -94,3 +94,38 @@ class DefaultButton extends StatelessWidget {
     );
   }
 }
+
+class RoundButton extends StatelessWidget {
+  final Color color;
+  final Color iconColor;
+  final IconData icon;
+  final void Function() func;
+  const RoundButton({
+    Key? key,
+    required this.color,
+    required this.iconColor,
+    required this.icon,
+    required this.func,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: func,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            boxShadow: AppTheme.bottomLightShadow),
+        child: Center(
+          child: Icon(
+            icon,
+            color: iconColor,
+          ),
+        ),
+      ),
+    );
+  }
+}
