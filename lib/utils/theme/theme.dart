@@ -113,6 +113,9 @@ class AppTheme {
   }
 
 //suzanne
+
+  static const lighterGreen = Color.fromARGB(255, 177, 213, 194);
+
   static TextStyle blackBodyText = GoogleFonts.nunito(
     textStyle: TextStyle(
       fontSize: 16,
