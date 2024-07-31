@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rongo/routes.dart';
 
 void dialogPopUp(BuildContext context) {
   showDialog(
@@ -44,6 +45,13 @@ class FridgePage extends StatefulWidget {
 class _FridgePageState extends State<FridgePage> {
   @override
   Widget build(BuildContext context) {
+    //functions
+
+    //NOTE: placeholder until refridgerator is done, replace route with refridgerator later on
+    void _navToNotePage() {
+      Navigator.pushNamed(context, Routes.notespage);
+    }
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -52,9 +60,12 @@ class _FridgePageState extends State<FridgePage> {
         children: [
           //fridge background
           Positioned.fill(
-            child: Image.asset(
-              'lib/images/fridgebackground.png',
-              fit: BoxFit.cover,
+            child: GestureDetector(
+              onTap: () => _navToNotePage(),
+              child: Image.asset(
+                'lib/images/fridgebackground.png',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
 
