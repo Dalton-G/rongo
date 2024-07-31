@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:rongo/screen/fridge/fridge.dart';
 import 'package:rongo/screen/home/dummypages.dart';
 import 'package:rongo/screen/home/homepagecontent.dart';
 import 'package:rongo/screen/scan_and_add/scanner.dart';
@@ -21,7 +22,7 @@ class _HomePageState extends State<HomePage> {
   //pages for navbar
   final List<Widget> _pages = [
     HomePageContent(),
-    DummyPage1(),
+    FridgePage(),
     DummyPage2(),
     Scanner(),
     DummyPage3(),
