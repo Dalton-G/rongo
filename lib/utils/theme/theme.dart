@@ -113,11 +113,39 @@ class AppTheme {
   }
 
 //suzanne
-
   static TextStyle blackBodyText = GoogleFonts.nunito(
     textStyle: TextStyle(
       fontSize: 16,
       color: Colors.grey[900],
+    ),
+  );
+
+  static TextStyle whiteBodyText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 16,
+      color: Colors.white,
+    ),
+  );
+
+  static TextStyle whiteSubtitleText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 12,
+      color: Colors.white,
+      height: 1.2,
+    ),
+  );
+
+  static TextStyle blackAppBarText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 18,
+      color: Colors.grey[900],
+    ),
+  );
+
+  static TextStyle greenAppBarText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 18,
+      color: mainGreen,
     ),
   );
 
