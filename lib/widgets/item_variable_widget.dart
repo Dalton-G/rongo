@@ -6,52 +6,162 @@ import 'package:rongo/utils/theme/theme.dart';
 
 import '../utils/utils.dart';
 
-class ItemVariableWidget extends StatelessWidget {
+class ItemVariableWidget extends StatefulWidget {
   final String output;
   final String title;
-  const ItemVariableWidget({super.key, required this.output, required this.title});
+
+  const ItemVariableWidget(
+      {super.key, required this.output, required this.title});
+
+  @override
+  State<ItemVariableWidget> createState() => _ItemVariableWidgetState();
+}
+
+class _ItemVariableWidgetState extends State<ItemVariableWidget> {
+  TextEditingController _controller = TextEditingController();
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _controller.text = toBeginningOfSentenceCase(widget.output);
+    _selectedIndex = cats.indexWhere((cat) => cat == widget.output);
+  }
+
+  void undo() {
+    _controller.text = widget.output;
+    setState(() {
+
+    });
+  }
+
+  void selectCat() {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) => StatefulBuilder(
+              builder: (BuildContext context,
+                      StateSetter setModalState /*You can rename this!*/) =>
+                  Container(
+                      width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: ListView.builder(
+                          itemCount: cats.length,
+                          itemBuilder: (context, index) {
+                            String cat = cats[index];
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedIndex = index;
+                                  _controller.text = cats[index];
+                                  setModalState(() {});
+                                });
+                              },
+                              child: ListTile(
+                                title: Text(
+                                  cat,
+                                  style: TextStyle(
+                                    color: index == _selectedIndex
+                                        ? AppTheme.mainGreen
+                                        : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )),
+            ));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          8.0, 20, 8, 0),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 17, horizontal: 20),
-        decoration: AppTheme.widgetDeco(),
-
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Icon(
-              variableIcon[title],
-              color: AppTheme.mainGreen,
-            ),
-            SizedBox(width: 20,),
-            Flexible(
-              child: Column(
-                mainAxisAlignment:
-                MainAxisAlignment.start,
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: TextStyle(
-                          fontSize: 12)),
-                  SizedBox(height: 7,),
-                  Text(
-                    softWrap: true,
-                    toBeginningOfSentenceCase(output),
-                    style: TextStyle(
-                      color: Colors.black87,
-                        fontWeight:
-                        FontWeight.w500,
-                        fontSize: 17),
-                  )
-                ],
+      padding: const EdgeInsets.fromLTRB(8.0, 20, 8, 0),
+      child: GestureDetector(
+        onTap: widget.title == "Categories"
+            ? selectCat
+            : widget.title == "Expiry date"
+                ? () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2050),
+                    ).then((value) => setState(() {
+                          _controller.text = DateFormat("d MMM y").format(
+                              DateTime(value!.year, value.month, value.day));
+                        }));
+                  }
+                : () {},
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 17, horizontal: 20),
+          decoration: AppTheme.widgetDeco(),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(
+                variableIcon[widget.title],
+                color: AppTheme.mainGreen,
               ),
-            )
-          ],
+              SizedBox(
+                width: 20,
+              ),
+              Flexible(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.title, style: TextStyle(fontSize: 12)),
+                    SizedBox(
+                      height: 7,
+                    ),
+                    (widget.title == "Categories" ||
+                            widget.title == "Expiry date")
+                        ? Container(
+                            width: double.infinity,
+                            child: Text(
+                              _controller.text,
+                              style: TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15),
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: TextField(
+                              onChanged: (text){setState(() {
+
+                              });},
+                              onTapOutside: (event) {
+                                print('onTapOutside');
+                                FocusManager.instance.primaryFocus?.unfocus();
+                              },
+                              maxLines: null,
+                              controller: _controller,
+                              decoration: null,
+                              style: TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15),
+                            ),
+                          )
+                  ],
+                ),
+              ),
+              Visibility(
+                visible: _controller.text != widget.output,
+                child: GestureDetector(
+                  onTap: undo,
+                    child: Icon(
+                  Icons.undo,
+                  color: Colors.grey,
+                )),
+              )
+            ],
+          ),
         ),
       ),
     );
