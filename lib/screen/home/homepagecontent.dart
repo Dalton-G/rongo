@@ -53,16 +53,9 @@ class _HomePageContentState extends State<HomePageContent> {
             child: Container(
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(25),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: AppTheme.bottomLightShadow),
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search...',
