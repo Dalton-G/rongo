@@ -116,6 +116,20 @@ class AppTheme {
 
   static const lighterGreen = Color.fromARGB(255, 177, 213, 194);
 
+  static List<BoxShadow> bottomLightShadow = [
+    BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 10,
+        offset: Offset(0, 4))
+  ];
+
+  static List<BoxShadow> topLightShadow = [
+    BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 10,
+        offset: Offset(0, -4))
+  ];
+
   static TextStyle blackBodyText = GoogleFonts.nunito(
     textStyle: TextStyle(
       fontSize: 16,
