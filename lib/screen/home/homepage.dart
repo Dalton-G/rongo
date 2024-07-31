@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Welcome back,", style: AppTheme.blackAppBarText),
-              Text(" Dalton", style: AppTheme.greenAppBarText),
+              Text(" John", style: AppTheme.greenAppBarText),
             ],
           ),
         ),
