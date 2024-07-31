@@ -184,7 +184,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SquareContainer(
-                      backgroundColor: Colors.lightGreen,
+                      backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
                       child: Center(
@@ -196,7 +196,7 @@ class _HomePageContentState extends State<HomePageContent> {
                       roundedCorner: 25,
                     ),
                     SquareContainer(
-                      backgroundColor: Colors.lightGreen,
+                      backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
                       child: Center(
@@ -214,7 +214,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SquareContainer(
-                      backgroundColor: Colors.lightGreen,
+                      backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
                       child: Center(
@@ -226,7 +226,7 @@ class _HomePageContentState extends State<HomePageContent> {
                       roundedCorner: 25,
                     ),
                     SquareContainer(
-                      backgroundColor: Colors.lightGreen,
+                      backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
                       child: Center(

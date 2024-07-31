@@ -40,33 +40,34 @@ class _ScannerState extends State<Scanner> {
     setState(() {
       _isLoading = true;
     });
-    const prompt = 'You are helping your mom to buy groceries, you need to recognize the name of item including the brand accurately and the ingredients of the item.'
-    'You have been given a photo of the item, read the name carefully and also try to spot the expiry date and ingredient table in the image if provided.'
-    'Identify the name as what name it should used when displayed on the rack in the groceries store'
-    'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or Others.'
-    'All the cooked food shall be considered as leftovers'
-    'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
-    'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
-    'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, so instead of expiry date return the days'
-    'Also recommend storage method to keep the food fresh for longer time.'
-    'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
-    '**For allergens and halal, if you cannot find the information, use "Unknown" as the value.**'
-    'Provide your response as a JSON object with the following keys: {"isFood": bool , "Item name": string, "Categories": string, "Ingredients": List of strings, "Expiry date": string(DD/MM/YYYY) or string(days to keep), "Storage method": string, "Allergens": List of strings, "Halal": String}.'
-    'Do not return your result as Markdown.';
-        // 'You are helping your mom to buy groceries, you need to recognize the name of item including the brand accurately and the ingredients of the item.'
-        // 'You have been given a photo of the item, read the name carefully and also try to spot the expiry date and ingredient table in the image if provided.'
-        // 'Identify the name as what name it should used when displayed on the rack in the groceries store'
-        // 'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or others.'
-        // 'All the cooked food shall be considered as leftovers'
-        // 'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
-        // 'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
-        // 'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, so instead of expiry date return the days'
-        // 'Also recommend storage method to keep the food fresh for longer time.'
-        // 'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
-        //
-        // 'Provide your response as a JSON object with the following keys: {"isFood": bool , "Item name": string, "Categories": string, "Ingredients": List of strings, "Expiry date": string(DD/MM/YYYY) or string(days to keep), "Storage method": string, "Allergens": List of strings, "Halal": String}.'
-        // 'Do not return not visible for allergens and halal.'
-        // 'Do not return your result as Markdown.';
+    const prompt =
+        'You are helping your mom to buy groceries, you need to recognize the name of item including the brand accurately and the ingredients of the item.'
+        'You have been given a photo of the item, read the name carefully and also try to spot the expiry date and ingredient table in the image if provided.'
+        'Identify the name as what name it should used when displayed on the rack in the groceries store'
+        'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or Others.'
+        'All the cooked food shall be considered as leftovers'
+        'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
+        'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
+        'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, so instead of expiry date return the days'
+        'Also recommend storage method to keep the food fresh for longer time.'
+        'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
+        '**For allergens and halal, if you cannot find the information, use "Unknown" as the value.**'
+        'Provide your response as a JSON object with the following keys: {"isFood": bool , "Item name": string, "Categories": string, "Ingredients": List of strings, "Expiry date": string(DD/MM/YYYY) or string(days to keep), "Storage method": string, "Allergens": List of strings, "Halal": String}.'
+        'Do not return your result as Markdown.';
+    // 'You are helping your mom to buy groceries, you need to recognize the name of item including the brand accurately and the ingredients of the item.'
+    // 'You have been given a photo of the item, read the name carefully and also try to spot the expiry date and ingredient table in the image if provided.'
+    // 'Identify the name as what name it should used when displayed on the rack in the groceries store'
+    // 'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or others.'
+    // 'All the cooked food shall be considered as leftovers'
+    // 'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
+    // 'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
+    // 'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, so instead of expiry date return the days'
+    // 'Also recommend storage method to keep the food fresh for longer time.'
+    // 'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
+    //
+    // 'Provide your response as a JSON object with the following keys: {"isFood": bool , "Item name": string, "Categories": string, "Ingredients": List of strings, "Expiry date": string(DD/MM/YYYY) or string(days to keep), "Storage method": string, "Allergens": List of strings, "Halal": String}.'
+    // 'Do not return not visible for allergens and halal.'
+    // 'Do not return your result as Markdown.';
 
     final response = await model.generateContent([
       Content.multi([TextPart(prompt), DataPart('image/jpeg', image)]),
@@ -175,6 +176,7 @@ class _ScannerState extends State<Scanner> {
       }
     });
   }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -201,10 +203,6 @@ class _ScannerState extends State<Scanner> {
       child: KeyboardDetection(
         controller: _keyboardDetectionController,
         child: Scaffold(
-
-          appBar: AppBar(
-            title: const Text("Food Scanner"),
-          ),
           body: SafeArea(
             child: Stack(
               children: [
@@ -234,7 +232,8 @@ class _ScannerState extends State<Scanner> {
                                     "Tap on scan button to see the magic!")
                                 : result["isFood"]
                                     ? SingleChildScrollView(
-                                        child: Column(children: generateOutput()),
+                                        child:
+                                            Column(children: generateOutput()),
                                       )
                                     : displayMessages(
                                         "Item scanned is not a food!\nTry again by tapping on the scan button!"),
@@ -245,7 +244,7 @@ class _ScannerState extends State<Scanner> {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 10.0, bottom: 20),
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 100),
                       child: result.isEmpty
                           ? CustomizedButton(
                               func: _onItemFound,
@@ -257,7 +256,8 @@ class _ScannerState extends State<Scanner> {
                                   title: "Scan",
                                 )
                               : Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
                                   children: [
                                     CustomizedButton(
                                       tooltip:

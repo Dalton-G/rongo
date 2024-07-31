@@ -31,6 +31,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     //page content
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -64,7 +66,72 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: _pages[_selectedIndex],
+      body: Stack(
+        children: [
+          //content
+          Positioned.fill(
+            child: _pages[_selectedIndex],
+          ),
+
+          //bottom nav bar
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+                height: 60,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(25),
+                    topLeft: Radius.circular(25),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, -4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(Icons.home_rounded, 0),
+                    _buildNavItem(Icons.kitchen_rounded, 1),
+                    _buildNavItem(Icons.sticky_note_2_rounded, 2),
+                    _buildNavItem(Icons.qr_code_rounded, 3),
+                    _buildNavItem(Icons.dinner_dining_rounded, 4),
+                  ],
+                )),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, int index) {
+    bool isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.mainGreen : Colors.transparent,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Icon(
+          icon,
+          color: isSelected ? Colors.white : AppTheme.mainGreen,
+        ),
+      ),
     );
   }
 }
