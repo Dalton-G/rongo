@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:rongo/firebase_options.dart';
 import 'package:rongo/providers.dart';
 import 'package:rongo/routes.dart';
-import 'package:rongo/screen/temp/feature_page.dart';
+import 'package:rongo/screen/onboarding/onboarding.dart';
 import 'package:rongo/utils/theme/theme.dart';
 
 void main() async {
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Rongo',
-        home: const FeaturePage(),
+        home: const OnboardingPage(),
         theme: AppTheme.lightTheme,
         routes: Routes.routes,
       ),
