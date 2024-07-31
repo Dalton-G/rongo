@@ -76,6 +76,22 @@ class AppTheme {
   //   textTheme: _lightTextTheme,
   // );
 
+  // DG
+  static InputDecoration recipeDropdownMenu = InputDecoration(
+    fillColor: AppTheme.backgroundWhite,
+    filled: true,
+    prefixIcon: const Icon(Icons.soup_kitchen, color: mainGreen),
+    suffixIcon: const Icon(Icons.keyboard_arrow_down, color: mainGreen),
+    enabledBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: backgroundWhite),
+      borderRadius: BorderRadius.circular(15),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: backgroundWhite),
+      borderRadius: BorderRadius.circular(15),
+    ),
+  );
+
   // JL
   static const mainGreen = Color(0xff25995C);
   static const backgroundWhite = Color(0xffFAFAFA);
