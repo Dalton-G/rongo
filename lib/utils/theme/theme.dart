@@ -105,6 +105,20 @@ class AppTheme {
     ),
   );
 
+  static TextStyle blackAppBarText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 18,
+      color: Colors.grey[900],
+    ),
+  );
+
+  static TextStyle greenAppBarText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 18,
+      color: mainGreen,
+    ),
+  );
+
   static TextStyle whiteButtonText = GoogleFonts.nunito(
     textStyle: TextStyle(
       fontSize: 20,
