@@ -2,8 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rongo/screen/fridge/fridge.dart';
-import 'package:rongo/screen/home/dummypages.dart';
 import 'package:rongo/screen/home/homepagecontent.dart';
+import 'package:rongo/screen/notes/notespage.dart';
+import 'package:rongo/screen/recipe/recipe_homepage.dart';
 import 'package:rongo/screen/scan_and_add/scanner.dart';
 import 'package:rongo/utils/theme/theme.dart';
 
@@ -23,9 +24,9 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     HomePageContent(),
     FridgePage(),
-    DummyPage2(),
+    NotesPage(),
     Scanner(),
-    DummyPage3(),
+    RecipeHomePage(),
   ];
 
   //functions
