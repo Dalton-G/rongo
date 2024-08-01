@@ -6,6 +6,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
+import 'package:provider/provider.dart';
+import 'package:rongo/model/item.dart';
+import 'package:rongo/provider/Item_provider.dart';
 import 'dart:convert';
 
 import 'package:rongo/utils/theme/theme.dart';
@@ -30,6 +33,8 @@ class _ScannerState extends State<Scanner> {
   bool _isFollowUp = false;
   late KeyboardDetectionController _keyboardDetectionController;
   bool _keyboard = false;
+  List<TextEditingController> _controller =
+      variableIcon.keys.map((key) => TextEditingController()).toList();
 
   final model = GenerativeModel(
     model: 'gemini-1.5-flash-001',
@@ -48,7 +53,7 @@ class _ScannerState extends State<Scanner> {
         'All the cooked food shall be considered as leftovers'
         'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
         'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
-        'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, so instead of expiry date return the days'
+        'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, the return the expected expiry date'
         'Also recommend storage method to keep the food fresh for longer time.'
         'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
         '**For allergens and halal, if you cannot find the information, use "Unknown" as the value.**'
@@ -75,7 +80,12 @@ class _ScannerState extends State<Scanner> {
     setState(() {
       _isLoading = false;
     });
-    print(response);
+    print(
+        "=========================================================================================");
+    print(response.text);
+    print(
+        "=========================================================================================");
+
     return response;
   }
 
@@ -111,6 +121,7 @@ class _ScannerState extends State<Scanner> {
         result.keys.where((element) => element != "isFood").toList();
     List<Widget> variableList = variableKeys
         .map((e) => ItemVariableWidget(
+            controller: _controller[variableKeys.indexWhere((key) => key == e)],
             output: (result[e] is String) ? result[e] : result[e].join(", "),
             title: e))
         .toList();
@@ -163,16 +174,39 @@ class _ScannerState extends State<Scanner> {
   }
 
   void addToFridge() {
-    showSnackBar("added to fridge", context);
+    setState(() {
+      List<String> keys = variableIcon.keys.toList();
+      Provider.of<ItemProvider>(context, listen: false).addItem(Item(
+          name: result[keys[0]],
+          category: result[keys[1]],
+          ingredients: result[keys[2]],
+          expiryDate: result[keys[3]],
+          storageMethod: result[keys[4]],
+          allergen: result[keys[5]],
+          halal: result[keys[6]]));
+      result = {};
+    });
+    showSnackBar("added to list", context);
   }
 
   Future<void> remove() async {
     bool? delete = await showBackDialog(
-        "Are you sure you want to clear this item result?", context);
+        "Are you sure you want to clear this item result?", context, close: true);
     setState(() {
       if (delete!) {
         result = {};
         showSnackBar("remove", context);
+      }
+    });
+  }
+
+  Future<void> receipt() async {
+    bool? move = await showBackDialog("Done scanning all the item?", context,
+        yes: "Yes", no: "No", close: true);
+    print(move);
+    setState(() {
+      if (move!) {
+        Navigator.pushNamed(context, '/scanned-item-list');
       }
     });
   }
@@ -198,11 +232,14 @@ class _ScannerState extends State<Scanner> {
         if (didPop) {
           return;
         }
-        showBackDialog('Discard record and leave?', context);
+        showBackDialog('Discard record and leave?', context, close: true);
       },
       child: KeyboardDetection(
         controller: _keyboardDetectionController,
         child: Scaffold(
+          appBar: AppBar(
+            title: const Text("Food Scanner"),
+          ),
           body: SafeArea(
             child: Stack(
               children: [
@@ -230,7 +267,7 @@ class _ScannerState extends State<Scanner> {
                             : result.isEmpty
                                 ? displayMessages(
                                     "Tap on scan button to see the magic!")
-                                : result["isFood"]
+                                : result["isFood"] == true
                                     ? SingleChildScrollView(
                                         child:
                                             Column(children: generateOutput()),
@@ -246,39 +283,61 @@ class _ScannerState extends State<Scanner> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 10.0, bottom: 100),
                       child: result.isEmpty
-                          ? CustomizedButton(
-                              func: _onItemFound,
-                              title: "Scan",
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                CustomizedButton(
+                                  func: _onItemFound,
+                                  title: "Scan",
+                                ),
+                                CustomizedButton(
+                                  isRoundButton: true,
+                                  func: receipt,
+                                  icon: Icons.receipt_long_rounded,
+                                )
+                              ],
                             )
                           : !result["isFood"]
                               ? CustomizedButton(
                                   func: _onItemFound,
                                   title: "Scan",
                                 )
-                              : Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    CustomizedButton(
-                                      tooltip:
-                                          "Scan again to add on details to the item",
-                                      func: _onItemFound,
-                                      title: "Scan Again",
-                                    ),
-                                    CustomizedButton(
-                                      tooltip: "Add to fridge",
-                                      func: addToFridge,
-                                      isRoundButton: true,
-                                      icon: Icons.add,
-                                    ),
-                                    CustomizedButton(
-                                      tooltip: "Discard this item",
-                                      color: Colors.redAccent,
-                                      func: remove,
-                                      isRoundButton: true,
-                                      icon: Icons.delete,
-                                    )
-                                  ],
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      CustomizedButton(
+                                        width: 150,
+                                        tooltip:
+                                            "Scan again to add on details to the item",
+                                        func: _onItemFound,
+                                        title: "Scan Again",
+                                      ),
+                                      CustomizedButton(
+                                        tooltip: "Add to list",
+                                        func: addToFridge,
+                                        isRoundButton: true,
+                                        icon: Icons.add,
+                                      ),
+                                      CustomizedButton(
+                                        tooltip:
+                                            "Scan receipt / add list to fridge",
+                                        func: receipt,
+                                        isRoundButton: true,
+                                        icon: Icons.receipt_long_rounded,
+                                      ),
+                                      CustomizedButton(
+                                        tooltip: "Discard this item",
+                                        color: Colors.redAccent,
+                                        func: remove,
+                                        isRoundButton: true,
+                                        icon: Icons.delete,
+                                      )
+                                    ],
+                                  ),
                                 ),
                     ),
                   ),
