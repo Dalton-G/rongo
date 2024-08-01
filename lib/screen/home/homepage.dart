@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rongo/screen/fridge/fridge.dart';
 import 'package:rongo/screen/home/homepagecontent.dart';
@@ -7,6 +6,7 @@ import 'package:rongo/screen/notes/notespage.dart';
 import 'package:rongo/screen/recipe/recipe_homepage.dart';
 import 'package:rongo/screen/scan_and_add/scanner.dart';
 import 'package:rongo/utils/theme/theme.dart';
+import 'package:rongo/firestore.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,15 +19,56 @@ class _HomePageState extends State<HomePage> {
   //declarations
   int _selectedIndex = 0;
   String firstName = "Suzanne";
+  List<Map<String, dynamic>> users = [];
+  Map<String, dynamic>? currentUser;
 
-  //pages for navbar
-  final List<Widget> _pages = [
-    HomePageContent(),
-    FridgePage(),
-    NotesPage(),
-    Scanner(),
-    RecipeHomePage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchUsers();
+  }
+
+  void fetchUsers() async {
+    users = await FirestoreService().getUsers();
+    setState(() {
+      if (users.isNotEmpty) {
+        currentUser = users[0];
+      }
+    });
+  }
+
+  void showUserDropdown(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text('Select User'),
+          children: users.map((user) {
+            return SimpleDialogOption(
+              onPressed: () {
+                setState(() {
+                  currentUser = user;
+                });
+                Navigator.pop(context);
+              },
+              child: Text(user['firstName']),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  // Method to generate pages based on the current state
+  List<Widget> _getPages() {
+    return [
+      HomePageContent(),
+      FridgePage(),
+      NotesPage(currentUser: currentUser),
+      Scanner(),
+      RecipeHomePage(),
+    ];
+  }
 
   //functions
 
@@ -53,14 +94,18 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Welcome back,", style: AppTheme.blackAppBarText),
-              Text(" John", style: AppTheme.greenAppBarText),
+              if (currentUser != null)
+                Text(" ${currentUser!['firstName']}",
+                    style: AppTheme.greenAppBarText),
             ],
           ),
         ),
         actions: [
           //settings button
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              showUserDropdown(context);
+            },
             icon: Icon(
               Icons.settings_rounded,
               color: Colors.grey[900],
@@ -72,7 +117,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           //content
           Positioned.fill(
-            child: _pages[_selectedIndex],
+            child: _getPages()[_selectedIndex],
           ),
 
           //bottom nav bar
