@@ -27,7 +27,6 @@ class Scanner extends StatefulWidget {
 
 class _ScannerState extends State<Scanner> {
   bool _isLoading = false;
-  PhotoPicker photoPicker = PhotoPicker(imagePicker: ImagePicker());
   Map result = {};
   Uint8List? img;
   bool _isFollowUp = false;
@@ -36,10 +35,7 @@ class _ScannerState extends State<Scanner> {
   List<TextEditingController> _controller =
       variableIcon.keys.map((key) => TextEditingController()).toList();
 
-  final model = GenerativeModel(
-    model: 'gemini-1.5-flash-001',
-    apiKey: dotenv.env['GEMINI_API_KEY']!,
-  );
+
 
   Future<GenerateContentResponse> validateImage(Uint8List image) async {
     setState(() {
@@ -92,7 +88,7 @@ class _ScannerState extends State<Scanner> {
   Future<String?> _onItemFound() async {
     try {
       final image = await photoPicker.takePhoto();
-      _isFollowUp = !result.isEmpty;
+      _isFollowUp = result.isNotEmpty;
       final itemFound = await validateImage(image);
       final response =
           itemFound.text!.replaceAll("```json", "").replaceAll("```", "");
@@ -143,7 +139,7 @@ class _ScannerState extends State<Scanner> {
         variableList +
         [
           const SizedBox(
-            height: 75,
+            height: 120,
           )
         ];
     return variableList;
@@ -201,14 +197,7 @@ class _ScannerState extends State<Scanner> {
   }
 
   Future<void> receipt() async {
-    bool? move = await showBackDialog("Done scanning all the item?", context,
-        yes: "Yes", no: "No", close: true);
-    print(move);
-    setState(() {
-      if (move!) {
-        Navigator.pushNamed(context, '/scanned-item-list');
-      }
-    });
+    Navigator.pushNamed(context, '/scanned-item-list');
   }
 
   @override
@@ -237,9 +226,6 @@ class _ScannerState extends State<Scanner> {
       child: KeyboardDetection(
         controller: _keyboardDetectionController,
         child: Scaffold(
-          appBar: AppBar(
-            title: const Text("Food Scanner"),
-          ),
           body: SafeArea(
             child: Stack(
               children: [
@@ -281,7 +267,7 @@ class _ScannerState extends State<Scanner> {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 10.0, bottom: 100),
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 70),
                       child: result.isEmpty
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

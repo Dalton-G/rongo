@@ -2,6 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:rongo/utils/photo.dart';
 
 Map<String, IconData> variableIcon = {
   "Item name": Icons.image_rounded,
@@ -14,6 +18,13 @@ Map<String, IconData> variableIcon = {
 };
 
 enum cats { Fruits, Vegetables, Meat, Fish, Condiments, Leftovers, Others }
+
+final model = GenerativeModel(
+  model: 'gemini-1.5-flash-001',
+  apiKey: dotenv.env['GEMINI_API_KEY']!,
+);
+
+final PhotoPicker photoPicker = PhotoPicker(imagePicker: ImagePicker());
 
 showSnackBar(String message, context) {
   final snackbar = SnackBar(
