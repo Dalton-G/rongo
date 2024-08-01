@@ -1,12 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:rongo/firestore.dart';
 import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/widgets/button.dart';
+import 'package:intl/intl.dart';
 import 'package:rongo/widgets/containers.dart';
 
 class NotesPage extends StatefulWidget {
-  const NotesPage({super.key});
+  final Map<String, dynamic>? currentUser;
+
+  const NotesPage({Key? key, this.currentUser}) : super(key: key);
 
   @override
   State<NotesPage> createState() => _NotesPageState();
@@ -15,10 +18,10 @@ class NotesPage extends StatefulWidget {
 class _NotesPageState extends State<NotesPage> {
   final FirestoreService firestoreService = FirestoreService();
 
-  //controllers
+  // Controllers
   final TextEditingController _messageController = TextEditingController();
 
-  //functions
+  // Functions
   void openNoteBox() {
     showDialog(
       context: context,
@@ -29,19 +32,23 @@ class _NotesPageState extends State<NotesPage> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop;
+              Navigator.of(context).pop();
             },
             child: Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              //add the note using function
-              firestoreService.addNote(_messageController.text);
+              // Add the note using function
+              firestoreService.addNote(
+                _messageController.text,
+                widget.currentUser?['uid'],
+                widget.currentUser?['firstName'],
+              );
 
-              //clear the controller
+              // Clear the controller
               _messageController.clear();
 
-              //close the box
+              // Close the box
               Navigator.pop(context);
             },
             child: Text("Save"),
@@ -49,6 +56,11 @@ class _NotesPageState extends State<NotesPage> {
         ],
       ),
     );
+  }
+
+  String formatTimestamp(Timestamp timestamp) {
+    DateTime date = timestamp.toDate();
+    return DateFormat('yyyy-MM-dd HH:mm').format(date);
   }
 
   @override
@@ -63,7 +75,7 @@ class _NotesPageState extends State<NotesPage> {
             children: [
               const SizedBox(height: 20),
 
-              //description box
+              // Description box
               Center(
                 child: Container(
                   height: 100,
@@ -93,6 +105,59 @@ class _NotesPageState extends State<NotesPage> {
                       ),
                     ],
                   ),
+                ),
+              ),
+
+              // StreamBuilder to display notes
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: firestoreService.getNotesStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return Center(child: Text('No notes available.'));
+                    }
+
+                    final notes = snapshot.data!.docs;
+
+                    return ListView.builder(
+                      itemCount: notes.length,
+                      itemBuilder: (context, index) {
+                        final note = notes[index];
+                        final noteMessage = note['message'];
+                        final firstName = note['firstName'];
+                        final Timestamp timestamp = note['datePosted'];
+                        final String datePosted = formatTimestamp(timestamp);
+                        final uid = note['uid'];
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 35, vertical: 10.0),
+                          child: Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: AppTheme.bottomLightShadow,
+                            ),
+                            child: Column(
+                              children: [
+                                Text(noteMessage),
+                                Text(firstName),
+                                Text(datePosted),
+                                Text(uid),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ],
