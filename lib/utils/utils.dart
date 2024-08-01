@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -5,14 +7,13 @@ Map<String, IconData> variableIcon = {
   "Item name": Icons.image_rounded,
   "Categories": Icons.category_rounded,
   "Ingredients": Icons.incomplete_circle_rounded,
-  "Expiry date": Icons.timelapse_rounded ,
+  "Expiry date": Icons.timelapse_rounded,
   "Storage method": Icons.food_bank_rounded,
-  "Freshness": Icons.browse_gallery_rounded,
   "Allergens": Icons.sick,
-  "Halal" : Icons.restaurant,
+  "Halal": Icons.restaurant,
 };
 
-List cats = ["Fruits", "Vegetables", "Meat", "Fish", "Condiments", "Leftovers", "Others"];
+enum cats { Fruits, Vegetables, Meat, Fish, Condiments, Leftovers, Others }
 
 showSnackBar(String message, context) {
   final snackbar = SnackBar(
@@ -23,10 +24,10 @@ showSnackBar(String message, context) {
   ScaffoldMessenger.of(context).showSnackBar(snackbar);
 }
 
-Future<bool?> showBackDialog(String confirmation, context) async {
-  bool item = confirmation.contains("item");
-  bool? delete = false;
-  delete = await showDialog<bool>(
+Future<bool> showBackDialog(String confirmation, context, {yes = "Leave", no = "Nevermind", close = true}) async {
+  Completer<bool> completer = Completer<bool>();
+
+  showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
@@ -39,35 +40,33 @@ Future<bool?> showBackDialog(String confirmation, context) async {
             style: TextButton.styleFrom(
               textStyle: Theme.of(context).textTheme.labelLarge,
             ),
-            child: const Text('Nevermind'),
+            child: Text(no),
             onPressed: () {
               Navigator.pop(context);
+              completer.complete(false);
             },
           ),
           TextButton(
             style: TextButton.styleFrom(
               textStyle: Theme.of(context).textTheme.labelLarge,
             ),
-            child: Text(item ? 'Discard' : 'Leave'),
+            child: Text(yes),
             onPressed: () {
               if (confirmation == 'Are you sure you want to leave the app?') {
                 SystemNavigator.pop();
-              } else if (item) {
-                var value = true;
-                Navigator.pop(context, value);
-
+              } else if (close) {
+                Navigator.pop(context);
+                completer.complete(true);
               } else {
                 Navigator.pop(context);
-                Navigator.pop(context);
+                completer.complete(false);
               }
             },
           ),
         ],
       );
     },
-
   );
-  return delete;
 
-
+  return completer.future;
 }

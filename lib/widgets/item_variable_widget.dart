@@ -9,28 +9,28 @@ import '../utils/utils.dart';
 class ItemVariableWidget extends StatefulWidget {
   final String output;
   final String title;
+  final TextEditingController controller;
 
   const ItemVariableWidget(
-      {super.key, required this.output, required this.title});
+      {super.key, required this.output, required this.title, required this.controller});
 
   @override
   State<ItemVariableWidget> createState() => _ItemVariableWidgetState();
 }
 
 class _ItemVariableWidgetState extends State<ItemVariableWidget> {
-  TextEditingController _controller = TextEditingController();
   int _selectedIndex = 0;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _controller.text = toBeginningOfSentenceCase(widget.output);
-    _selectedIndex = cats.indexWhere((cat) => cat == widget.output);
+    widget.controller.text = toBeginningOfSentenceCase(widget.output);
+    _selectedIndex = cats.values.indexWhere((e) => e.toString() == widget.output);
   }
 
   void undo() {
-    _controller.text = widget.output;
+    widget.controller.text = widget.output;
     setState(() {
 
     });
@@ -47,20 +47,19 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: ListView.builder(
-                          itemCount: cats.length,
+                          itemCount: cats.values.length,
                           itemBuilder: (context, index) {
-                            String cat = cats[index];
                             return GestureDetector(
                               onTap: () {
                                 setState(() {
                                   _selectedIndex = index;
-                                  _controller.text = cats[index];
+                                  widget.controller.text = cats.values[index].name;
                                   setModalState(() {});
                                 });
                               },
                               child: ListTile(
                                 title: Text(
-                                  cat,
+                                  cats.values[index].name,
                                   style: TextStyle(
                                     color: index == _selectedIndex
                                         ? AppTheme.mainGreen
@@ -90,7 +89,7 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
                       firstDate: DateTime.now(),
                       lastDate: DateTime(2050),
                     ).then((value) => setState(() {
-                          _controller.text = DateFormat("d MMM y").format(
+                      widget.controller.text = DateFormat("d MMM y").format(
                               DateTime(value!.year, value.month, value.day));
                         }));
                   }
@@ -122,7 +121,7 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
                         ? Container(
                             width: double.infinity,
                             child: Text(
-                              _controller.text,
+                              widget.controller.text,
                               style: TextStyle(
                                   color: Colors.black87,
                                   fontWeight: FontWeight.w500,
@@ -140,7 +139,7 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
                                 FocusManager.instance.primaryFocus?.unfocus();
                               },
                               maxLines: null,
-                              controller: _controller,
+                              controller: widget.controller,
                               decoration: null,
                               style: TextStyle(
                                   color: Colors.black87,
@@ -152,7 +151,7 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
                 ),
               ),
               Visibility(
-                visible: _controller.text != widget.output,
+                visible: widget.controller.text != widget.output,
                 child: GestureDetector(
                   onTap: undo,
                     child: Icon(
