@@ -6,9 +6,12 @@ class FirestoreService {
       FirebaseFirestore.instance.collection('notes');
 
   //create notes
-  Future<void> addNote(String message, String uid, String firstName) {
-    return notes.add(
+  Future<void> addNote(String message, String uid, String firstName) async {
+    DocumentReference newNoteRef = notes.doc();
+
+    return newNoteRef.set(
       {
+        'notesId': newNoteRef.id,
         'message': message,
         'isCompleted': false,
         'datePosted': Timestamp.now(),
@@ -23,6 +26,34 @@ class FirestoreService {
     final notesStream =
         notes.orderBy('datePosted', descending: true).snapshots();
     return notesStream;
+  }
+
+  // Method to delete a note
+  Future<void> deleteNote(String notesId) async {
+    // Find the document with the given notesId
+    QuerySnapshot snapshot =
+        await notes.where('notesId', isEqualTo: notesId).get();
+
+    if (snapshot.docs.isNotEmpty) {
+      // Delete the document
+      await notes.doc(snapshot.docs.first.id).delete();
+    } else {
+      throw Exception('Note with notesId $notesId not found');
+    }
+  }
+
+  // Method to mark a note as completed
+  Future<void> completeNote(String notesId) async {
+    // Find the document with the given notesId
+    QuerySnapshot snapshot =
+        await notes.where('notesId', isEqualTo: notesId).get();
+
+    if (snapshot.docs.isNotEmpty) {
+      // Update the document
+      await notes.doc(snapshot.docs.first.id).update({'isCompleted': true});
+    } else {
+      throw Exception('Note with notesId $notesId not found');
+    }
   }
 
 //user collection
