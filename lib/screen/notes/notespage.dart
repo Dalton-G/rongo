@@ -26,8 +26,29 @@ class _NotesPageState extends State<NotesPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        content: TextField(
-          controller: _messageController,
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Label
+              Text('Note:', style: AppTheme.greenAppBarText),
+              SizedBox(height: 8),
+              // TextField
+              TextField(
+                controller: _messageController,
+                maxLines: null,
+                minLines: 5,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                decoration: InputDecoration(
+                  hintText: 'Enter your note here...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -38,17 +59,13 @@ class _NotesPageState extends State<NotesPage> {
           ),
           TextButton(
             onPressed: () {
-              // Add the note using function
               firestoreService.addNote(
                 _messageController.text,
                 widget.currentUser?['uid'],
                 widget.currentUser?['firstName'],
               );
 
-              // Clear the controller
               _messageController.clear();
-
-              // Close the box
               Navigator.pop(context);
             },
             child: Text("Save"),
@@ -134,6 +151,14 @@ class _NotesPageState extends State<NotesPage> {
                         final Timestamp timestamp = note['datePosted'];
                         final String datePosted = formatTimestamp(timestamp);
                         final uid = note['uid'];
+                        final notesId = note['notesId'];
+                        final bool isCompleted = note['isCompleted'];
+
+                        final backgroundColor = isCompleted
+                            ? Colors.grey[300]
+                            : (uid == widget.currentUser?['uid']
+                                ? Colors.white
+                                : Colors.yellow[100]);
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(
@@ -141,16 +166,61 @@ class _NotesPageState extends State<NotesPage> {
                           child: Container(
                             padding: EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: backgroundColor,
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: AppTheme.bottomLightShadow,
                             ),
-                            child: Column(
+                            child: Row(
                               children: [
-                                Text(noteMessage),
-                                Text(firstName),
-                                Text(datePosted),
-                                Text(uid),
+                                // Note details
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(noteMessage,
+                                          style: TextStyle(fontSize: 16)),
+                                      SizedBox(height: 8),
+                                      Text(firstName,
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold)),
+                                      SizedBox(height: 4),
+                                      Text(datePosted,
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Color.fromARGB(
+                                                  255, 159, 159, 159))),
+                                    ],
+                                  ),
+                                ),
+                                // Actions
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.check_rounded,
+                                          color: isCompleted
+                                              ? Color.fromARGB(
+                                                  255, 101, 101, 101)
+                                              : AppTheme.mainGreen),
+                                      onPressed: isCompleted
+                                          ? null
+                                          : () async {
+                                              await firestoreService
+                                                  .completeNote(notesId);
+                                            },
+                                    ),
+                                    IconButton(
+                                      icon:
+                                          Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () async {
+                                        await firestoreService
+                                            .deleteNote(notesId);
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
@@ -160,6 +230,8 @@ class _NotesPageState extends State<NotesPage> {
                   },
                 ),
               ),
+
+              const SizedBox(height: 60),
             ],
           ),
           Positioned(
