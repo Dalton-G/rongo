@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rongo/screen/home/homepage.dart';
+import 'package:rongo/screen/inventory/inventory_category.dart';
+import 'package:rongo/screen/inventory/inventory_listview.dart';
 import 'package:rongo/screen/onboarding/onboarding.dart';
 import 'package:rongo/screen/recipe/recipe_homepage.dart';
 import 'package:rongo/screen/scan_and_add/scanned_item_list.dart';
@@ -13,10 +15,10 @@ class Routes {
   static const String scanner = '/scanner';
   static const String homepage = '/homepage';
   static const String recipeHomepage = '/recipe-homepage';
-
   static const String notespage = '/notespage';
-
   static const String scannedItemList = '/scanned-item-list';
+  static const String inventoryCategory = '/inventory-category';
+  static const String inventoryListView = '/inventory-listview';
 
   static final dynamic routes = <String, WidgetBuilder>{
     onboarding: (BuildContext context) => const OnboardingPage(),
@@ -25,5 +27,7 @@ class Routes {
     recipeHomepage: (BuildContext context) => const RecipeHomePage(),
     notespage: (BuildContext context) => const NotesPage(),
     scannedItemList: (BuildContext context) => const ScannedItemList(),
+    inventoryCategory: (BuildContext context) => const InventoryCategory(),
+    inventoryListView: (BuildContext context) => const InventoryListview(),
   };
 }
