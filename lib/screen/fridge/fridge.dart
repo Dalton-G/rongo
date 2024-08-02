@@ -1,67 +1,84 @@
 import 'package:flutter/material.dart';
-import 'package:rongo/routes.dart';
-
-void dialogPopUp(BuildContext context) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return Dialog(
-        backgroundColor: Colors.transparent,
-        child: Stack(
-          children: [
-            AlertDialog(
-              title: Text('Confirm'),
-              content: Text('Are you sure you want to proceed?'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                  child: Text('Yes'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                  child: Text('No'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import 'package:rongo/firestore.dart';
+import 'package:rongo/utils/theme/theme.dart';
 
 class FridgePage extends StatefulWidget {
-  const FridgePage({super.key});
+  final Map<String, dynamic>? currentUser;
+
+  const FridgePage({super.key, this.currentUser});
 
   @override
   State<FridgePage> createState() => _FridgePageState();
 }
 
 class _FridgePageState extends State<FridgePage> {
+  final FirestoreService firestoreService = FirestoreService();
+  Map<String, String> userImages = {};
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.currentUser != null) {
+      _loadUserImages(widget.currentUser!['uid']);
+    }
+  }
+
+  Future<void> _pickAndUploadImage(String uid, String imageField) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        String fileName = '${uid}_$imageField';
+        String? imageUrl =
+            await firestoreService.uploadImage(imageFile, uid, fileName);
+
+        if (imageUrl != null) {
+          await firestoreService.updateUserImages(uid,
+              image1: imageField == 'image1' ? imageUrl : null,
+              image2: imageField == 'image2' ? imageUrl : null,
+              image3: imageField == 'image3' ? imageUrl : null);
+          setState(() {
+            userImages[imageField] = imageUrl;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to upload image: $e'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _loadUserImages(String uid) async {
+    try {
+      Map<String, String> images = await firestoreService.getUserImages(uid);
+      setState(() {
+        userImages = images;
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    //functions
-
-    //NOTE: placeholder until refridgerator is done, replace route with refridgerator later on
-    void _navToNotePage() {
-      Navigator.pushNamed(context, Routes.notespage);
-    }
-
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    final String? currentUserId = widget.currentUser?['uid'];
 
     return Scaffold(
       body: Stack(
         children: [
-          //fridge background
+          // Fridge background
           Positioned.fill(
             child: GestureDetector(
-              onTap: () => _navToNotePage(),
+              onTap: () {},
               child: Image.asset(
                 'lib/images/fridgebackground.png',
                 fit: BoxFit.cover,
@@ -69,47 +86,64 @@ class _FridgePageState extends State<FridgePage> {
             ),
           ),
 
-          //add icons
+          // Image position 1
           Positioned(
-            left: screenWidth * 0.4,
-            top: screenHeight * 0.22,
+            left: MediaQuery.of(context).size.width * 0.4,
+            top: MediaQuery.of(context).size.height * 0.22,
             child: GestureDetector(
-              onTap: () => dialogPopUp(context),
+              onTap: () => currentUserId != null
+                  ? _pickAndUploadImage(currentUserId, 'image1')
+                  : null,
               child: Container(
                 height: 60,
                 width: 100,
-                child: Image.asset('lib/images/addicon.png'),
+                child: userImages['image1'] != null &&
+                        userImages['image1']!.isNotEmpty
+                    ? Image.network(userImages['image1']!)
+                    : Image.asset('lib/images/addicon.png'),
               ),
             ),
           ),
 
+          // Image position 2
           Positioned(
-            left: screenWidth * 0.31,
-            top: screenHeight * 0.42,
+            left: MediaQuery.of(context).size.width * 0.31,
+            top: MediaQuery.of(context).size.height * 0.42,
             child: Transform.rotate(
               angle: -0.3,
               child: GestureDetector(
-                onTap: () => dialogPopUp(context),
+                onTap: () => currentUserId != null
+                    ? _pickAndUploadImage(currentUserId, 'image2')
+                    : null,
                 child: Container(
                   height: 60,
                   width: 100,
-                  child: Image.asset('lib/images/addicon.png'),
+                  child: userImages['image2'] != null &&
+                          userImages['image2']!.isNotEmpty
+                      ? Image.network(userImages['image2']!)
+                      : Image.asset('lib/images/addicon.png'),
                 ),
               ),
             ),
           ),
 
+          // Image position 3
           Positioned(
-            left: screenWidth * 0.48,
-            top: screenHeight * 0.53,
+            left: MediaQuery.of(context).size.width * 0.48,
+            top: MediaQuery.of(context).size.height * 0.53,
             child: Transform.rotate(
               angle: 0.6,
               child: GestureDetector(
-                onTap: () => dialogPopUp(context),
+                onTap: () => currentUserId != null
+                    ? _pickAndUploadImage(currentUserId, 'image3')
+                    : null,
                 child: Container(
                   height: 60,
                   width: 100,
-                  child: Image.asset('lib/images/addicon.png'),
+                  child: userImages['image3'] != null &&
+                          userImages['image3']!.isNotEmpty
+                      ? Image.network(userImages['image3']!)
+                      : Image.asset('lib/images/addicon.png'),
                 ),
               ),
             ),
