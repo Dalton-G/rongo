@@ -70,7 +70,9 @@ class _HomePageState extends State<HomePage> {
         const Center(
             child:
                 CircularProgressIndicator()), // Placeholder while fetching user
-        Scanner(),
+        const Center(
+            child:
+            CircularProgressIndicator()), // Scanner(currentUser: currentUser!) -> Placeholder while fetching user
         RecipeHomePage(),
       ];
     }
@@ -79,7 +81,7 @@ class _HomePageState extends State<HomePage> {
       HomePageContent(),
       FridgePage(currentUser: currentUser!),
       NotesPage(currentUser: currentUser!),
-      Scanner(),
+      Scanner(currentUser: currentUser!),
       RecipeHomePage(),
     ];
   }

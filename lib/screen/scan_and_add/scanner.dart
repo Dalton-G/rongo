@@ -19,7 +19,8 @@ import 'package:rongo/widgets/item_variable_widget.dart';
 import '../../utils/utils.dart';
 
 class Scanner extends StatefulWidget {
-  const Scanner({super.key});
+  const Scanner({super.key, this.currentUser});
+  final Object? currentUser;
 
   @override
   State<Scanner> createState() => _ScannerState();
@@ -34,6 +35,8 @@ class _ScannerState extends State<Scanner> {
   bool _keyboard = false;
   List<TextEditingController> _controller =
       variableIcon.keys.map((key) => TextEditingController()).toList();
+
+  get currentUser => widget.currentUser;
 
 
 
@@ -197,7 +200,7 @@ class _ScannerState extends State<Scanner> {
   }
 
   Future<void> receipt() async {
-    Navigator.pushNamed(context, '/scanned-item-list');
+    Navigator.pushNamed(context, '/scanned-item-list',arguments: currentUser );
   }
 
   @override

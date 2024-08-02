@@ -8,8 +8,12 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:provider/provider.dart';
 import 'package:rongo/provider/Item_provider.dart';
 import 'package:rongo/widgets/button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
+
 
 import '../../model/item.dart';
+import '../../resources/CRUD/fridge.dart';
 import '../../utils/photo.dart';
 import '../../utils/theme/theme.dart';
 import '../../utils/utils.dart';
@@ -25,6 +29,15 @@ class _ScannedItemListState extends State<ScannedItemList> {
   var _selectedIndex = null;
   var _isLoading = false;
   var result;
+
+  late var currentUser;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Extract the arguments
+    currentUser = ModalRoute.of(context)!.settings.arguments; // Need Fridge ID
+  }
 
   Future<GenerateContentResponse> validateImage(Uint8List image, ItemProvider itemProvider) async {
     setState(() {
@@ -76,15 +89,48 @@ class _ScannedItemListState extends State<ScannedItemList> {
       return Scaffold(
         appBar: AppBar(
           title: const Text("Scanned items"),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20.0),
-              child: Text(
-                "Save",
-                style: TextStyle(color: AppTheme.mainGreen, fontSize: 17),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: GestureDetector(
+                  onTap: () async {
+                    bool successfullyAddToFridge = false;
+                    var historyUid = Uuid().v4(); //Receipt ID
+
+                    for (int i = 0; i< itemList.length;i++){
+                      var item = itemList[i];
+                      item.historyUid = historyUid;
+
+                      successfullyAddToFridge =  await addItemToFridge(item,currentUser['fridgeId']);
+
+                    }
+                    if ( successfullyAddToFridge ){
+                      if (mounted) {
+                        setState(() {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Item added successfully!')),);
+                          itemList.clear();
+                          Navigator.pop(context);
+                        });
+
+                    }
+                  } else{
+                      setState(() {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Failed to add Item, Please Try again.')),
+                        );
+                      });
+
+                    }
+
+                  },
+                  child: const Text(
+                    "Save",
+                    style: TextStyle(color: AppTheme.mainGreen, fontSize: 17),
+                  ),
+                ),
               ),
-            )
-          ],
+            ],
         ),
         floatingActionButton: Padding(
           padding: const EdgeInsets.all(20.0),
