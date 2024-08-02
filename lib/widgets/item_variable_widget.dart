@@ -27,7 +27,7 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
     super.initState();
     widget.controller.text = toBeginningOfSentenceCase(widget.output);
 
-    _selectedIndex = cats.values.indexWhere((e) => e.name == widget.output);
+    _selectedIndex = InventoryCategories.values.indexWhere((e) => e.name == widget.output);
 
   }
 
@@ -50,21 +50,21 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
                         padding: const EdgeInsets.all(10.0),
                         child: ListView.builder(
 
-                          itemCount: cats.values.length,
+                          itemCount: InventoryCategories.values.length,
                           itemBuilder: (context, index) {
                             return GestureDetector(
                               onTap: () {
                                 setState(() {
 
                                   _selectedIndex = index;
-                                  widget.controller.text = cats.values[index].name;
+                                  widget.controller.text = InventoryCategories.values[index].name;
                                   print(_selectedIndex);
                                   setModalState(() {});
                                 });
                               },
                               child: ListTile(
                                 title: Text(
-                                  cats.values[index].name,
+                                  InventoryCategories.values[index].name,
                                   style: TextStyle(
                                     color: index == _selectedIndex
                                         ? AppTheme.mainGreen

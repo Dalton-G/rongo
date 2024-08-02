@@ -1,20 +1,33 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/widgets/containers.dart';
 import 'package:rongo/widgets/stats.dart';
 
 class HomePageContent extends StatefulWidget {
-  const HomePageContent({super.key});
+  final currentUser;
+
+  const HomePageContent({super.key, this.currentUser});
 
   @override
   State<HomePageContent> createState() => _HomePageContentState();
 }
 
 class _HomePageContentState extends State<HomePageContent> {
+
+  final CollectionReference _fridgesCollection =
+  FirebaseFirestore.instance.collection('fridges');
+
   @override
   Widget build(BuildContext context) {
     //page dimensions
+    final Map currentUserMap = Map<String, dynamic>.from((widget.currentUser));
+
+    print(currentUserMap);
+    print(widget.currentUser.runtimeType);
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -167,7 +180,71 @@ class _HomePageContentState extends State<HomePageContent> {
           ),
 
           // Analysis squares (2x2 grid)
-          Positioned(
+
+        StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance.collection('fridges').doc(currentUserMap['fridgeId']).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData) {
+            return Center(child: Text('Document does not exist'));
+          }
+
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final List inventory = data['inventory'];
+          print(data['inventory']);
+
+          int totalInventory = inventory.length;
+          int addedThisMonth = 0;
+          int expiringSoonCount = 0;
+          int expiredCount = 0;
+
+          DateTime now = DateTime.now();
+          int currentMonth = now.month;
+          int currentYear = now.year;
+
+          for (var item in inventory) {
+            // Convert the addedDate string to a DateTime object
+            DateTime addedDate = DateTime.parse(item['addedDate']);
+
+            // Check if the year and month match the current year and month
+            if (addedDate.year == currentYear &&
+                addedDate.month == currentMonth) {
+              addedThisMonth++;
+            }
+
+            DateTime? expiryDate;
+
+            try {
+              expiryDate = DateTime.parse(item['expiryDate']);
+            } catch (e) {
+              // If parsing fails, set expiryDate to null
+              expiryDate = null;
+            }
+
+            if (expiryDate != null) {
+              // Check if the expiryDate is within the next 7 days
+              DateTime oneWeekFromNow = now.add(Duration(days: 7));
+              if (expiryDate.isAfter(now) &&
+                  expiryDate.isBefore(oneWeekFromNow)) {
+                expiringSoonCount++;
+              }
+
+              // Check if the expiryDate has already passed
+              if (expiryDate.isBefore(now)) {
+                expiredCount++;
+              }
+            }
+          }
+
+          // return Text('Field value: ${data['field_name']}');
+          return Positioned(
             left: screenWidth * 0.07,
             right: screenWidth * 0.07,
             bottom: screenHeight * 0.05,
@@ -177,21 +254,28 @@ class _HomePageContentState extends State<HomePageContent> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    SquareContainer(
-                      withPadding: false,
-                      backgroundColor: AppTheme.lighterGreen,
-                      height: 130,
-                      width: 130,
-                      child: Stats(stats: "total",),
-                      roundedCorner: 25,
+
+                    GestureDetector(
+                      onTap:((){
+                        Navigator.pushNamed(context, '/inventory-category',arguments: currentUserMap);
+                      })
+                      ,
+                      child: SquareContainer(
+                        withPadding: false,
+                        backgroundColor: AppTheme.lighterGreen,
+                        height: 130,
+                        width: 130,
+                        roundedCorner: 25,
+                        child: Stats(stats: "total", num: totalInventory,),
+                      ),
                     ),
                     SquareContainer(
                       withPadding: false,
                       backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
-                      child: Stats(stats: "new",),
                       roundedCorner: 25,
+                      child: Stats(stats: "new",num: addedThisMonth,),
                     ),
                   ],
                 ),
@@ -204,22 +288,109 @@ class _HomePageContentState extends State<HomePageContent> {
                       backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
-                      child: Stats(stats: "soon",),
                       roundedCorner: 25,
+                      child: Stats(stats: "soon",num: expiringSoonCount,),
                     ),
                     SquareContainer(
                       withPadding: false,
                       backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
-                      child: Stats(stats: "expired",),
                       roundedCorner: 25,
+                      child: Stats(stats: "expired",num: expiredCount,),
                     ),
                   ],
                 ),
               ],
             ),
-          ),
+          );
+        }
+      )
+
+
+      // StreamBuilder<Object>(
+      //       stream: _fridgesCollection.doc(currentUser['fridgeId']).get(),,
+      //       builder: (context, snapshot) {
+      //         return Positioned(
+      //           left: screenWidth * 0.07,
+      //           right: screenWidth * 0.07,
+      //           bottom: screenHeight * 0.05,
+      //           child: Column(
+      //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //             children: [
+      //               Row(
+      //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //                 children: [
+      //                   GestureDetector(
+      //                     onTap:((){
+      //                       print("Tapp Data1");
+      //                       print("currentUserMap");
+      //                       print(currentUserMap);
+      //                       Navigator.pushNamed(context, '/inventory-category',arguments: currentUserMap);
+      //                     })
+      //                     ,
+      //                     child: SquareContainer(
+      //                       backgroundColor: AppTheme.lighterGreen,
+      //                       height: 130,
+      //                       width: 130,
+      //                       child: Center(
+      //                         child: Text(
+      //                           "Data 1",
+      //                           textAlign: TextAlign.center,
+      //                         ),
+      //                       ),
+      //                       roundedCorner: 25,
+      //                     ),
+      //                   ),
+      //                   SquareContainer(
+      //                     backgroundColor: AppTheme.lighterGreen,
+      //                     height: 130,
+      //                     width: 130,
+      //                     child: Center(
+      //                       child: Text(
+      //                         "Data 2",
+      //                         textAlign: TextAlign.center,
+      //                       ),
+      //                     ),
+      //                     roundedCorner: 25,
+      //                   ),
+      //                 ],
+      //               ),
+      //               const SizedBox(height: 20),
+      //               Row(
+      //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //                 children: [
+      //                   SquareContainer(
+      //                     backgroundColor: AppTheme.lighterGreen,
+      //                     height: 130,
+      //                     width: 130,
+      //                     child: Center(
+      //                       child: Text(
+      //                         "Data 3",
+      //                         textAlign: TextAlign.center,
+      //                       ),
+      //                     ),
+      //                     roundedCorner: 25,
+      //                   ),
+      //                   SquareContainer(
+      //                     backgroundColor: AppTheme.lighterGreen,
+      //                     height: 130,
+      //                     width: 130,
+      //                     child: Center(
+      //                       child: Text(
+      //                         "Data 4",
+      //                         textAlign: TextAlign.center,
+      //                       ),
+      //                     ),
+      //                     roundedCorner: 25,
+      //                   ),
+      //                 ],
+      //               ),
+      //             ],
+      //           ),
+      //         );
+      //       }
+      //     ),
         ],
       ),
     );

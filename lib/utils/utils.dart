@@ -17,7 +17,7 @@ Map<String, IconData> variableIcon = {
   "Halal": Icons.restaurant,
 };
 
-enum cats { Fruits, Vegetables, Meat, Fish, Condiments, Leftovers, Others }
+enum InventoryCategories { Fruits, Vegetables, Meat, Fish, Condiments, Leftovers, Others }
 
 final model = GenerativeModel(
   model: 'gemini-1.5-flash-001',
