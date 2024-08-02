@@ -8,6 +8,7 @@ class SquareContainer extends StatelessWidget {
   final double roundedCorner;
   final double height, width;
   final Widget? child;
+  final bool withPadding;
 
   const SquareContainer({
     Key? key,
@@ -16,6 +17,8 @@ class SquareContainer extends StatelessWidget {
     required this.height,
     required this.width,
     this.child,
+    this.withPadding = true
+
   }) : super(key: key);
 
   @override
@@ -29,8 +32,8 @@ class SquareContainer extends StatelessWidget {
       ),
       child: Center(
         child: SizedBox(
-          height: height * 0.8,
-          width: width * 0.8,
+          height: withPadding? height * 0.8:height,
+          width: withPadding? width * 0.8: width,
           child: child,
         ),
       ),

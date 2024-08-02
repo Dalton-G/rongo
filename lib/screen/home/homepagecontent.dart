@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/widgets/containers.dart';
+import 'package:rongo/widgets/stats.dart';
 
 class HomePageContent extends StatefulWidget {
   const HomePageContent({super.key});
@@ -170,34 +171,26 @@ class _HomePageContentState extends State<HomePageContent> {
             left: screenWidth * 0.07,
             right: screenWidth * 0.07,
             bottom: screenHeight * 0.05,
-            child: const Column(
+            child:  Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SquareContainer(
+                      withPadding: false,
                       backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
-                      child: Center(
-                        child: Text(
-                          "Data 1",
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                      child: Stats(stats: "total",),
                       roundedCorner: 25,
                     ),
                     SquareContainer(
+                      withPadding: false,
                       backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
-                      child: Center(
-                        child: Text(
-                          "Data 2",
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                      child: Stats(stats: "new",),
                       roundedCorner: 25,
                     ),
                   ],
@@ -207,27 +200,19 @@ class _HomePageContentState extends State<HomePageContent> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SquareContainer(
+                      withPadding: false,
                       backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
-                      child: Center(
-                        child: Text(
-                          "Data 3",
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                      child: Stats(stats: "soon",),
                       roundedCorner: 25,
                     ),
                     SquareContainer(
+                      withPadding: false,
                       backgroundColor: AppTheme.lighterGreen,
                       height: 130,
                       width: 130,
-                      child: Center(
-                        child: Text(
-                          "Data 4",
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                      child: Stats(stats: "expired",),
                       roundedCorner: 25,
                     ),
                   ],
