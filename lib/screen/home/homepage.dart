@@ -63,7 +63,9 @@ class _HomePageState extends State<HomePage> {
   List<Widget> _getPages() {
     if (currentUser == null) {
       return [
-        HomePageContent(),
+        const Center(
+            child:
+            CircularProgressIndicator()), // Placeholder while fetching user
         const Center(
             child:
                 CircularProgressIndicator()), // Placeholder while fetching user
@@ -78,7 +80,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     return [
-      HomePageContent(),
+      HomePageContent(currentUser: currentUser!),
       FridgePage(currentUser: currentUser!),
       NotesPage(currentUser: currentUser!),
       Scanner(currentUser: currentUser!),
