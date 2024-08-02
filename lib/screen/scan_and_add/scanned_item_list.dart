@@ -1,10 +1,18 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:provider/provider.dart';
 import 'package:rongo/provider/Item_provider.dart';
+import 'package:rongo/widgets/button.dart';
 
 import '../../model/item.dart';
+import '../../utils/photo.dart';
 import '../../utils/theme/theme.dart';
+import '../../utils/utils.dart';
 
 class ScannedItemList extends StatefulWidget {
   const ScannedItemList({super.key});
@@ -15,6 +23,50 @@ class ScannedItemList extends StatefulWidget {
 
 class _ScannedItemListState extends State<ScannedItemList> {
   var _selectedIndex = null;
+  var _isLoading = false;
+  var result;
+
+  Future<GenerateContentResponse> validateImage(Uint8List image, ItemProvider itemProvider) async {
+    setState(() {
+      _isLoading = true;
+    });
+    final itemList = itemProvider.itemList.map((item) => item.name).toList();
+    print(itemList.toString());
+    final prompt = 'Given the list of item: ${itemList.toString()}'
+    'You need to match the entry in the image given, and identify the quantity purchased and the total price of the item with the item name in list'
+    'When you return the item name, return the name in the list given instead of the name in receipt'
+    'Then, return the output as map like { "isReceipt": true/false, name of item: {"totalPrice": the price, "quantity": the quantity of the item}, ...}';
+
+    final response = await model.generateContent([
+      Content.multi([TextPart(prompt), DataPart('image/jpeg', image)]),
+    ]);
+    print(
+        "=========================================================================================");
+    print(response.text);
+    print(
+        "=========================================================================================");
+
+    return response;
+  }
+
+  Future<String?> _onItemFound(ItemProvider itemProvider) async {
+    try {
+      final image = await photoPicker.takePhoto();
+      final itemFound = await validateImage(image, itemProvider);
+      final response =
+          itemFound.text!.replaceAll("```json", "").replaceAll("```", "");
+      result = json.decode(response);
+
+      setState(() {
+        itemProvider.update(result);
+        _isLoading = false;
+
+      });
+    } on PhotoPickerException {
+      return "error";
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +75,29 @@ class _ScannedItemListState extends State<ScannedItemList> {
 
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Food Scanner"),
+          title: const Text("Scanned items"),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: Text(
+                "Save",
+                style: TextStyle(color: AppTheme.mainGreen, fontSize: 17),
+              ),
+            )
+          ],
+        ),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: CustomizedButton(
+            isRoundButton: true,
+            icon: Icons.receipt_long_rounded,
+            func: () {
+              _onItemFound(itemProvider);
+            },
+          ),
         ),
         body: itemList.length > 0
-            ? Padding(
+            ? _isLoading? Center(child: CircularProgressIndicator(),):Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 child: ListView.builder(
                     itemCount: itemList.length,
@@ -77,7 +148,8 @@ class _ScannedItemListState extends State<ScannedItemList> {
                                               width: 150,
                                               height: 30,
                                               child: Padding(
-                                                padding: const EdgeInsets.only(top: 5.0),
+                                                padding: const EdgeInsets.only(
+                                                    top: 5.0),
                                                 child: Text("RM $price"),
                                               ),
                                             ),

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/cupertino.dart';
 
 import '../model/item.dart';
@@ -30,6 +32,19 @@ class ItemProvider with ChangeNotifier{
 
   void setPrice(int index, double price){
     itemList[index].price = price;
+    notifyListeners();
+  }
+
+  void update(Map result){
+    for (var n in result.keys){
+      print(n);
+      int index = itemList.indexWhere((item) => item.name == n);
+      if(index>-1){
+        itemList[index].price = double.parse(result[n]['totalPrice'].toString());
+        itemList[index].quantity = result[n]['quantity'];
+      }
+
+    }
     notifyListeners();
   }
 

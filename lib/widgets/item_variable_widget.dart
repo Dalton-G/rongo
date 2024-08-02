@@ -26,7 +26,9 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
     // TODO: implement initState
     super.initState();
     widget.controller.text = toBeginningOfSentenceCase(widget.output);
-    _selectedIndex = cats.values.indexWhere((e) => e.toString() == widget.output);
+
+    _selectedIndex = cats.values.indexWhere((e) => e.name == widget.output);
+
   }
 
   void undo() {
@@ -47,13 +49,16 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: ListView.builder(
+
                           itemCount: cats.values.length,
                           itemBuilder: (context, index) {
                             return GestureDetector(
                               onTap: () {
                                 setState(() {
+
                                   _selectedIndex = index;
                                   widget.controller.text = cats.values[index].name;
+                                  print(_selectedIndex);
                                   setModalState(() {});
                                 });
                               },
