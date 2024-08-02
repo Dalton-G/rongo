@@ -32,4 +32,23 @@ class Item {
     ingredients = ingredients == "Not visible" ? ["Unknown"] : ingredients;
     allergen = allergen == "Not visible" ? ["Unknown"] : allergen;
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      // 'uid': uid,
+      'name': name,
+      'quantity': quantity,
+      'price': price,
+      'expiryDate': expiryDate,
+      'addedDate': addedDate.toIso8601String(),
+      'dictionaryUid': dictionaryUid,
+      'historyUid': historyUid,
+      'allergen': allergen,
+      'halal': halal,
+      'category': category,
+      'ingredients': ingredients,
+      'storageMethod': storageMethod,
+    };
+  }
+
 }
