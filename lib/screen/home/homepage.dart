@@ -61,10 +61,24 @@ class _HomePageState extends State<HomePage> {
 
   // Method to generate pages based on the current state
   List<Widget> _getPages() {
+    if (currentUser == null) {
+      return [
+        HomePageContent(),
+        const Center(
+            child:
+                CircularProgressIndicator()), // Placeholder while fetching user
+        const Center(
+            child:
+                CircularProgressIndicator()), // Placeholder while fetching user
+        Scanner(),
+        RecipeHomePage(),
+      ];
+    }
+
     return [
       HomePageContent(),
-      FridgePage(),
-      NotesPage(currentUser: currentUser),
+      FridgePage(currentUser: currentUser!),
+      NotesPage(currentUser: currentUser!),
       Scanner(),
       RecipeHomePage(),
     ];

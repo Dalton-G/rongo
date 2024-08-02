@@ -2,69 +2,75 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-import 'package:rongo/routes.dart';
+import 'package:rongo/firestore.dart';
+import 'package:rongo/utils/theme/theme.dart';
 
 class FridgePage extends StatefulWidget {
-  const FridgePage({super.key});
+  final Map<String, dynamic>? currentUser;
+
+  const FridgePage({super.key, this.currentUser});
 
   @override
   State<FridgePage> createState() => _FridgePageState();
 }
 
 class _FridgePageState extends State<FridgePage> {
-  final ImagePicker _picker = ImagePicker();
+  final FirestoreService firestoreService = FirestoreService();
+  Map<String, String> userImages = {};
 
-  // State to store the image URLs
-  String? _imageUrl1;
-  String? _imageUrl2;
-  String? _imageUrl3;
-
-  // Function to pick an image from gallery and upload it
-  Future<void> _pickImage(int index) async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      File imageFile = File(pickedFile.path);
-
-      // Upload the image to Firebase Storage and get the download URL
-      String downloadUrl = await _uploadImage(imageFile);
-
-      // Update the state with the new image URL
-      setState(() {
-        if (index == 1) {
-          _imageUrl1 = downloadUrl;
-        } else if (index == 2) {
-          _imageUrl2 = downloadUrl;
-        } else if (index == 3) {
-          _imageUrl3 = downloadUrl;
-        }
-      });
-    } else {
-      print('No image selected.');
+  @override
+  void initState() {
+    super.initState();
+    if (widget.currentUser != null) {
+      _loadUserImages(widget.currentUser!['uid']);
     }
   }
 
-  // Function to upload the image to Firebase Storage
-  Future<String> _uploadImage(File image) async {
+  Future<void> _pickAndUploadImage(String uid, String imageField) async {
     try {
-      FirebaseStorage storage = FirebaseStorage.instance;
-      String fileName = DateTime.now().toString();
-      Reference ref = storage.ref().child('uploads/$fileName');
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-      UploadTask uploadTask = ref.putFile(image);
-      TaskSnapshot snapshot = await uploadTask;
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        String fileName = '${uid}_$imageField';
+        String? imageUrl =
+            await firestoreService.uploadImage(imageFile, uid, fileName);
 
-      return await snapshot.ref.getDownloadURL();
+        if (imageUrl != null) {
+          await firestoreService.updateUserImages(uid,
+              image1: imageField == 'image1' ? imageUrl : null,
+              image2: imageField == 'image2' ? imageUrl : null,
+              image3: imageField == 'image3' ? imageUrl : null);
+          setState(() {
+            userImages[imageField] = imageUrl;
+          });
+        }
+      }
     } catch (e) {
-      print('Failed to upload image: $e');
-      return '';
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to upload image: $e'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _loadUserImages(String uid) async {
+    try {
+      Map<String, String> images = await firestoreService.getUserImages(uid);
+      setState(() {
+        userImages = images;
+      });
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    final String? currentUserId = widget.currentUser?['uid'];
 
     return Scaffold(
       body: Stack(
@@ -72,7 +78,7 @@ class _FridgePageState extends State<FridgePage> {
           // Fridge background
           Positioned.fill(
             child: GestureDetector(
-              onTap: () => Navigator.pushNamed(context, Routes.notespage),
+              onTap: () {},
               child: Image.asset(
                 'lib/images/fridgebackground.png',
                 fit: BoxFit.cover,
@@ -80,37 +86,69 @@ class _FridgePageState extends State<FridgePage> {
             ),
           ),
 
-          // Add icon or image placeholders
-          _buildImageContainer(
-              screenWidth * 0.4, screenHeight * 0.22, _imageUrl1, 1),
-          _buildImageContainer(
-              screenWidth * 0.31, screenHeight * 0.42, _imageUrl2, 2, -0.3),
-          _buildImageContainer(
-              screenWidth * 0.48, screenHeight * 0.53, _imageUrl3, 3, 0.6),
-        ],
-      ),
-    );
-  }
-
-  // Helper function to build image containers
-  Widget _buildImageContainer(
-      double left, double top, String? imageUrl, int index,
-      [double angle = 0]) {
-    return Positioned(
-      left: left,
-      top: top,
-      child: Transform.rotate(
-        angle: angle,
-        child: GestureDetector(
-          onTap: () => _pickImage(index),
-          child: Container(
-            height: 60,
-            width: 100,
-            child: imageUrl == null
-                ? Image.asset('lib/images/addicon.png')
-                : Image.network(imageUrl, fit: BoxFit.cover),
+          // Image position 1
+          Positioned(
+            left: MediaQuery.of(context).size.width * 0.4,
+            top: MediaQuery.of(context).size.height * 0.22,
+            child: GestureDetector(
+              onTap: () => currentUserId != null
+                  ? _pickAndUploadImage(currentUserId, 'image1')
+                  : null,
+              child: Container(
+                height: 60,
+                width: 100,
+                child: userImages['image1'] != null &&
+                        userImages['image1']!.isNotEmpty
+                    ? Image.network(userImages['image1']!)
+                    : Image.asset('lib/images/addicon.png'),
+              ),
+            ),
           ),
-        ),
+
+          // Image position 2
+          Positioned(
+            left: MediaQuery.of(context).size.width * 0.31,
+            top: MediaQuery.of(context).size.height * 0.42,
+            child: Transform.rotate(
+              angle: -0.3,
+              child: GestureDetector(
+                onTap: () => currentUserId != null
+                    ? _pickAndUploadImage(currentUserId, 'image2')
+                    : null,
+                child: Container(
+                  height: 60,
+                  width: 100,
+                  child: userImages['image2'] != null &&
+                          userImages['image2']!.isNotEmpty
+                      ? Image.network(userImages['image2']!)
+                      : Image.asset('lib/images/addicon.png'),
+                ),
+              ),
+            ),
+          ),
+
+          // Image position 3
+          Positioned(
+            left: MediaQuery.of(context).size.width * 0.48,
+            top: MediaQuery.of(context).size.height * 0.53,
+            child: Transform.rotate(
+              angle: 0.6,
+              child: GestureDetector(
+                onTap: () => currentUserId != null
+                    ? _pickAndUploadImage(currentUserId, 'image3')
+                    : null,
+                child: Container(
+                  height: 60,
+                  width: 100,
+                  child: userImages['image3'] != null &&
+                          userImages['image3']!.isNotEmpty
+                      ? Image.network(userImages['image3']!)
+                      : Image.asset('lib/images/addicon.png'),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
