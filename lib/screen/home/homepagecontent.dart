@@ -6,6 +6,8 @@ import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/widgets/containers.dart';
 import 'package:rongo/widgets/stats.dart';
 
+import '../../utils/utils.dart';
+
 class HomePageContent extends StatefulWidget {
   final currentUser;
 
@@ -185,7 +187,7 @@ class _HomePageContentState extends State<HomePageContent> {
         stream: FirebaseFirestore.instance.collection('fridges').doc(currentUserMap['fridgeId']).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -193,7 +195,7 @@ class _HomePageContentState extends State<HomePageContent> {
           }
 
           if (!snapshot.hasData) {
-            return Center(child: Text('Document does not exist'));
+            return const Center(child: Text('Fridge DocumentID does not exist'));
           }
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
@@ -212,25 +214,29 @@ class _HomePageContentState extends State<HomePageContent> {
           for (var item in inventory) {
             // Convert the addedDate string to a DateTime object
             DateTime addedDate = DateTime.parse(item['addedDate']);
+            DateTime? expiryDate;
+
+            if (item['expiryDate'].endsWith("day") || item['expiryDate'].endsWith("days")) {
+                int expiredDayLeft = extractNumber(item['expiryDate']);
+                expiryDate = addedDate.add(Duration(days: expiredDayLeft)); //Convert Day left to DateTime
+            } else {
+              try {
+                expiryDate = DateTime.parse(item['expiryDate']);
+              } catch (e) {
+                // If parsing fails, set expiryDate to null
+                expiryDate = null;
+              }
+            }
+            item['expiryDate'] = expiryDate;
 
             // Check if the year and month match the current year and month
             if (addedDate.year == currentYear &&
                 addedDate.month == currentMonth) {
               addedThisMonth++;
             }
-
-            DateTime? expiryDate;
-
-            try {
-              expiryDate = DateTime.parse(item['expiryDate']);
-            } catch (e) {
-              // If parsing fails, set expiryDate to null
-              expiryDate = null;
-            }
-
             if (expiryDate != null) {
               // Check if the expiryDate is within the next 7 days
-              DateTime oneWeekFromNow = now.add(Duration(days: 7));
+              DateTime oneWeekFromNow = now.add(const Duration(days: 7));
               if (expiryDate.isAfter(now) &&
                   expiryDate.isBefore(oneWeekFromNow)) {
                 expiringSoonCount++;
@@ -257,7 +263,7 @@ class _HomePageContentState extends State<HomePageContent> {
 
                     GestureDetector(
                       onTap:((){
-                        Navigator.pushNamed(context, '/inventory-category',arguments: currentUserMap);
+                        Navigator.pushNamed(context, '/inventory-category',arguments: inventory);
                       })
                       ,
                       child: SquareContainer(

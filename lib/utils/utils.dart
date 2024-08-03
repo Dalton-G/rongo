@@ -81,3 +81,12 @@ Future<bool> showBackDialog(String confirmation, context, {yes = "Leave", no = "
 
   return completer.future;
 }
+
+int extractNumber(String input) {
+  RegExp regex = RegExp(r'\d+');
+  Match? match = regex.firstMatch(input);
+  if (match != null) {
+    return int.parse(match.group(0)!);
+  }
+  throw Exception("No numeric value found in the string");
+}
