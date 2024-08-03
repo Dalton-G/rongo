@@ -17,15 +17,12 @@ class InventoryCategory extends StatefulWidget {
 class _InventoryCategoryState extends State<InventoryCategory> {
   late var inventory;
 
-
   @override
   Widget build(BuildContext context) {
-
     inventory = ModalRoute.of(context)!.settings.arguments; // Need Fridge ID
     print("HI2222");
     print(inventory);
     print(inventory.runtimeType);
-
 
     return Scaffold(
         appBar: AppBar(
@@ -39,52 +36,57 @@ class _InventoryCategoryState extends State<InventoryCategory> {
               icon: const Icon(Icons.arrow_back),
             ),
           ),
-          title: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Your fridge", style: AppTheme.blackAppBarText),
-              ],
-            ),
-          ),
+          title: Text("Your fridge", style: AppTheme.blackAppBarText),
         ),
         body: SafeArea(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Number of columns
-              childAspectRatio: 1.0, // Aspect ratio of the items
-            ),
-            itemCount: InventoryCategories.values.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.all(16.0),
-                child: GestureDetector(
-                  onTap: (() {
-                    Navigator.pushNamed(
-                      context,
-                      '/inventory-listview',
-                      arguments: {
-                        'inventory': inventory,
-                        'currentCategory':
-                            InventoryCategories.values[index].name,
-                      },
-                    );
-                  }),
-                  child: SquareContainer(
-                    backgroundColor: AppTheme.lighterGreen,
-                    height: 130,
-                    width: 130,
-                    roundedCorner: 25,
-                    child: Center(
-                      child: Text(
-                        InventoryCategories.values[index].name,
-                        textAlign: TextAlign.center,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Number of columns
+                childAspectRatio: 1, // Aspect ratio of the items
+              ),
+              itemCount: InventoryCategories.values.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: GestureDetector(
+                    onTap: (() {
+                      Navigator.pushNamed(
+                        context,
+                        '/inventory-listview',
+                        arguments: {
+                          'inventory': inventory,
+                          'currentCategory':
+                              InventoryCategories.values[index].name,
+                        },
+                      );
+                    }),
+                    child: Container(
+                      decoration: AppTheme.widgetDeco(),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 15.0),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: Image.asset(
+                                "lib/images/${InventoryCategories.values[index].name.toLowerCase()}.png",
+                                height: 80,
+                              ),
+                            ),
+                            Text(
+                              InventoryCategories.values[index].name,
+                           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ));
   }
