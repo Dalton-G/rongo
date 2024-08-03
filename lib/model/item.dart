@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class Item {
   String uid;
   String name;
@@ -12,6 +14,8 @@ class Item {
   String category;
   List<dynamic> ingredients;
   String storageMethod;
+  Uint8List? image;
+  String? imageDownloadURL;
 
   Item(
       {this.uid = "",
@@ -26,7 +30,8 @@ class Item {
       this.halal = "Unknown",
       this.ingredients = const ["Unknown"],
       this.storageMethod = "Unknown",
-      this.category = "Others"})
+      this.category = "Others",
+      this.image})
       : addedDate = dateTime ?? DateTime.now() {
     expiryDate = expiryDate == "Not visible" ? "Unknown" : expiryDate;
     ingredients = ingredients == "Not visible" ? ["Unknown"] : ingredients;
@@ -41,13 +46,14 @@ class Item {
       'price': price,
       'expiryDate': expiryDate,
       'addedDate': addedDate.toIso8601String(),
-      'dictionaryUid': dictionaryUid,
+      // 'dictionaryUid': dictionaryUid,
       'historyUid': historyUid,
       'allergen': allergen,
       'halal': halal,
       'category': category,
       'ingredients': ingredients,
       'storageMethod': storageMethod,
+      'imageDownloadURL':imageDownloadURL,
     };
   }
 

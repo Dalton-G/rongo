@@ -182,7 +182,8 @@ class _ScannerState extends State<Scanner> {
           expiryDate: _controller[3].text,
           storageMethod: _controller[4].text,
           allergen: _controller[5].text.split(","),
-          halal: _controller[6].text));
+          halal: _controller[6].text,
+          image: img));
       result = {};
     });
     showSnackBar("added to list", context);
