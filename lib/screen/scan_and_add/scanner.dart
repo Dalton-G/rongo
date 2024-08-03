@@ -176,13 +176,13 @@ class _ScannerState extends State<Scanner> {
     setState(() {
       List<String> keys = variableIcon.keys.toList();
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
-          name: result[keys[0]],
-          category: result[keys[1]],
-          ingredients: result[keys[2]],
-          expiryDate: result[keys[3]],
-          storageMethod: result[keys[4]],
-          allergen: result[keys[5]],
-          halal: result[keys[6]]));
+          name: _controller[0].text,
+          category: _controller[1].text,
+          ingredients: [_controller[2].text],
+          expiryDate: _controller[3].text,
+          storageMethod: _controller[4].text,
+          allergen: _controller[5].text.split(","),
+          halal: _controller[6].text));
       result = {};
     });
     showSnackBar("added to list", context);
