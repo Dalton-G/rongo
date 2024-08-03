@@ -200,12 +200,16 @@ class _HomePageContentState extends State<HomePageContent> {
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final List inventory = data['inventory'];
-          print(data['inventory']);
 
           int totalInventory = inventory.length;
           int addedThisMonth = 0;
           int expiringSoonCount = 0;
           int expiredCount = 0;
+
+          List addedThisMonthList = [];
+          List expiringSoonCountList = [];
+          List expiredCountList = [];
+
 
           DateTime now = DateTime.now();
           int currentMonth = now.month;
@@ -233,6 +237,7 @@ class _HomePageContentState extends State<HomePageContent> {
             if (addedDate.year == currentYear &&
                 addedDate.month == currentMonth) {
               addedThisMonth++;
+              addedThisMonthList.add(item);
             }
             if (expiryDate != null) {
               // Check if the expiryDate is within the next 7 days
@@ -240,11 +245,13 @@ class _HomePageContentState extends State<HomePageContent> {
               if (expiryDate.isAfter(now) &&
                   expiryDate.isBefore(oneWeekFromNow)) {
                 expiringSoonCount++;
+                expiringSoonCountList.add(item);
               }
 
               // Check if the expiryDate has already passed
               if (expiryDate.isBefore(now)) {
                 expiredCount++;
+                expiredCountList.add(item);
               }
             }
           }
@@ -263,7 +270,12 @@ class _HomePageContentState extends State<HomePageContent> {
 
                     GestureDetector(
                       onTap:((){
-                        Navigator.pushNamed(context, '/inventory-category',arguments: inventory);
+                        print(inventory);
+                        Navigator.pushNamed(context, '/inventory-category',
+                            arguments: {
+                          'inventory' : inventory,
+                              'type' : 'total',
+                        });
                       })
                       ,
                       child: SquareContainer(
@@ -275,13 +287,23 @@ class _HomePageContentState extends State<HomePageContent> {
                         child: Stats(stats: "total", num: totalInventory,),
                       ),
                     ),
-                    SquareContainer(
-                      withPadding: false,
-                      backgroundColor: AppTheme.lighterGreen,
-                      height: 130,
-                      width: 130,
-                      roundedCorner: 25,
-                      child: Stats(stats: "new",num: addedThisMonth,),
+                    GestureDetector(
+                      onTap:((){
+                        Navigator.pushNamed(context, '/inventory-listview',
+                            arguments: {
+                            'inventory' : addedThisMonthList,
+                            'type' : 'new',
+                            });
+                        })
+                      ,
+                      child: SquareContainer(
+                        withPadding: false,
+                        backgroundColor: AppTheme.lighterGreen,
+                        height: 130,
+                        width: 130,
+                        roundedCorner: 25,
+                        child: Stats(stats: "new",num: addedThisMonth,),
+                      ),
                     ),
                   ],
                 ),
@@ -289,21 +311,41 @@ class _HomePageContentState extends State<HomePageContent> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    SquareContainer(
-                      withPadding: false,
-                      backgroundColor: AppTheme.lighterGreen,
-                      height: 130,
-                      width: 130,
-                      roundedCorner: 25,
-                      child: Stats(stats: "soon",num: expiringSoonCount,),
+                    GestureDetector(
+                      onTap:((){
+                        Navigator.pushNamed(context, '/inventory-listview',
+                            arguments: {
+                              'inventory' : expiringSoonCountList,
+                              'type' : 'soon',
+                            });
+                      })
+                      ,
+                      child: SquareContainer(
+                        withPadding: false,
+                        backgroundColor: AppTheme.lighterGreen,
+                        height: 130,
+                        width: 130,
+                        roundedCorner: 25,
+                        child: Stats(stats: "soon",num: expiringSoonCount,),
+                      ),
                     ),
-                    SquareContainer(
-                      withPadding: false,
-                      backgroundColor: AppTheme.lighterGreen,
-                      height: 130,
-                      width: 130,
-                      roundedCorner: 25,
-                      child: Stats(stats: "expired",num: expiredCount,),
+                    GestureDetector(
+                      onTap:((){
+                        Navigator.pushNamed(context, '/inventory-listview',
+                            arguments: {
+                              'inventory' : expiredCountList,
+                              'type' : 'expired',
+                            });
+                      })
+                      ,
+                      child: SquareContainer(
+                        withPadding: false,
+                        backgroundColor: AppTheme.lighterGreen,
+                        height: 130,
+                        width: 130,
+                        roundedCorner: 25,
+                        child: Stats(stats: "expired",num: expiredCount,),
+                      ),
                     ),
                   ],
                 ),

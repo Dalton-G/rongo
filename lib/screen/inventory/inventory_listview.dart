@@ -14,57 +14,52 @@ class InventoryListview extends StatefulWidget {
 }
 
 class _InventoryListviewState extends State<InventoryListview> {
+  @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Map;
     List inventory = args['inventory'];
     var currentCategory = args['currentCategory'];
+    var type = args['type'];
+    List? desiredCategory = [];
+    String? nullPrompting;
 
-    List desiredCategory;
-    desiredCategory =
-        inventory.where((item) => item['category'] == currentCategory).toList();
+    switch (type){
+      case 'total':
+        desiredCategory =
+            inventory.where((item) => item['category'] == currentCategory).toList();
+        nullPrompting = "Fridge's empty—time to restock! A full fridge uses less energy.";
+        break;
+
+      case 'new':
+        desiredCategory = inventory;
+        nullPrompting = "Fridge's empty—time to restock! A full fridge uses less energy.";
+        break;
+
+      case 'soon':
+        desiredCategory = inventory;
+        nullPrompting = "No nearly expired food! Your fridge is fresh.";
+        break;
+
+      case 'expired':
+        desiredCategory = inventory;
+        nullPrompting = "No food wasted? You're a food hero!";
+        break;
+
+    }
 
     return Scaffold(
         appBar: AppBar(
           title: const Text('Inventory'),
         ),
-        body: ListView.builder(
-          itemCount: desiredCategory.length,
+
+        //TODO: Handle if desiredCategory? is null
+        body: desiredCategory!.isNotEmpty? ListView.builder(
+          itemCount: desiredCategory?.length,
           itemBuilder: (context, index) {
-            var item = desiredCategory[index];
+            var item = desiredCategory?[index];
             DateFormat format = DateFormat("yyyy-MM-dd");
             DateTime addDate = format.parse(item['addedDate']);
             DateTime expiryDate = item['expiryDate'];
-            // List<String> months = [
-            //   'January', 'February', 'March', 'April', 'May', 'June', 'July',
-            //   'August', 'September', 'October', 'November', 'December'
-            // ];
-            // List<String> months = [
-            //   'Jan',
-            //   'Feb',
-            //   'Mar',
-            //   'Apr',
-            //   'May',
-            //   'Jun',
-            //   'Jul',
-            //   'Aug',
-            //   'Sep',
-            //   'Oct',
-            //   'Nov',
-            //   'Dec'
-            // ];
-            // List<String> weekdays = [
-            //   'Monday',
-            //   'Tuesday',
-            //   'Wednesday',
-            //   'Thursday',
-            //   'Friday',
-            //   'Saturday',
-            //   'Sunday'
-            // ];
-            // String addDateWeekday = weekdays[addDate.weekday - 1];
-            // String expiryDateWeekday = weekdays[expiryDate.weekday - 1];
-            // String addDateMonth = months[addDate.month - 1];
-            // String expiryDateMonth = months[expiryDate.month - 1];
 
             return Padding(
               padding:
@@ -124,32 +119,9 @@ class _InventoryListviewState extends State<InventoryListview> {
                 ),
               ),
             );
-            // return ListTile(
-            //   leading: item['imageDownloadURL'] == null
-            //       ? const Icon(Icons.kitchen)
-            //       :
-            //   SizedBox(
-            //     width: 100,
-            //     child: ClipRRect(
-            //       borderRadius: BorderRadius.circular(10),
-            //       child: Image.network(
-            //         item['imageDownloadURL'],
-            //         fit: BoxFit.cover,
-            //       ),
-            //     ),
-            //   ),
-            //   title: Text(item['name'] ?? 'Unknown'),
-            //   subtitle: Text(
-            //     'Added: ${addDate.year} $addDateMonth ${addDate.day} - $addDateWeekday \n '
-            //     'Expiry: ${expiryDate.year} $expiryDateMonth ${expiryDate.day} - $expiryDateWeekday',
-            //     style: const TextStyle(fontSize: 12),
-            //   ),
-            //   trailing: Text(
-            //     "x${item['quantity']}",
-            //   ),
-            //   isThreeLine: true,
-            // );
           },
-        ));
+        ):
+            Center(child: Text(nullPrompting??""))
+    );
   }
 }
