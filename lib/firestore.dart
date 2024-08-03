@@ -132,4 +132,27 @@ class FirestoreService {
       throw Exception('User with uid $userId not found');
     }
   }
+
+
+  // Inventory Collection
+  final CollectionReference inventoryCollection =
+  FirebaseFirestore.instance.collection('inventory');
+
+  Future<String?> updateInventoryImages(image) async {
+
+    try {
+      Reference storageRef =
+      _storage.ref().child('inventory/${DateTime.now().millisecondsSinceEpoch}');
+      UploadTask uploadTask = storageRef.putData(image);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      return await taskSnapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading image: $e');
+      return null;
+    }
+  }
+
+
+
+
 }

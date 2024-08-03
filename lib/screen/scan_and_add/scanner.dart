@@ -182,7 +182,8 @@ class _ScannerState extends State<Scanner> {
           expiryDate: result[keys[3]],
           storageMethod: result[keys[4]],
           allergen: result[keys[5]],
-          halal: result[keys[6]]));
+          halal: result[keys[6]],
+          image: img));
       result = {};
     });
     showSnackBar("added to list", context);
