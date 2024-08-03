@@ -15,16 +15,16 @@ class InventoryCategory extends StatefulWidget {
 }
 
 class _InventoryCategoryState extends State<InventoryCategory> {
-  late var currentUser;
+  late var inventory;
 
 
   @override
   Widget build(BuildContext context) {
 
-    currentUser = ModalRoute.of(context)!.settings.arguments; // Need Fridge ID
+    inventory = ModalRoute.of(context)!.settings.arguments; // Need Fridge ID
     print("HI2222");
-    print(currentUser);
-    print(currentUser.runtimeType);
+    print(inventory);
+    print(inventory.runtimeType);
 
 
     return Scaffold(
@@ -64,7 +64,7 @@ class _InventoryCategoryState extends State<InventoryCategory> {
                       context,
                       '/inventory-listview',
                       arguments: {
-                        'currentUser': currentUser,
+                        'inventory': inventory,
                         'currentCategory':
                             InventoryCategories.values[index].name,
                       },
