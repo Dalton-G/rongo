@@ -3,8 +3,9 @@ import 'package:rongo/utils/theme/theme.dart';
 
 class Stats extends StatelessWidget {
   final String stats;
+  final int num;
 
-  Stats({super.key, required this.stats});
+  Stats({super.key, required this.stats, required this.num});
 
   @override
   Widget build(BuildContext context) {
@@ -12,18 +13,18 @@ class Stats extends StatelessWidget {
     Color color = AppTheme.mainGreen;
     switch (stats) {
       case "total":
-        data = ["Total Item", "45", "lib/images/totalitem.png"];
+        data = ["Total Item", "$num", "lib/images/totalitem.png"];
         break;
       case "soon":
-        data = ["Expire Soon", "2", "lib/images/expiresoon.png"];
+        data = ["Expire Soon", "$num", "lib/images/expiresoon.png"];
         color = Colors.yellowAccent;
         break;
       case "expired":
-        data = ["Expired Item", "4", "lib/images/expireditem.png"];
+        data = ["Expired Item", "$num", "lib/images/expireditem.png"];
         color = Colors.redAccent;
         break;
       case "new":
-        data = ["New Item", "12", "lib/images/newitem.png"];
+        data = ["New Item", "$num", "lib/images/newitem.png"];
     }
     ;
     return Padding(

@@ -17,7 +17,7 @@ Map<String, IconData> variableIcon = {
   "Halal": Icons.restaurant,
 };
 
-enum cats { Fruits, Vegetables, Meat, Fish, Condiments, Leftovers, Others }
+enum InventoryCategories { Fruits, Vegetables, Meat, Fish, Condiments, Leftovers, Others }
 
 final model = GenerativeModel(
   model: 'gemini-1.5-flash-001',
@@ -80,4 +80,13 @@ Future<bool> showBackDialog(String confirmation, context, {yes = "Leave", no = "
   );
 
   return completer.future;
+}
+
+int extractNumber(String input) {
+  RegExp regex = RegExp(r'\d+');
+  Match? match = regex.firstMatch(input);
+  if (match != null) {
+    return int.parse(match.group(0)!);
+  }
+  throw Exception("No numeric value found in the string");
 }
