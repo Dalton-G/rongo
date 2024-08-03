@@ -19,10 +19,11 @@ class _InventoryCategoryState extends State<InventoryCategory> {
 
   @override
   Widget build(BuildContext context) {
-    inventory = ModalRoute.of(context)!.settings.arguments; // Need Fridge ID
-    print("HI2222");
-    print(inventory);
-    print(inventory.runtimeType);
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    List inventory = args['inventory'];
+    var type = args['type'];
+
+
 
     return Scaffold(
         appBar: AppBar(
@@ -57,6 +58,7 @@ class _InventoryCategoryState extends State<InventoryCategory> {
                         '/inventory-listview',
                         arguments: {
                           'inventory': inventory,
+                          'type': type,
                           'currentCategory':
                               InventoryCategories.values[index].name,
                         },
