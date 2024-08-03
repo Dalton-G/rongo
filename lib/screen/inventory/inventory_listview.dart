@@ -157,9 +157,6 @@ class _InventoryListviewState extends State<InventoryListview> {
                   ),
                 ),
               );
-
-
-
           },
         ):
             Center(child: Text(nullPrompting??""))
