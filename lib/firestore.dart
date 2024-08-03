@@ -143,7 +143,7 @@ class FirestoreService {
     try {
       Reference storageRef =
       _storage.ref().child('inventory/${DateTime.now().millisecondsSinceEpoch}');
-      UploadTask uploadTask = storageRef.putData(image);
+      UploadTask uploadTask = storageRef.putData(image,SettableMetadata(contentType: 'image/jpeg'));
       TaskSnapshot taskSnapshot = await uploadTask;
       return await taskSnapshot.ref.getDownloadURL();
     } catch (e) {
