@@ -42,8 +42,10 @@ class Item {
     return {
       // 'uid': uid,
       'name': name,
-      'quantity': quantity,
-      'price': price,
+      'purchaseQuantity': quantity,
+      'currentQuantity': quantity,
+      'netPrice': price/quantity,
+      'totalPrice': price,
       'expiryDate': expiryDate,
       'addedDate': addedDate.toIso8601String(),
       // 'dictionaryUid': dictionaryUid,
