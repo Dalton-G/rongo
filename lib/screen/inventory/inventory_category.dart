@@ -21,7 +21,8 @@ class _InventoryCategoryState extends State<InventoryCategory> {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Map;
     List inventory = args['inventory'];
-    var type = args['type'];
+    String type = args['type'];
+    String fridgeId = args['fridgeId'];
 
 
 
@@ -59,6 +60,7 @@ class _InventoryCategoryState extends State<InventoryCategory> {
                         arguments: {
                           'inventory': inventory,
                           'type': type,
+                          'fridgeId' : fridgeId,
                           'currentCategory':
                               InventoryCategories.values[index].name,
                         },
