@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:rongo/model/item.dart';
 import 'package:rongo/firestore.dart';
+CollectionReference fridges = FirebaseFirestore.instance.collection('fridges');
 
 Future<bool> addItemToFridge(Item item, fridgeID) async {
 
-  CollectionReference fridges = FirebaseFirestore.instance.collection('fridges');
   DocumentReference fridgeDoc = fridges.doc(fridgeID);
   final FirestoreService firestoreService = FirestoreService();
 
@@ -39,3 +39,56 @@ Future<bool> addItemToFridge(Item item, fridgeID) async {
     }
   }
 }
+
+Future<List<Map<String, dynamic>>?> getInventoryList(String fridgeID) async {
+  try {
+    DocumentReference fridgeDoc = fridges.doc(fridgeID);
+    DocumentSnapshot snapshot = await fridgeDoc.get();
+
+    if (snapshot.exists) {
+      Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
+      List<dynamic>? inventory = data?['inventory'] as List<dynamic>?;
+
+      // Cast to List<Map<String, dynamic>> for easier manipulation
+      return inventory?.map((item) => item as Map<String, dynamic>).toList();
+    } else {
+      print('No such document!');
+      return null;
+    }
+  } catch (e) {
+    print('Error retrieving inventory list: $e');
+    return null;
+  }
+}
+
+Future<void> updateInventoryItem(String fridgeID, String addedDate, Map<String, dynamic> updatedItem) async {
+  try {
+    DocumentReference fridgeDoc = fridges.doc(fridgeID);
+
+    List<Map<String, dynamic>>? inventory = await getInventoryList(fridgeID);
+
+    if (inventory != null) {
+      // Find the index of the item to update
+      int index = inventory.indexWhere((item) => item['addedDate'] == addedDate);
+
+      if (index != -1) {
+        // Update the item at the found index
+        inventory[index] = updatedItem;
+
+        // Update the document with the modified list
+        await fridgeDoc.update({
+          'inventory': inventory,
+        });
+
+        print('Item updated successfully!');
+      } else {
+        print('Item not found in inventory!');
+      }
+    } else {
+      print('Failed to retrieve inventory list!');
+    }
+  } catch (e) {
+    print('Error updating inventory item: $e');
+  }
+}
+

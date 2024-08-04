@@ -231,30 +231,34 @@ class _HomePageContentState extends State<HomePageContent> {
                 expiryDate = null;
               }
             }
-            item['expiryDate'] = expiryDate;
+            item['expiryDate'] = expiryDate?.toIso8601String();
 
-            // Check if the year and month match the current year and month
-            if (addedDate.year == currentYear &&
-                addedDate.month == currentMonth) {
-              addedThisMonth++;
-              addedThisMonthList.add(item);
-            }
-            if (expiryDate != null) {
-              // Check if the expiryDate is within the next 7 days
-              DateTime oneWeekFromNow = now.add(const Duration(days: 7));
-              if (expiryDate.isAfter(now) &&
-                  expiryDate.isBefore(oneWeekFromNow)) {
-                expiringSoonCount++;
-                expiringSoonCountList.add(item);
-              }
 
-              // Check if the expiryDate has already passed
-              if (expiryDate.isBefore(now)) {
-                expiredCount++;
-                expiredCountList.add(item);
-              }
-            }
-          }
+            if(item['currentQuantity'] > 0){
+                    // Check if the year and month match the current year and month
+                    if (addedDate.year == currentYear &&
+                        addedDate.month == currentMonth) {
+                      addedThisMonth++;
+                      addedThisMonthList.add(item);
+                    }
+                    if (expiryDate != null) {
+                      // Check if the expiryDate is within the next 7 days
+                      DateTime oneWeekFromNow =
+                          now.add(const Duration(days: 7));
+                      if (expiryDate.isAfter(now) &&
+                          expiryDate.isBefore(oneWeekFromNow)) {
+                        expiringSoonCount++;
+                        expiringSoonCountList.add(item);
+                      }
+
+                      // Check if the expiryDate has already passed
+                      if (expiryDate.isBefore(now)) {
+                        expiredCount++;
+                        expiredCountList.add(item);
+                      }
+                    }
+                  }
+                }
 
           // return Text('Field value: ${data['field_name']}');
           return Positioned(
@@ -271,10 +275,12 @@ class _HomePageContentState extends State<HomePageContent> {
                     GestureDetector(
                       onTap:((){
                         print(inventory);
+                        print(currentUserMap['fridgeId']);
                         Navigator.pushNamed(context, '/inventory-category',
                             arguments: {
-                          'inventory' : inventory,
+                              'inventory' : inventory,
                               'type' : 'total',
+                              'fridgeId' : currentUserMap['fridgeId'],
                         });
                       })
                       ,
@@ -293,6 +299,7 @@ class _HomePageContentState extends State<HomePageContent> {
                             arguments: {
                             'inventory' : addedThisMonthList,
                             'type' : 'new',
+                              'fridgeId' : currentUserMap['fridgeId'],
                             });
                         })
                       ,
@@ -317,6 +324,7 @@ class _HomePageContentState extends State<HomePageContent> {
                             arguments: {
                               'inventory' : expiringSoonCountList,
                               'type' : 'soon',
+                              'fridgeId' : currentUserMap['fridgeId'],
                             });
                       })
                       ,
@@ -335,6 +343,7 @@ class _HomePageContentState extends State<HomePageContent> {
                             arguments: {
                               'inventory' : expiredCountList,
                               'type' : 'expired',
+                              'fridgeId' : currentUserMap['fridgeId'],
                             });
                       })
                       ,
@@ -354,91 +363,6 @@ class _HomePageContentState extends State<HomePageContent> {
           );
         }
       )
-
-
-      // StreamBuilder<Object>(
-      //       stream: _fridgesCollection.doc(currentUser['fridgeId']).get(),,
-      //       builder: (context, snapshot) {
-      //         return Positioned(
-      //           left: screenWidth * 0.07,
-      //           right: screenWidth * 0.07,
-      //           bottom: screenHeight * 0.05,
-      //           child: Column(
-      //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      //             children: [
-      //               Row(
-      //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      //                 children: [
-      //                   GestureDetector(
-      //                     onTap:((){
-      //                       print("Tapp Data1");
-      //                       print("currentUserMap");
-      //                       print(currentUserMap);
-      //                       Navigator.pushNamed(context, '/inventory-category',arguments: currentUserMap);
-      //                     })
-      //                     ,
-      //                     child: SquareContainer(
-      //                       backgroundColor: AppTheme.lighterGreen,
-      //                       height: 130,
-      //                       width: 130,
-      //                       child: Center(
-      //                         child: Text(
-      //                           "Data 1",
-      //                           textAlign: TextAlign.center,
-      //                         ),
-      //                       ),
-      //                       roundedCorner: 25,
-      //                     ),
-      //                   ),
-      //                   SquareContainer(
-      //                     backgroundColor: AppTheme.lighterGreen,
-      //                     height: 130,
-      //                     width: 130,
-      //                     child: Center(
-      //                       child: Text(
-      //                         "Data 2",
-      //                         textAlign: TextAlign.center,
-      //                       ),
-      //                     ),
-      //                     roundedCorner: 25,
-      //                   ),
-      //                 ],
-      //               ),
-      //               const SizedBox(height: 20),
-      //               Row(
-      //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      //                 children: [
-      //                   SquareContainer(
-      //                     backgroundColor: AppTheme.lighterGreen,
-      //                     height: 130,
-      //                     width: 130,
-      //                     child: Center(
-      //                       child: Text(
-      //                         "Data 3",
-      //                         textAlign: TextAlign.center,
-      //                       ),
-      //                     ),
-      //                     roundedCorner: 25,
-      //                   ),
-      //                   SquareContainer(
-      //                     backgroundColor: AppTheme.lighterGreen,
-      //                     height: 130,
-      //                     width: 130,
-      //                     child: Center(
-      //                       child: Text(
-      //                         "Data 4",
-      //                         textAlign: TextAlign.center,
-      //                       ),
-      //                     ),
-      //                     roundedCorner: 25,
-      //                   ),
-      //                 ],
-      //               ),
-      //             ],
-      //           ),
-      //         );
-      //       }
-      //     ),
         ],
       ),
     );
