@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rongo/screen/chatbot/chat.dart';
 import 'package:rongo/screen/home/homepage.dart';
 import 'package:rongo/screen/inventory/inventory_category.dart';
 import 'package:rongo/screen/inventory/inventory_listview.dart';
@@ -19,6 +20,7 @@ class Routes {
   static const String scannedItemList = '/scanned-item-list';
   static const String inventoryCategory = '/inventory-category';
   static const String inventoryListView = '/inventory-listview';
+  static const String chat = '/chat';
 
   static final dynamic routes = <String, WidgetBuilder>{
     onboarding: (BuildContext context) => const OnboardingPage(),
@@ -29,5 +31,6 @@ class Routes {
     scannedItemList: (BuildContext context) => const ScannedItemList(),
     inventoryCategory: (BuildContext context) => const InventoryCategory(),
     inventoryListView: (BuildContext context) => const InventoryListview(),
+    chat: (BuildContext context) => const ChatPage(),
   };
 }

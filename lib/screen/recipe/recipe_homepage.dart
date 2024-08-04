@@ -79,10 +79,10 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
       ),
       // trigger chatbot
       floatingActionButton: Container(
-        margin: const EdgeInsets.fromLTRB(0, 0, 20, 50),
+        margin: const EdgeInsets.fromLTRB(0, 0, 10, 70),
         child: FloatingActionButton(
           shape: const CircleBorder(),
-          onPressed: () {},
+          onPressed: () => Navigator.pushNamed(context, '/chat'),
           backgroundColor: AppTheme.backgroundWhite,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
