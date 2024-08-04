@@ -95,6 +95,8 @@ class AppTheme {
   // JL
   static const mainGreen = Color(0xff25995C);
   static const backgroundWhite = Color(0xffFAFAFA);
+  static const lightOrange = Color(0XFFFFDEBF);
+  static const lightGrey = Color(0XFFEAEAEA);
 
   static BoxDecoration widgetDeco({Color color = Colors.white}) {
     return BoxDecoration(
