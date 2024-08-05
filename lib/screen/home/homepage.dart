@@ -16,7 +16,6 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-
 class IndexProvider with ChangeNotifier {
   int _selectedIndex = 0;
 
@@ -78,17 +77,19 @@ class _HomePageState extends State<HomePage> {
       return [
         const Center(
             child:
-            CircularProgressIndicator()), // Placeholder while fetching user
-        const Center(
-            child:
                 CircularProgressIndicator()), // Placeholder while fetching user
         const Center(
             child:
                 CircularProgressIndicator()), // Placeholder while fetching user
         const Center(
             child:
-            CircularProgressIndicator()), // Scanner(currentUser: currentUser!) -> Placeholder while fetching user
-        RecipeHomePage(),
+                CircularProgressIndicator()), // Placeholder while fetching user
+        const Center(
+            child:
+                CircularProgressIndicator()), // Scanner(currentUser: currentUser!) -> Placeholder while fetching user
+        const Center(
+            child:
+                CircularProgressIndicator()), // Placeholder while fetching user
       ];
     }
 
@@ -97,7 +98,7 @@ class _HomePageState extends State<HomePage> {
       FridgePage(currentUser: currentUser!),
       NotesPage(currentUser: currentUser!),
       Scanner(currentUser: currentUser!),
-      RecipeHomePage(),
+      RecipeHomePage(currentUser: currentUser!),
     ];
   }
 
@@ -186,12 +187,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildNavItem(IconData icon, int index) {
-    bool isSelected = Provider.of<IndexProvider>(context).selectedIndex == index;
+    bool isSelected =
+        Provider.of<IndexProvider>(context).selectedIndex == index;
     return GestureDetector(
       onTap: () {
         setState(() {
           // _selectedIndex = index;
-          Provider.of<IndexProvider>(context, listen: false).setSelectedIndex(index);
+          Provider.of<IndexProvider>(context, listen: false)
+              .setSelectedIndex(index);
         });
       },
       child: AnimatedContainer(

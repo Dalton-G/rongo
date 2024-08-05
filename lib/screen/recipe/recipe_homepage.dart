@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:rongo/model/recipe_meal_type.dart';
+import 'package:rongo/screen/chatbot/chat.dart';
 import 'package:rongo/utils/theme/theme.dart';
 
 class RecipeHomePage extends StatefulWidget {
-  const RecipeHomePage({super.key});
+  final Object? currentUser;
+  const RecipeHomePage({super.key, this.currentUser});
 
   @override
   State<RecipeHomePage> createState() => _RecipeHomePageState();
 }
 
 class _RecipeHomePageState extends State<RecipeHomePage> {
+  get currentUser => widget.currentUser;
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -43,12 +46,15 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                     topRight: Radius.circular(30),
                   ),
                 ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Nothing to see here!"),
-                    Text("Start generating recipes now!"),
-                  ],
+                child: const Padding(
+                  padding: EdgeInsets.only(top: 50.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text("Nothing to see here!"),
+                      Text("Start generating recipes now!"),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -82,7 +88,10 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         margin: const EdgeInsets.fromLTRB(0, 0, 10, 70),
         child: FloatingActionButton(
           shape: const CircleBorder(),
-          onPressed: () => Navigator.pushNamed(context, '/chat'),
+          onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ChatPage(currentUser: currentUser))),
           backgroundColor: AppTheme.backgroundWhite,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
