@@ -28,18 +28,18 @@ class _InventoryListviewState extends State<InventoryListview> {
     var type = args['type'];
     List? desiredCategory = [];
     String? nullPrompting;
-    bool inventoryNotEMpty = false;
+    bool inventoryListNotEmpty = false;
 
     switch (type){
       case 'total':
         desiredCategory =
             inventory.where((item) => item['category'] == currentCategory).toList();
-        nullPrompting = "Fridge's empty—time to restock! A full fridge uses less energy.";
+        nullPrompting = "Fridge's empty—time to restock!\n A full fridge uses less energy.";
         break;
 
       case 'new':
         desiredCategory = inventory;
-        nullPrompting = "Fridge's empty—time to restock! A full fridge uses less energy.";
+        nullPrompting = "Fridge's empty—time to restock!\n A full fridge uses less energy.";
         break;
 
       case 'soon':
@@ -66,7 +66,7 @@ class _InventoryListviewState extends State<InventoryListview> {
 
             if (index == (desiredCategory!.length) ) {
 
-              if(inventoryNotEMpty){
+              if(inventoryListNotEmpty){
                 return const AddItemWidget();
               }
               else{
@@ -84,7 +84,7 @@ class _InventoryListviewState extends State<InventoryListview> {
             }
 
             if ( item['currentQuantity'] > 0 ){
-              inventoryNotEMpty = true;
+              inventoryListNotEmpty = true;
             }
 
             return Padding(
