@@ -170,11 +170,14 @@ class _InventoryListviewState extends State<InventoryListview> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            item['name'] ?? 'Unknown',
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600),
+                                          SizedBox(
+                                            width: MediaQuery.of(context).size.width - 230,
+                                            child: Text(
+                                              item['name'] ?? 'Unknown',
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
                                           ),
                                           SizedBox(
                                             height: 8,
