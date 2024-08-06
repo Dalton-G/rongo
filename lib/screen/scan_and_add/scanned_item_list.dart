@@ -28,6 +28,7 @@ class ScannedItemList extends StatefulWidget {
 class _ScannedItemListState extends State<ScannedItemList> {
   var _selectedIndex = null;
   var _isLoading = false;
+  var _isAdding = false;
   var result;
 
   late var currentUser;
@@ -94,41 +95,49 @@ class _ScannedItemListState extends State<ScannedItemList> {
                 padding: const EdgeInsets.only(right: 20.0),
                 child: GestureDetector(
                   onTap: () async {
+
+                  if (!_isAdding) {
+
+                    setState(() {
+                      _isAdding = true;
+                    });
+
                     bool successfullyAddToFridge = false;
                     var historyUid = Uuid().v4(); //Receipt ID
 
-                    for (int i = 0; i< itemList.length;i++){
+                    for (int i = 0; i < itemList.length; i++) {
                       var item = itemList[i];
                       item.historyUid = historyUid;
 
-                      successfullyAddToFridge =  await addItemToFridge(item,currentUser['fridgeId']);
-
+                      successfullyAddToFridge =
+                          await addItemToFridge(item, currentUser['fridgeId']);
                     }
-                    if ( successfullyAddToFridge ){
+                    if (successfullyAddToFridge) {
                       if (mounted) {
                         setState(() {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Item added successfully!')),);
+                          showSnackBar('Item added successfully!.',context);
+
+                          _isAdding = false;
                           itemList.clear();
                           Navigator.pop(context);
                         });
-
-                    }
-                  } else{
+                      }
+                    } else {
                       setState(() {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Failed to add Item, Please Try again.')),
-                        );
+                        showSnackBar('Failed to add Item, Please Try again.',context);
+                        _isAdding = false;
                       });
-
                     }
-
-                  },
-                  child: const Text(
-                    "Save",
-                    style: TextStyle(color: AppTheme.mainGreen, fontSize: 17),
-                  ),
-                ),
+                  }
+                },
+                child: _isAdding
+                    ? const CircularProgressIndicator()
+                    : const Text(
+                        "Save",
+                        style:
+                            TextStyle(color: AppTheme.mainGreen, fontSize: 17),
+                      ),
+              ),
               ),
             ],
         ),
