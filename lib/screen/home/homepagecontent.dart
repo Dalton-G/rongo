@@ -220,18 +220,20 @@ class _HomePageContentState extends State<HomePageContent> {
             DateTime addedDate = DateTime.parse(item['addedDate']);
             DateTime? expiryDate;
 
-            if (item['expiryDate']?.endsWith("day") || item['expiryDate']?.endsWith("days")) {
+            if (item['expiryDate'] != null){
+              if (item['expiryDate']?.endsWith("day") || item['expiryDate']?.endsWith("days")) {
                 int expiredDayLeft = extractNumber(item['expiryDate']);
                 expiryDate = addedDate.add(Duration(days: expiredDayLeft)); //Convert Day left to DateTime
-            } else {
-              try {
-                expiryDate = DateTime.parse(item['expiryDate']);
-              } catch (e) {
-                // If parsing fails, set expiryDate to null
-                expiryDate = null;
+              } else {
+                try {
+                  expiryDate = DateTime.parse(item['expiryDate']);
+                } catch (e) {
+                  // If parsing fails, set expiryDate to null
+                  expiryDate = null;
+                }
               }
+              item['expiryDate'] = expiryDate?.toIso8601String();
             }
-            item['expiryDate'] = expiryDate?.toIso8601String();
 
 
             if(item['currentQuantity'] > 0){
