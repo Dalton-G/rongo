@@ -220,7 +220,7 @@ class _HomePageContentState extends State<HomePageContent> {
             DateTime addedDate = DateTime.parse(item['addedDate']);
             DateTime? expiryDate;
 
-            if (item['expiryDate'].endsWith("day") || item['expiryDate'].endsWith("days")) {
+            if (item['expiryDate']?.endsWith("day") || item['expiryDate']?.endsWith("days")) {
                 int expiredDayLeft = extractNumber(item['expiryDate']);
                 expiryDate = addedDate.add(Duration(days: expiredDayLeft)); //Convert Day left to DateTime
             } else {

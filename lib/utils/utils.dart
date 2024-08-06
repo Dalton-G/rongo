@@ -26,10 +26,10 @@ final model = GenerativeModel(
 
 final PhotoPicker photoPicker = PhotoPicker(imagePicker: ImagePicker());
 
-showSnackBar(String message, context) {
+showSnackBar(String message, context, {durationSeconds = 1}) {
   final snackbar = SnackBar(
     content: Text(message),
-    duration: Duration(seconds: 1),
+    duration: Duration(seconds: durationSeconds),
   );
   ScaffoldMessenger.of(context).hideCurrentSnackBar();
   ScaffoldMessenger.of(context).showSnackBar(snackbar);
