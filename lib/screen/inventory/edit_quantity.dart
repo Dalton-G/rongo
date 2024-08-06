@@ -39,29 +39,27 @@ class _CounterWidgetState extends State<CounterWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 100,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("How many ${widget.name} left after comsumed."),
-          SizedBox(height: 30,),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.remove),
-                onPressed: _decrementCounter,
-              ),
-              Text('$_counter', style: TextStyle(fontSize: 20)),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: _incrementCounter,
-              ),
-            ],
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("How many ${widget.name} left after comsumed."),
+        const SizedBox(height: 30,),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.remove),
+              onPressed: _decrementCounter,
+            ),
+            Text('$_counter', style: TextStyle(fontSize: 20)),
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: _incrementCounter,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
