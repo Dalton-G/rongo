@@ -5,7 +5,7 @@ class Item {
   String name;
   int quantity;
   double price;
-  String expiryDate;
+  String? expiryDate;
   DateTime addedDate;
   String dictionaryUid;
   String historyUid;
