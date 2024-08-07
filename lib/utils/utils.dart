@@ -90,3 +90,5 @@ int extractNumber(String input) {
   }
   throw Exception("No numeric value found in the string");
 }
+
+final extractJsonContent = RegExp(r'```json(.*?)```', dotAll: true);
