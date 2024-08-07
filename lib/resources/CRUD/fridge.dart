@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:rongo/model/item.dart';
 import 'package:rongo/firestore.dart';
+
+import '../../utils/utils.dart';
 CollectionReference fridges = FirebaseFirestore.instance.collection('fridges');
 
 Future<bool> addItemToFridge(Item item, fridgeID) async {
@@ -11,7 +13,33 @@ Future<bool> addItemToFridge(Item item, fridgeID) async {
 
   try {
     //Upload image to firebase
-    item.imageDownloadURL = await firestoreService.updateInventoryImages(item.image);
+    item.imageDownloadURL =
+        await firestoreService.updateInventoryImages(item.image);
+    print("fridge.dart Image uploaded");
+
+    DateTime addedDate = item.addedDate;
+    DateTime? expiryDate;
+
+    if (item.expiryDate != null) {
+      print("item.expiryDate not null: ${item.expiryDate}");
+      if (item.expiryDate!.contains('day') ||
+          item.expiryDate!.contains('days')) {
+        int expiredDayLeft = extractNumber(item.expiryDate!);
+        expiryDate = addedDate
+            .add(Duration(days: expiredDayLeft)); //Convert Day left to DateTime
+        item.expiryDate = expiryDate!.toIso8601String();
+      } else if (item.expiryDate == 'Unknown') {
+        item.expiryDate = null;
+      } else {
+        try {
+          expiryDate = DateTime.parse(item.expiryDate!);
+          item.expiryDate = expiryDate!.toIso8601String();
+        } catch (e) {
+          // If parsing fails, set expiryDate to null
+          item.expiryDate = null;
+        }
+      }
+    }
 
     // Append the item map to the 'inventory' list in the document
     await fridgeDoc.update({
