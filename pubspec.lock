@@ -732,10 +732,10 @@ packages:
     dependency: transitive
     description:
       name: record_web
-      sha256: "703adb626d31e2dd86a8f6b34e306e03cd323e0c5e16e11bbc0385b07a8df97e"
+      sha256: "0ef370d1e6553ad33c39dd03103b374e7861f3518b0533e64c94d73f988a5ffa"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.0"
   record_windows:
     dependency: transitive
     description:
@@ -918,5 +918,5 @@ packages:
     source: hosted
     version: "6.5.0"
 sdks:
-  dart: ">=3.4.0 <4.0.0"
-  flutter: ">=3.22.0"
+  dart: ">=3.3.1 <4.0.0"
+  flutter: ">=3.19.2"

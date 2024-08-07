@@ -23,6 +23,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   get currentUser => widget.currentUser;
+  final date = DateTime.now();
   final TextEditingController _controller = TextEditingController();
   final List<Message> _messages = [];
   final List<Map<String, dynamic>> _inventory = [];
@@ -47,6 +48,7 @@ class _ChatPageState extends State<ChatPage> {
             .map((item) => {
                   'name': item['name'],
                   'currentQuantity': item['currentQuantity'],
+                  'expiryDate': item['expiryDate'],
                 })
             .toList();
         for (final item in filteredInventory) {
@@ -70,7 +72,10 @@ class _ChatPageState extends State<ChatPage> {
         "Avoid using any technical jargon or terms that are too complex for a general audience to understand."
         "Avoid using point-form or bullet points. Write in full sentences or short paragraphs."
         "If instruction requires steps, you may format it in a step-by-step manner using numbers, such as 1., 2., 3., etc."
-        "The user currently have these items in their inventory $_inventory, so you can suggest recipes based on these items if they asked.";
+        "The user currently have these items in their inventory $_inventory, so you can suggest recipes based on these items if they asked."
+        "You do not have to introduce yourself unless explicitly stated by the user."
+        "Answer the user's prompt in the most simple and concise way possible, minimal word count is preferred while maintaining personality"
+        "Your timezone is in Malaysia, and today's date is $date";
     try {
       setState(() {
         _messages.add(Message(text: _controller.text, isUser: true));
