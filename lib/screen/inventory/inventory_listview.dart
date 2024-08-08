@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../resources/CRUD/fridge.dart';
 import '../../utils/theme/theme.dart';
@@ -27,7 +30,7 @@ class _InventoryListviewState extends State<InventoryListview> {
   double _confidence = 1.0;
   bool _showCancelSpeech = false;
   bool _isCancelSpeech = false;
-
+  bool speechAvailable = false;
   @override
   void initState() {
     super.initState();
@@ -219,63 +222,125 @@ class _InventoryListviewState extends State<InventoryListview> {
             bottom: 20,
             child: GestureDetector(
                 onTap: (() async {
-                  showSnackBar("Press and Hold to use Rongie voice assistant.", context);
-
-                  // showDialog(
-                  //   context: context,
-                  //   builder: (BuildContext context) {
-                  //     return Dialog(
-                  //       child: SpeechScreen(),
-                  //     );
-                  //   },
-                  // );
+                  setState(() async {
+                    showSnackBar("Press and Hold to use Rongie voice assistant.", context);
+                    if (!speechAvailable) {
+                      await _askSpeechPermission();
+                    }
+                  });
                 }),
 
-                onLongPress: (() async {
-                  showSnackBar("Recording.", context, durationSeconds: 10);
-                  _startListening();
+                onLongPress: (() {
+
+                  if (speechAvailable){
+                    setState(() {
+                      showSnackBar("Recording.", context);
+                      _startListening();
+                    });
+                  }
+                  else{
+                    _askSpeechPermission();
+                  }
+
                 }),
 
 
                 onLongPressUp: (() async {
-                  if (!_isCancelSpeech){
-                    showSnackBar("Finished Recording.", context);
-                    _stopListening();
-
-                    //TODO: Call gemini
-                    showSnackBar(_speechText, context);
-
-                  }
-
-                  setState(() {
-                    _isCancelSpeech = false;
-                  });
-                }),
-
-
-                onLongPressMoveUpdate: ((longPressMoveUpdateDetails_) {
-                  /// Show Delete location
-                  if (longPressMoveUpdateDetails_.localOffsetFromOrigin !=
-                      const Offset(0, 0)) {
-                    if (_isCancelSpeech != true) {
+                  if (speechAvailable) {
+                    /// Not calling Gemini if Use cancel (swipe up)
+                    if (_isCancelSpeech) {
                       setState(() {
-                        _showCancelSpeech = true;
+                        _isCancelSpeech = false;
+                        _showCancelSpeech = false;
+                      });
+                    }
+                    /// Call Gemini
+                    else{
+                      setState(() async {
+                        _isCancelSpeech = false;
+                        _showCancelSpeech = false;
+                        showSnackBar("Finished Recording.", context);
+                        _stopListening();
+
+
+                        //TODO: Call gemini here
+                        final systemPrompt =
+                            "Given this list of item: $inventory."
+                            ' Then, given this user prompt about what he consumed: $_speechText.'
+                            ' You need to match the user prompt given with the list of item, and identify which item in list he has consumed and the quantity he has consumed.'
+                            ' Return only the item you think that most relevant, and return only the same json Map (Map in list) format you received with field "name","addedDate","currentQuantity", and addition field "consumptionQuantity" (Quantity has been consumed by user).'
+                            ' If there is similar product, return it in List of maps.';
+                        var response = await model
+                            .generateContent([Content.text(systemPrompt)]);
+                        print('Gemini response: ${response.text}');
+                        print('Inventory: $inventory');
+                        final match = extractJsonContent.firstMatch(response.text!);
+
+                        if (match != null) {
+                          final jsonContent = match.group(1)?.trim();
+
+                          // Parse the JSON string
+                          final List<dynamic> jsonResponse = jsonDecode(jsonContent!);
+
+                          // Cast the dynamic List to List<Map<String, dynamic>>
+                          final List<Map<String, dynamic>> items = jsonResponse.cast<Map<String, dynamic>>();
+
+                          if (items.length == 1){
+
+                            /// gemini understand and return exactly
+                            for (var item in inventory){
+                              if (item['addedDate'] == items[0]['addedDate']){
+                                print("IM HERE");
+                                print(item['currentQuantity']);
+                                item['currentQuantity'] = item['currentQuantity'] - items[0]['consumptionQuantity'];
+                                print(item['currentQuantity']);
+                                print(item);
+                                updateInventoryItem(fridgeId,item['addedDate'],item);
+                              }
+                            }
+
+
+                          }
+                          else if (items.length > 1){
+                            /// gemini confused and return multiple, ask user to
+                          }
+                          else{
+                            /// got error
+                          }
+                        } else {
+                          print('No JSON content found.');
+                        }
                       });
                     }
                   }
-
-                  /// Cancel Speech to text without calling gemini
-                  if (longPressMoveUpdateDetails_.localOffsetFromOrigin <
-                      const Offset(100, -180)) {
-                    setState(() {
-                      if (_isCancelSpeech == false) {
-                        showSnackBar("Cancel Rongie assistant", context,
-                            durationSeconds: 3);
+                }),
+                onLongPressMoveUpdate: ((longPressMoveUpdateDetails_) {
+                  print(_speechText);
+                  if(speechAvailable)
+                  {
+                    /// Show Delete location
+                    if (longPressMoveUpdateDetails_.localOffsetFromOrigin !=
+                        const Offset(0, 0)) {
+                      if (_isCancelSpeech != true) {
+                        setState(() {
+                          _showCancelSpeech = true;
+                        });
                       }
-                      _isCancelSpeech = true;
-                      _showCancelSpeech = false;
-                      _stopListening();
-                    });
+                    }
+
+                    /// Cancel Speech to text without calling gemini
+                    if (longPressMoveUpdateDetails_.localOffsetFromOrigin <
+                        const Offset(100, -180)) {
+                        if (_isCancelSpeech == false) {
+                          setState(() {
+                            showSnackBar("Cancel Rongie assistant", context);
+                            _isCancelSpeech = true;
+                            _showCancelSpeech = false;
+                            _stopListening();
+                          });
+
+                        }
+                    }
                   }
                 }),
 
@@ -375,12 +440,18 @@ class _InventoryListviewState extends State<InventoryListview> {
     );
   }
 
-  void _startListening() async {
-    bool available = await _speech.initialize(
-      onStatus: (val) => print('onStatus: $val'),
-      onError: (val) => print('onError: $val'),
-    );
-    if (available) {
+  Future<void> _askSpeechPermission() async {
+    if (!speechAvailable){
+      speechAvailable = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+    }
+  }
+
+  void _startListening() {
+
+    if (speechAvailable) {
       setState(() => _isListening = true);
       _speech.listen(
         onResult: (val) => setState(() {
