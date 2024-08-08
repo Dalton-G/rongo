@@ -200,7 +200,6 @@ class _ChatPageState extends State<ChatPage> {
                             callGeminiModel();
                             _controller.clear();
                             FocusScope.of(context).unfocus();
-                            print(currentUser['firstName']);
                           },
                         ),
                 ),

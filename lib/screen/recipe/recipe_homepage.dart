@@ -1,14 +1,18 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:rongo/model/recipe.dart';
 import 'package:rongo/model/recipe_meal_type.dart';
 import 'package:rongo/screen/chatbot/chat.dart';
 import 'package:rongo/screen/recipe/recipe_details_page.dart';
 import 'package:rongo/utils/theme/theme.dart';
+import 'package:rongo/utils/utils.dart';
 
 class RecipeHomePage extends StatefulWidget {
   final Object? currentUser;
@@ -21,76 +25,8 @@ class RecipeHomePage extends StatefulWidget {
 class _RecipeHomePageState extends State<RecipeHomePage> {
   get currentUser => widget.currentUser;
   final List<Map<String, dynamic>> _inventory = [];
-  final List<Recipe> _recipes = [
-    Recipe(
-      name: 'Spaghetti Aglio e Olio',
-      description: 'A simple pasta dish with garlic and olive oil',
-      imageUrl:
-          'https://theplantbasedschool.com/wp-content/uploads/2022/04/Aglio-olio-1-1.jpg',
-      ingredients: [
-        'Spaghetti',
-        'Garlic',
-        'Olive oil',
-        'Red pepper flakes',
-        'Parsley',
-        'Parmesan cheese',
-      ],
-      steps: [
-        'Boil spaghetti in salted water until al dente',
-        'In a pan, heat olive oil and garlic until fragrant',
-        'Add red pepper flakes and parsley',
-        'Add cooked spaghetti and toss until coated',
-        'Serve with grated Parmesan cheese',
-      ],
-      nutritionalValue: [
-        'Calories: 500',
-        'Fat: 20g',
-        'Carbs: 70g',
-        'Protein: 15g',
-      ],
-      cookingTime: "30 minutes",
-      tags: [
-        'Italian',
-        'Pasta',
-        'Vegetarian',
-      ],
-    ),
-    Recipe(
-      name: 'Chicken Alfredo',
-      description: 'A creamy pasta dish with chicken and Alfredo sauce',
-      imageUrl:
-          'https://assets.epicurious.com/photos/5988e3458e3ab375fe3c0caf/4:3/w_4808,h_3606,c_limit/How-to-Make-Chicken-Alfredo-Pasta-hero-02082017.jpg',
-      ingredients: [
-        'Fettuccine',
-        'Chicken breast',
-        'Butter',
-        'Heavy cream',
-        'Garlic',
-        'Parmesan cheese',
-      ],
-      steps: [
-        'Cook fettuccine in salted water until al dente',
-        'Season chicken breast with salt and pepper',
-        'In a pan, cook chicken until browned and cooked through',
-        'In the same pan, melt butter and sauté garlic',
-        'Add heavy cream and Parmesan cheese',
-        'Add cooked fettuccine and chicken',
-        'Serve with more Parmesan cheese',
-      ],
-      nutritionalValue: [
-        'Calories: 700',
-        'Fat: 30g',
-        'Carbs: 60g',
-        'Protein: 40g',
-      ],
-      cookingTime: "45 minutes",
-      tags: [
-        'Italian',
-        'Pasta',
-        'Chicken',
-      ],
-    ),
-  ];
+  //bool _isLoading = false;
+  final List<Recipe> _recipes = [];
 
   @override
   void initState() {
@@ -133,6 +69,46 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     );
   }
 
+  Future<void> generateRecipe(MealType mealType) async {
+    String category = mealType.name;
+    String unsplashKey = dotenv.env['UNSPLASH_ACCESS_KEY']!;
+    // Gemini API
+    var prompt =
+        "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory"
+        "Please suggest an appropriate recipe and return it in a JSON format"
+        "The JSON for recipe must strictly follow this data schema {name: string, description: string, cookingTime: string, tags: List<String>}"
+        "Make sure to add the origin of food in the tags"
+        "Do not reply any additional information other than the recipe JSON"
+        "do not include the formatting in the JSON response";
+    final content = [Content.text(prompt)];
+    final response = await model.generateContent(content);
+    final map = jsonDecode(response.text!) as Map<String, dynamic>;
+
+    // Unsplash API
+    String foodName = map['name'];
+    final imageUrl = await http.get(Uri.parse(
+        'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
+    if (imageUrl.statusCode == 200) {
+      final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
+      final image = imageMap['results'][0]['urls']['regular'];
+      map['imageUrl'] = image;
+      print(image);
+    } else {
+      print(imageUrl.statusCode);
+    }
+
+    final recipe = Recipe(
+      name: map['name'],
+      imageUrl: map['imageUrl'],
+      description: map['description'],
+      cookingTime: map['cookingTime'],
+      tags: List<String>.from(map['tags']),
+    );
+    setState(() {
+      _recipes.add(recipe);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -168,94 +144,93 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(top: 30.0, bottom: 50.0),
-                  child: Expanded(
-                    child: ListView.builder(
-                      itemCount: _recipes.length,
-                      itemBuilder: (context, index) {
-                        final Recipe recipe = _recipes[index];
-                        return ListTile(
-                          title: Container(
-                            decoration: BoxDecoration(
-                                color: AppTheme.backgroundWhite,
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.30),
-                                    spreadRadius: 2,
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ]),
-                            margin: const EdgeInsets.all(12),
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              children: [
-                                Image.network(recipe.imageUrl),
-                                const SizedBox(height: 5),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    recipe.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                  child: ListView.builder(
+                    itemCount: _recipes.length,
+                    itemBuilder: (context, index) {
+                      final Recipe recipe = _recipes[index];
+                      return ListTile(
+                        title: Container(
+                          decoration: BoxDecoration(
+                              color: AppTheme.backgroundWhite,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.30),
+                                  spreadRadius: 2,
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]),
+                          margin: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            children: [
+                              Image.network(recipe.imageUrl),
+                              const SizedBox(height: 5),
+                              Align(
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  recipe.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(height: 5),
-                                Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Text(recipe.description)),
-                                const SizedBox(height: 5),
-                                Align(
+                              ),
+                              const SizedBox(height: 5),
+                              Align(
                                   alignment: Alignment.topLeft,
-                                  child: Wrap(
-                                    spacing: 5,
-                                    runSpacing: 5,
-                                    children: recipe.tags
-                                        .map((tag) => _buildTag(tag))
-                                        .toList(),
-                                  ),
+                                  child: Text(recipe.description)),
+                              const SizedBox(height: 5),
+                              Align(
+                                alignment: Alignment.topLeft,
+                                child: Wrap(
+                                  spacing: 5,
+                                  runSpacing: 5,
+                                  children: recipe.tags
+                                      .map((tag) => _buildTag(tag))
+                                      .toList(),
                                 ),
-                                const SizedBox(height: 5),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    "Cooking time: ${recipe.cookingTime}",
+                              ),
+                              const SizedBox(height: 5),
+                              Align(
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  "Cooking time: ${recipe.cookingTime}",
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey[600]),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              GestureDetector(
+                                onTap: () => _navigateToRecipeDetails(index),
+                                child: Container(
+                                  margin: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(10),
+                                  alignment: Alignment.center,
+                                  width: width * 0.4,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(32),
+                                    color: AppTheme.mainGreen,
+                                  ),
+                                  child: const Text(
+                                    "Get Started",
                                     style: TextStyle(
-                                        fontSize: 12, color: Colors.grey[600]),
-                                    textAlign: TextAlign.left,
+                                        color: AppTheme.backgroundWhite),
                                   ),
                                 ),
-                                const SizedBox(height: 5),
-                                GestureDetector(
-                                  onTap: () => _navigateToRecipeDetails(index),
-                                  child: Container(
-                                    margin: const EdgeInsets.all(10),
-                                    padding: const EdgeInsets.all(10),
-                                    alignment: Alignment.center,
-                                    width: width * 0.4,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(32),
-                                      color: AppTheme.mainGreen,
-                                    ),
-                                    child: const Text(
-                                      "Get Started",
-                                      style: TextStyle(
-                                          color: AppTheme.backgroundWhite),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
             ),
           ),
+
           // dropdown overlay
           Align(
             alignment: Alignment.topCenter,
@@ -273,7 +248,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                   );
                 }).toList(),
                 onChanged: (MealType? newValue) {
-                  setState(() {});
+                  generateRecipe(newValue!);
                 },
               ),
             ),
