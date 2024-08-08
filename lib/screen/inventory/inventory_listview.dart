@@ -222,12 +222,12 @@ class _InventoryListviewState extends State<InventoryListview> {
             bottom: 20,
             child: GestureDetector(
                 onTap: (() async {
-                  setState(() {
+                  setState(() async {
                     showSnackBar("Press and Hold to use Rongie voice assistant.", context);
+                    if (!speechAvailable) {
+                      await _askSpeechPermission();
+                    }
                   });
-
-                  _askSpeechPermission();
-
                 }),
 
                 onLongPress: (() {
@@ -247,10 +247,21 @@ class _InventoryListviewState extends State<InventoryListview> {
 
                 onLongPressUp: (() async {
                   if (speechAvailable) {
-                    if (!_isCancelSpeech) {
+                    /// Not calling Gemini if Use cancel (swipe up)
+                    if (_isCancelSpeech) {
+                      setState(() {
+                        _isCancelSpeech = false;
+                        _showCancelSpeech = false;
+                      });
+                    }
+                    /// Call Gemini
+                    else{
                       setState(() async {
+                        _isCancelSpeech = false;
+                        _showCancelSpeech = false;
                         showSnackBar("Finished Recording.", context);
                         _stopListening();
+
 
                         //TODO: Call gemini here
                         final systemPrompt =
@@ -296,18 +307,15 @@ class _InventoryListviewState extends State<InventoryListview> {
                           else{
                             /// got error
                           }
-
                         } else {
                           print('No JSON content found.');
                         }
                       });
                     }
-                    _isCancelSpeech = false;
-                    _showCancelSpeech = false;
                   }
                 }),
                 onLongPressMoveUpdate: ((longPressMoveUpdateDetails_) {
-                  print(longPressMoveUpdateDetails_.localOffsetFromOrigin);
+                  print(_speechText);
                   if(speechAvailable)
                   {
                     /// Show Delete location
@@ -323,14 +331,15 @@ class _InventoryListviewState extends State<InventoryListview> {
                     /// Cancel Speech to text without calling gemini
                     if (longPressMoveUpdateDetails_.localOffsetFromOrigin <
                         const Offset(100, -180)) {
-                      setState(() {
                         if (_isCancelSpeech == false) {
-                          showSnackBar("Cancel Rongie assistant", context);
-                          _isCancelSpeech = true;
-                          _showCancelSpeech = false;
-                          _stopListening();
+                          setState(() {
+                            showSnackBar("Cancel Rongie assistant", context);
+                            _isCancelSpeech = true;
+                            _showCancelSpeech = false;
+                            _stopListening();
+                          });
+
                         }
-                      });
                     }
                   }
                 }),
