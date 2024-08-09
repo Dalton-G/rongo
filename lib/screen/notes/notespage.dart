@@ -253,14 +253,9 @@ class _NotesPageState extends State<NotesPage> {
       });
 
       final prompt =
-          'Given this prompt: $_speechText, compile a groceries item list with quantities in numeric form. Extract both the item and numeric quantity from the text. The response should be in JSON format like this: { "response": [{"item": "mangoes", "quantity": 3}] }. Do not include markdown formatting.';
+          'Given this prompt: $_speechText, compile a groceries item list with quantities and units in numeric form. Extract both the item (including any unit) and numeric quantity from the text. The response should be in JSON format like this: { "response": [{"item": "packets of blueberries", "quantity": 3}] }. Do not include markdown formatting.';
 
       var response = await model.generateContent([Content.text(prompt)]);
-      print(
-          "=========================================================================================");
-      print(response.text);
-      print(
-          "=========================================================================================");
       var result =
           response.text!.replaceAll("```json", "").replaceAll("```", "");
       Map<String, dynamic> map = json.decode(result);
