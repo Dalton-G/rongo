@@ -251,11 +251,11 @@ class _InventoryListviewState extends State<InventoryListview> {
               right: 20,
               bottom: 20,
               child: GestureDetector(
-                  onTap: (() async {
-                    setState(() async {
+                  onTap: (() {
+                    setState(() {
                       showSnackBar("Press and Hold to use Rongie voice assistant.", context);
                       if (!_speechAvailable) {
-                        await _askSpeechPermission();
+                        _askSpeechPermission();
                       }
                     });
                   }),
@@ -263,10 +263,8 @@ class _InventoryListviewState extends State<InventoryListview> {
                   onLongPress: (() {
 
                     if (_speechAvailable){
-                      setState(() {
-                        showSnackBar("Recording.", context);
-                        _startListening();
-                      });
+                      _startListening();
+                      showSnackBar("Recording.", context);
                     }
                     else{
                       _askSpeechPermission();
@@ -277,18 +275,15 @@ class _InventoryListviewState extends State<InventoryListview> {
                     if (_speechAvailable) {
                       /// Not calling Gemini if Use cancel (swipe up)
                       if (_isCancelSpeech) {
-                        setState(() {
                           _isCancelSpeech = false;
                           _showCancelSpeech = false;
-                        });
                       }
                       /// Call Gemini
                       else{
-                        setState(() async {
+                        _stopListening();
                           _isCancelSpeech = false;
                           _showCancelSpeech = false;
                           showSnackBar("Finished Recording.", context);
-                          _stopListening();
 
                           final systemPrompt =
                               ' Given this list of item: $inventory.'
@@ -320,7 +315,6 @@ class _InventoryListviewState extends State<InventoryListview> {
                             showSnackBar("Rongie don't know what you have said. Please try again..", context);
 
                           }
-                        });
                       }
                     }
                   }),
@@ -451,10 +445,8 @@ class _InventoryListviewState extends State<InventoryListview> {
                 ),
                 actions: <Widget>[
                   TextButton(
-                    onPressed: () {
-                      setState(() async {
+                    onPressed: () async{
                         // Close Dialog
-                        _geminiResponse = false;
                         for (var geminiItem in _geminiModificationList) {
                           int index = inventory.indexWhere((item) =>
                               item['addedDate'] == geminiItem['addedDate']);
@@ -463,7 +455,9 @@ class _InventoryListviewState extends State<InventoryListview> {
                               inventory[index]);
                         }
                         showSnackBar("Consumption Updated Successfully.",context);
-                      });
+                        setState(() {
+                          _geminiResponse = false;
+                        });
                     },
                     child: const Text('Save'),
                   ),
@@ -543,7 +537,6 @@ class _InventoryListviewState extends State<InventoryListview> {
   }
 
   void _startListening() {
-
     if (_speechAvailable) {
       setState(() => _isListening = true);
       _speech.listen(
