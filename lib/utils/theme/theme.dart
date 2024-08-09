@@ -116,7 +116,7 @@ class AppTheme {
 
 //suzanne
 
-  static const lighterGreen = Color.fromARGB(255, 177, 213, 194);
+  static const lighterGreen = Color.fromARGB(255, 206, 244, 215);
 
   static List<BoxShadow> bottomLightShadow = [
     BoxShadow(
