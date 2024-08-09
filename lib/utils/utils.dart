@@ -18,6 +18,7 @@ Map<String, IconData> variableIcon = {
 };
 
 enum InventoryCategories { Fruits, Vegetables, Meat, Fish, Condiments, Leftovers, Others }
+enum InventoryFilter { total, newAdded, expiredSoon, expired }
 
 final model = GenerativeModel(
   model: 'gemini-1.5-flash-001',
