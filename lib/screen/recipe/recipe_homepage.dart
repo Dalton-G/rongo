@@ -70,43 +70,57 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
   }
 
   Future<void> generateRecipe(MealType mealType) async {
+    // Clear the existing recipes
+    setState(() {
+      _recipes.clear();
+    });
+
     String category = mealType.name;
     String unsplashKey = dotenv.env['UNSPLASH_ACCESS_KEY']!;
-    // Gemini API
     var prompt =
-        "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory"
-        "Please suggest an appropriate recipe and return it in a JSON format"
-        "The JSON for recipe must strictly follow this data schema {name: string, description: string, cookingTime: string, tags: List<String>}"
-        "Make sure to add the origin of food in the tags"
-        "Do not reply any additional information other than the recipe JSON"
-        "do not include the formatting in the JSON response";
+        "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
+        "Please suggest an appropriate recipe and return it in a JSON format."
+        "The JSON for recipe must strictly follow this data schema: {name: string, description: string, cookingTime: string, tags: List<String>}"
+        "Make sure to add the origin of food in the tags."
+        "Do not reply any additional information other than the recipe JSON."
+        "Do not include the formatting in the JSON response.";
     final content = [Content.text(prompt)];
-    final response = await model.generateContent(content);
-    final map = jsonDecode(response.text!) as Map<String, dynamic>;
 
-    // Unsplash API
-    String foodName = map['name'];
-    final imageUrl = await http.get(Uri.parse(
-        'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
-    if (imageUrl.statusCode == 200) {
-      final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
-      final image = imageMap['results'][0]['urls']['regular'];
-      map['imageUrl'] = image;
-      print(image);
-    } else {
-      print(imageUrl.statusCode);
+    try {
+      final response = await model.generateContent(content);
+      if (response.text == null || response.text!.isEmpty) {
+        throw FormatException('Empty response from the model');
+      }
+
+      final map = jsonDecode(response.text!) as Map<String, dynamic>;
+
+      String foodName = map['name'];
+      final imageUrl = await http.get(Uri.parse(
+          'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
+
+      if (imageUrl.statusCode == 200) {
+        final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
+        final image = imageMap['results'][0]['urls']['regular'];
+        map['imageUrl'] = image;
+      } else {
+        print('Unsplash API error: ${imageUrl.statusCode}');
+      }
+
+      final recipe = Recipe(
+        name: map['name'],
+        imageUrl: map['imageUrl'],
+        description: map['description'],
+        cookingTime: map['cookingTime'],
+        tags: List<String>.from(map['tags']),
+      );
+
+      // Add the new recipe to the list
+      setState(() {
+        _recipes.add(recipe);
+      });
+    } catch (e) {
+      print('Error: $e');
     }
-
-    final recipe = Recipe(
-      name: map['name'],
-      imageUrl: map['imageUrl'],
-      description: map['description'],
-      cookingTime: map['cookingTime'],
-      tags: List<String>.from(map['tags']),
-    );
-    setState(() {
-      _recipes.add(recipe);
-    });
   }
 
   @override
@@ -152,7 +166,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                         title: Container(
                           decoration: BoxDecoration(
                               color: AppTheme.backgroundWhite,
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(25),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.30),
@@ -162,11 +176,11 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                                 ),
                               ]),
                           margin: const EdgeInsets.all(12),
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(20),
                           child: Column(
                             children: [
                               Image.network(recipe.imageUrl),
-                              const SizedBox(height: 5),
+                              const SizedBox(height: 15),
                               Align(
                                 alignment: Alignment.topLeft,
                                 child: Text(
@@ -176,11 +190,12 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 5),
+                              const SizedBox(height: 15),
                               Align(
                                   alignment: Alignment.topLeft,
-                                  child: Text(recipe.description)),
-                              const SizedBox(height: 5),
+                                  child: Text(recipe.description,
+                                      style: AppTheme.blackBodyText)),
+                              const SizedBox(height: 15),
                               Align(
                                 alignment: Alignment.topLeft,
                                 child: Wrap(
@@ -237,6 +252,18 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
             child: Container(
               margin: EdgeInsets.only(top: height * 0.15),
               width: width * 0.9,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
               child: DropdownButtonFormField<MealType>(
                 hint: const Text("What meal are you cooking?"),
                 iconSize: 0,
@@ -252,7 +279,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                 },
               ),
             ),
-          ),
+          )
         ],
       ),
       // trigger chatbot
