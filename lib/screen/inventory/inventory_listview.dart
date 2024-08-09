@@ -37,10 +37,12 @@ class _InventoryListviewState extends State<InventoryListview> {
 
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
+  bool _updatingInventory = false;
   String _speechText = 'Press the button and start speaking';
   double _confidence = 1.0;
   bool _showCancelSpeech = false;
   bool _isCancelSpeech = false;
+  bool _waitingGemini = false;
   bool _speechAvailable = false;
   bool _geminiResponse = false;
   List _geminiModificationList = [];
@@ -52,7 +54,6 @@ class _InventoryListviewState extends State<InventoryListview> {
 
   @override
   void initState() {
-    // TODO: implement initState
     _askSpeechPermission();
     super.initState();
   }
@@ -121,7 +122,7 @@ class _InventoryListviewState extends State<InventoryListview> {
           body: Stack(children: [
             desiredCategory!.isNotEmpty
                 ? ListView.builder(
-                    itemCount: desiredCategory!.length + 1,
+                    itemCount: desiredCategory.length + 1,
                     itemBuilder: (context, index) {
                       if (index == (desiredCategory!.length)) {
                         if (inventoryListNotEmpty) {
@@ -132,7 +133,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                         }
                       }
 
-                      var item = desiredCategory?[index];
+                      var item = desiredCategory[index];
                       DateFormat format = DateFormat("yyyy-MM-dd");
                       DateTime addDate = format.parse(item['addedDate']);
                       DateTime? expiryDate;
@@ -273,6 +274,10 @@ class _InventoryListviewState extends State<InventoryListview> {
               child: GestureDetector(
                   onTap: (() {
                     setState(() {
+                      _waitingGemini?
+                      showSnackBar(
+                          "Rongie is crafting something wonderful for you!.",
+                          context):
                       showSnackBar(
                           "Press and Hold to use Rongie voice assistant.",
                           context);
@@ -282,7 +287,12 @@ class _InventoryListviewState extends State<InventoryListview> {
                     });
                   }),
                   onLongPress: (() {
-                    if (_speechAvailable) {
+                    if (_waitingGemini) {
+                      showSnackBar(
+                          "Rongie is crafting something wonderful for you!.",
+                          context);
+                    }
+                    else if (_speechAvailable) {
                       _startListening();
                       showSnackBar("Recording.", context);
                     } else {
@@ -290,7 +300,12 @@ class _InventoryListviewState extends State<InventoryListview> {
                     }
                   }),
                   onLongPressUp: (() async {
-                    if (_speechAvailable) {
+                    if (_waitingGemini) {
+                      showSnackBar(
+                          "Rongie is crafting something wonderful for you!.",
+                          context);
+                    }
+                    else if (_speechAvailable) {
                       /// Not calling Gemini if Use cancel (swipe up)
                       if (_isCancelSpeech) {
                         _isCancelSpeech = false;
@@ -299,10 +314,14 @@ class _InventoryListviewState extends State<InventoryListview> {
 
                       /// Call Gemini
                       else {
-                        _stopListening();
-                        _isCancelSpeech = false;
-                        _showCancelSpeech = false;
-                        showSnackBar("Finished Recording.", context);
+                        setState(() {
+                          _stopListening();
+                          _isCancelSpeech = false;
+                          _showCancelSpeech = false;
+                          _waitingGemini = true;
+                          showSnackBar("Finished Recording.", context);
+                        });
+
 
                         final systemPrompt =
                             ' Given this list of item: $inventory.'
@@ -325,6 +344,7 @@ class _InventoryListviewState extends State<InventoryListview> {
 
                           if (items.isNotEmpty) {
                             setState(() {
+                              _waitingGemini = false;
                               _geminiResponse = true;
                               _geminiModificationList = items;
                             });
@@ -370,7 +390,9 @@ class _InventoryListviewState extends State<InventoryListview> {
                   }),
                   child: Container(
                     decoration: AppTheme.widgetDeco(color: Colors.white),
-                    child: const Icon(
+                    child: _waitingGemini?
+                    const CircularProgressIndicator():
+                    const Icon(
                         size: 80, Icons.fiber_manual_record_outlined),
                   )),
             ),
@@ -437,85 +459,125 @@ class _InventoryListviewState extends State<InventoryListview> {
                   )),
 
             /// Display dialog for user to confirm gemini modification
-            if (_geminiResponse && _geminiModificationList.isNotEmpty)
-              AlertDialog(
-                title: const Text('Confirm Gemini modification'),
-                content: SizedBox(
-                  width: double.maxFinite,
-                  child: ListView.builder(
-                    itemCount: _geminiModificationList.length,
-                    // number of items in the list
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: (() {
-                          setState(() {
-                            editingWidgetIndex = index;
-                          });
-                        }),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(
-                                "${_geminiModificationList[index]['name']} : "),
-                            Text(
-                                "${_geminiModificationList[index]['currentQuantity']}"),
-                            const Icon(
-                              Icons.arrow_forward,
-                            ),
-                            editingWidgetIndex == index
-                                ? ModifyQuantity(
-                                    currentQuantity:
-                                        _geminiModificationList[index]
+            if (_geminiResponse && _geminiModificationList.length >= 1)
+              GestureDetector(
+                onTap: (){
+                  setState(() {
+                    editingWidgetIndex = -1;
+                  });
+                },
+                child: AlertDialog(
+                  title: const Text('Confirm Gemini modification'),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: ListView.builder(
+                      itemCount: _geminiModificationList.length,
+                      // number of items in the list
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                            onTap: (() {
+                              setState(() {
+                                editingWidgetIndex = index;
+                              });
+                            }),
+                            child:
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: AppTheme.widgetDeco(),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    Expanded(
+                                      flex: 6,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                                        child: Text("${_geminiModificationList[index]['name']}"),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text("${_geminiModificationList[index]['currentQuantity']}"),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: const Icon(
+                                        Icons.arrow_forward,
+                                        size: 30,
+                                      ),
+                                    ),
+                                    if (editingWidgetIndex == index) Expanded(
+                                      flex: 3,
+                                      child: ModifyQuantity(
+                                            currentQuantity:
+                                            _geminiModificationList[index]
                                             ['afterConsumptionQuantity'],
-                                    name: _geminiModificationList[index]
-                                        ['name'],
-                                    onQuantityChanged: (int newCounter) {
-                                      setState(() {
-                                        _geminiModificationList[index]
+                                            name: _geminiModificationList[index]
+                                            ['name'],
+                                            onQuantityChanged: (int newCounter) {
+                                              setState(() {
+                                                _geminiModificationList[index]
                                                 ['afterConsumptionQuantity'] =
-                                            newCounter;
-                                      });
-                                    },
-                                  )
-                                : Text(
-                                    "${_geminiModificationList[index]['afterConsumptionQuantity']}"),
-                          ],
-                        ),
-                      );
-                    },
+                                                    newCounter;
+                                              });
+                                            },
+                                          ),
+                                    ) else Expanded(
+                                      flex: 3,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 45),
+                                        child: Text(
+                                                "${_geminiModificationList[index]['afterConsumptionQuantity']}"),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        );
+                      },
+                    ),
                   ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () async {
+                        if (!_updatingInventory) {
+                          setState(() {
+                            _updatingInventory = true;
+                          });
+
+                          for (var geminiItem in _geminiModificationList) {
+                            int index = inventory.indexWhere((item) =>
+                                item['addedDate'] == geminiItem['addedDate']);
+                            inventory[index]['currentQuantity'] =
+                                geminiItem['afterConsumptionQuantity'];
+                            await updateInventoryItem(fridgeId,
+                                geminiItem['addedDate'], inventory[index]);
+                          }
+                          showSnackBar(
+                              "Consumption Updated Successfully.", context);
+                          setState(() {
+                            _geminiResponse = false;
+                            _updatingInventory = false;
+                          });
+                        }
+                      },
+                      child: const Text('Save'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          // Close Dialog
+                          _geminiResponse = false;
+                          showSnackBar("Canceled Update Consumption.", context);
+                        });
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                  ],
                 ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () async {
-                      // Close Dialog
-                      for (var geminiItem in _geminiModificationList) {
-                        int index = inventory.indexWhere((item) =>
-                            item['addedDate'] == geminiItem['addedDate']);
-                        inventory[index]['currentQuantity'] =
-                            geminiItem['afterConsumptionQuantity'];
-                        await updateInventoryItem(fridgeId,
-                            geminiItem['addedDate'], inventory[index]);
-                      }
-                      showSnackBar(
-                          "Consumption Updated Successfully.", context);
-                      setState(() {
-                        _geminiResponse = false;
-                      });
-                    },
-                    child: const Text('Save'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        // Close Dialog
-                        _geminiResponse = false;
-                        showSnackBar("Canceled Update Consumption.", context);
-                      });
-                    },
-                    child: const Text('Cancel'),
-                  ),
-                ],
               ),
           ])),
     );
@@ -546,11 +608,10 @@ class _InventoryListviewState extends State<InventoryListview> {
           ),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
-                  Navigator.of(context).pop();
                   item['currentQuantity'] = _counter;
-                  updateInventoryItem(fridgeId, item['addedDate'], item);
+                });
                   item['currentQuantity'] == 0
                       ? showSnackBar(
                           "Consumption Updated Successfully. No more ${item['name']}.",
@@ -558,18 +619,11 @@ class _InventoryListviewState extends State<InventoryListview> {
                       : showSnackBar(
                           "Consumption Updated Successfully. ${item['currentQuantity']} ${item['name']} left.",
                           context);
-                });
+                  await updateInventoryItem(fridgeId, item['addedDate'], item);
+                  Navigator.of(context).pop();
               },
               child: const Text('Save'),
             ),
-            // TextButton(
-            //   onPressed: () {
-            //     Navigator.of(context).pop();
-            //     // Add your delete functionality here
-            //     print('Delete Item button pressed');
-            //   },
-            //   child: Text('Delete Item'),
-            // ),
           ],
         );
       },
