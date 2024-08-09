@@ -33,11 +33,11 @@ extension InventoryFilterExtension on InventoryFilter {
   String get displayName {
     switch (this) {
       case InventoryFilter.total:
-        return 'Total';
+        return 'All';
       case InventoryFilter.newAdded:
-        return 'Newly Added';
+        return 'New';
       case InventoryFilter.expiredSoon:
-        return 'Expired Soon';
+        return 'Expiring';
       case InventoryFilter.expired:
         return 'Expired';
     }

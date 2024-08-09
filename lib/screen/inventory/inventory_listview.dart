@@ -493,60 +493,52 @@ class _InventoryListviewState extends State<InventoryListview> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 10),
                                 decoration: AppTheme.widgetDeco(),
-                                child: Row(
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    Expanded(
-                                      flex: 6,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 15.0),
-                                        child: Text(
-                                            "${_geminiModificationList[index]['name']}"),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15.0),
                                       child: Text(
-                                          "${_geminiModificationList[index]['currentQuantity']}"),
+                                          "${_geminiModificationList[index]['name']}"),
                                     ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: const Icon(
-                                        Icons.arrow_forward,
-                                        size: 30,
-                                      ),
-                                    ),
-                                    if (editingWidgetIndex == index) Expanded(
-                                      flex: 5,
-                                      child: ModifyQuantity(
-                                        currentQuantity:
-                                        _geminiModificationList[index]
-                                        ['afterConsumptionQuantity'],
-                                        name: _geminiModificationList[index]
-                                        ['name'],
-                                        onQuantityChanged: (int newCounter) {
-                                          setState(() {
-                                            _geminiModificationList[index]
-                                            ['afterConsumptionQuantity'] =
-                                                newCounter;
-                                          });
-                                        },
-                                      ),
-                                    ) else
-                                      Expanded(
-                                        flex: 5,
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                                "${_geminiModificationList[index]['afterConsumptionQuantity']}"),
-                                          ],
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 15.0,top: 10),
+                                      child: Row(children: [Text(
+                                          "Original: ${_geminiModificationList[index]['currentQuantity']}"),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 10, right: 10),
+                                          child: const Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            size: 10,
+                                          ),
                                         ),
-                                      ),
+                                        if (editingWidgetIndex == index) ModifyQuantity(
+                                          currentQuantity:
+                                          _geminiModificationList[index]
+                                          ['afterConsumptionQuantity'],
+                                          name: _geminiModificationList[index]
+                                          ['name'],
+                                          onQuantityChanged: (int newCounter) {
+                                            setState(() {
+                                              _geminiModificationList[index]
+                                              ['afterConsumptionQuantity'] =
+                                                  newCounter;
+                                            });
+                                          },
+                                        ) else
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                  "Current: ${_geminiModificationList[index]['afterConsumptionQuantity']}"),
+                                            ],
+                                          )],),
+                                    )
+                                    ,
                                   ],
                                 ),
                               ),
@@ -609,7 +601,7 @@ class _InventoryListviewState extends State<InventoryListview> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("How many ${item['name']} left after comsumed."),
+              Text("How many ${item['name']} left after consumed."),
               const SizedBox(
                 height: 30,
               ),
@@ -630,10 +622,10 @@ class _InventoryListviewState extends State<InventoryListview> {
                 });
                   item['currentQuantity'] == 0
                       ? showSnackBar(
-                          "Consumption Updated Successfully. No more ${item['name']}.",
+                          "Inventory Updated Successfully. ${item['name']} removed.",
                           context)
                       : showSnackBar(
-                          "Consumption Updated Successfully. ${item['currentQuantity']} ${item['name']} left.",
+                          "Inventory Updated Successfully. ${item['currentQuantity']} ${item['name']} left.",
                           context);
                   await updateInventoryItem(fridgeId, item['addedDate'], item);
                   Navigator.of(context).pop();

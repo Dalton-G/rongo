@@ -47,16 +47,28 @@ class _ModifyQuantityState extends State<ModifyQuantity> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        IconButton(
-          icon: const Icon(Icons.remove),
-          onPressed: _decrementCounter,
+        Container(
+          width: 35,
+          height: 20,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(),
+            icon: const Icon(Icons.remove, size: 20,),
+            onPressed: _decrementCounter,
+          ),
         ),
         Text('$_counter',
             // style: TextStyle(fontSize: 20)
         ),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: _incrementCounter,
+        Container(
+          width: 35,
+          height: 20,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(),
+            icon: const Icon(Icons.add, size: 20,),
+            onPressed: _incrementCounter,
+          ),
         ),
       ],
     );

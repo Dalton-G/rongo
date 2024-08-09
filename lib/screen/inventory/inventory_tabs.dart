@@ -26,6 +26,7 @@ class _InventoryTabsState extends State<InventoryTabs> {
       length: InventoryFilter.values.length,
       child: Scaffold(
         appBar: AppBar(
+          centerTitle: true,
           backgroundColor: Colors.transparent,
           leading: Padding(
             padding: const EdgeInsets.only(left: 16.0),
@@ -38,6 +39,7 @@ class _InventoryTabsState extends State<InventoryTabs> {
           ),
           title: Text("Your fridge", style: AppTheme.blackAppBarText),
           bottom: TabBar(
+            isScrollable: true,
             tabs: [
               Tab(text: InventoryFilter.total.displayName),
               Tab(text: InventoryFilter.newAdded.displayName),
