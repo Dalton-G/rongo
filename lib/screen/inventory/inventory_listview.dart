@@ -500,9 +500,7 @@ class _InventoryListviewState extends State<InventoryListview> {
               ),
               ModifyQuantity(
                 onQuantityChanged: (int newQuantity) {
-                  setState(() {
                     _counter = newQuantity;
-                  });
                 }, currentQuantity: item['currentQuantity'], name: item['name'],
               ),
             ],
@@ -510,12 +508,14 @@ class _InventoryListviewState extends State<InventoryListview> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
-                item['currentQuantity'] = _counter;
-                updateInventoryItem(fridgeId,item['addedDate'],item);
-                item['currentQuantity'] == 0 ?
-                showSnackBar("Consumption Updated Successfully. No more ${item['name']}.",context)
-                    :showSnackBar("Consumption Updated Successfully. ${item['currentQuantity']} ${item['name']} left.",context);
+                setState(() {
+                  Navigator.of(context).pop();
+                  item['currentQuantity'] = _counter;
+                  updateInventoryItem(fridgeId,item['addedDate'],item);
+                  item['currentQuantity'] == 0 ?
+                  showSnackBar("Consumption Updated Successfully. No more ${item['name']}.",context)
+                      :showSnackBar("Consumption Updated Successfully. ${item['currentQuantity']} ${item['name']} left.",context);
+                });
               },
               child: const Text('Save'),
             ),

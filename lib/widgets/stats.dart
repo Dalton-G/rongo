@@ -13,59 +13,44 @@ class Stats extends StatelessWidget {
     Color color = AppTheme.mainGreen;
     switch (stats) {
       case "total":
-        data = ["Total Item", "$num", "lib/images/totalitem.png"];
+        data = ["Total Items", "$num", "lib/images/roastchicken.png"];
         break;
       case "soon":
-        data = ["Expire Soon", "$num", "lib/images/expiresoon.png"];
-        color = Colors.yellowAccent;
+        data = ["Expires Soon", "$num", "lib/images/cheese.png"];
+        color = AppTheme.mainGreen;
         break;
       case "expired":
-        data = ["Expired Item", "$num", "lib/images/expireditem.png"];
-        color = Colors.redAccent;
+        data = ["Expired Items", "$num", "lib/images/expiredfruits.png"];
+        color = AppTheme.mainGreen;
         break;
       case "new":
-        data = ["New Item", "$num", "lib/images/newitem.png"];
+        data = ["New Items", "$num", "lib/images/jelly.png"];
     }
-    ;
+
     return Padding(
       padding: const EdgeInsets.only(top: 15.0, left: 10, right: 10),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Center(
-            child: Text(
-              data[0],
-              style: TextStyle(fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
+          Text(
+            data[0],
+            style: TextStyle(
+                fontSize: 14, color: color, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
           ),
-          SizedBox(
-            height: 10,
-          ),
-          Stack(
-            children: [
-              SizedBox(height: 70, width: 80, child: Image.asset(data[2])),
-              Padding(
-                padding: const EdgeInsets.only(left: 60.0,top: 5),
-                child: Container(
 
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    color: AppTheme.backgroundWhite.withOpacity(0.5),
-                  ),
-                  child: Center(
-                    child: Text(
-                      data[1],
-                      style: TextStyle(
-                          fontSize: 30,
-                          color: color,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              )
-            ],
+          // Image
+          Image.asset(data[2], height: 60, width: 80),
+
+          // Number
+          Text(
+            data[1],
+            style: TextStyle(
+              fontSize: 16,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

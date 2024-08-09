@@ -176,61 +176,45 @@ class _HomePageContentState extends State<HomePageContent> {
 
           // Analysis squares (2x2 grid)
 
-        StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance.collection('fridges').doc(fridgeId).snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('fridges')
+                  .doc(fridgeId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-          if (!snapshot.hasData) {
-            return const Center(child: Text('Fridge DocumentID does not exist'));
-          }
+                if (!snapshot.hasData) {
+                  return const Center(
+                      child: Text('Fridge DocumentID does not exist'));
+                }
 
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-          final List inventory = data['inventory'];
+                final data = snapshot.data!.data() as Map<String, dynamic>;
+                final List inventory = data['inventory'];
 
-          int totalInventory = inventory.length;
-          int addedThisMonth = 0;
-          int expiringSoonCount = 0;
-          int expiredCount = 0;
+                int totalInventory = inventory.length;
+                int addedThisMonth = 0;
+                int expiringSoonCount = 0;
+                int expiredCount = 0;
 
-          List addedThisMonthList = [];
-          List expiringSoonCountList = [];
-          List expiredCountList = [];
+                DateTime now = DateTime.now();
+                int currentMonth = now.month;
+                int currentYear = now.year;
 
+                for (var item in inventory) {
+                  DateTime addedDate = DateTime.parse(item['addedDate']);
+                  DateTime? expiryDate;
 
-          DateTime now = DateTime.now();
-          int currentMonth = now.month;
-          int currentYear = now.year;
-
-          for (var item in inventory) {
-            // Convert the addedDate string to a DateTime object
-            DateTime addedDate = DateTime.parse(item['addedDate']);
-            DateTime? expiryDate;
-
-            if (item['expiryDate'] != null){
-              expiryDate = DateTime.parse(item['expiryDate']);
-              // if (item['expiryDate']?.endsWith("day") || item['expiryDate']?.endsWith("days")) {
-              //   int expiredDayLeft = extractNumber(item['expiryDate']);
-              //   expiryDate = addedDate.add(Duration(days: expiredDayLeft)); //Convert Day left to DateTime
-              // } else {
-              //   try {
-              //     expiryDate = DateTime.parse(item['expiryDate']);
-              //   } catch (e) {
-              //     // If parsing fails, set expiryDate to null
-              //     expiryDate = null;
-              //   }
-              // }
-              // item['expiryDate'] = expiryDate?.toIso8601String();
-            }
-
-
-            if(item['currentQuantity'] > 0){
+                  if (item['expiryDate'] != null) {
+                    expiryDate = DateTime.parse(item['expiryDate']);
+                  }
+                  if (item['currentQuantity'] > 0) {
                     // Check if the year and month match the current year and month
                     if (addedDate.year == currentYear &&
                         addedDate.month == currentMonth) {
@@ -253,103 +237,109 @@ class _HomePageContentState extends State<HomePageContent> {
                   }
                 }
 
-          // return Text('Field value: ${data['field_name']}');
-          return Positioned(
-            left: screenWidth * 0.07,
-            right: screenWidth * 0.07,
-            bottom: screenHeight * 0.05,
-            child:  Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-
-                    GestureDetector(
-                      onTap:((){
-                        Navigator.pushNamed(context, '/inventory-tabs',
-                            arguments: {
-                              'InventoryFilter' : InventoryFilter.total,
-                              'fridgeId' : widget.currentUser?['fridgeId'],
-                            });
-                      })
-                      ,
-                      child: SquareContainer(
-                        withPadding: false,
-                        backgroundColor: AppTheme.lighterGreen,
-                        height: 130,
-                        width: 130,
-                        roundedCorner: 25,
-                        child: Stats(stats: "total", num: totalInventory,),
+                return Positioned(
+                  left: screenWidth * 0.07,
+                  right: screenWidth * 0.07,
+                  bottom: screenHeight * 0.06,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, '/inventory-tabs',
+                                  arguments: {
+                                    'InventoryFilter': InventoryFilter.total,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
+                                  });
+                            }),
+                            child: SquareContainer(
+                              withPadding: false,
+                              backgroundColor: Colors.white,
+                              height: 130,
+                              width: 130,
+                              roundedCorner: 25,
+                              child: Stats(
+                                stats: "total",
+                                num: totalInventory,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, '/inventory-tabs',
+                                  arguments: {
+                                    'InventoryFilter': InventoryFilter.newAdded,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
+                                  });
+                            }),
+                            child: SquareContainer(
+                              withPadding: false,
+                              backgroundColor: Colors.white,
+                              height: 130,
+                              width: 130,
+                              roundedCorner: 25,
+                              child: Stats(
+                                stats: "new",
+                                num: addedThisMonth,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    GestureDetector(
-                      onTap:((){
-                        Navigator.pushNamed(context, '/inventory-tabs',
-                            arguments: {
-                              'InventoryFilter' : InventoryFilter.newAdded,
-                              'fridgeId' : widget.currentUser?['fridgeId'],
-                            });
-                        })
-                      ,
-                      child: SquareContainer(
-                        withPadding: false,
-                        backgroundColor: AppTheme.lighterGreen,
-                        height: 130,
-                        width: 130,
-                        roundedCorner: 25,
-                        child: Stats(stats: "new",num: addedThisMonth,),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, '/inventory-tabs',
+                                  arguments: {
+                                    'InventoryFilter':
+                                        InventoryFilter.expiredSoon,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
+                                  });
+                            }),
+                            child: SquareContainer(
+                              withPadding: false,
+                              backgroundColor: Colors.white,
+                              height: 130,
+                              width: 130,
+                              roundedCorner: 25,
+                              child: Stats(
+                                stats: "soon",
+                                num: expiringSoonCount,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, '/inventory-tabs',
+                                  arguments: {
+                                    'InventoryFilter': InventoryFilter.expired,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
+                                  });
+                            }),
+                            child: SquareContainer(
+                              withPadding: false,
+                              backgroundColor: Colors.white,
+                              height: 130,
+                              width: 130,
+                              roundedCorner: 25,
+                              child: Stats(
+                                stats: "expired",
+                                num: expiredCount,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    GestureDetector(
-                      onTap:((){
-                        Navigator.pushNamed(context, '/inventory-tabs',
-                            arguments: {
-                              'InventoryFilter' : InventoryFilter.expiredSoon,
-                              'fridgeId' : widget.currentUser?['fridgeId'],
-                            });
-                      })
-                      ,
-                      child: SquareContainer(
-                        withPadding: false,
-                        backgroundColor: AppTheme.lighterGreen,
-                        height: 130,
-                        width: 130,
-                        roundedCorner: 25,
-                        child: Stats(stats: "soon",num: expiringSoonCount,),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap:((){
-                        Navigator.pushNamed(context, '/inventory-tabs',
-                            arguments: {
-                              'InventoryFilter' : InventoryFilter.expired,
-                              'fridgeId' : widget.currentUser?['fridgeId'],
-                            });
-                      })
-                      ,
-                      child: SquareContainer(
-                        withPadding: false,
-                        backgroundColor: AppTheme.lighterGreen,
-                        height: 130,
-                        width: 130,
-                        roundedCorner: 25,
-                        child: Stats(stats: "expired",num: expiredCount,),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        }
-      )
+                    ],
+                  ),
+                );
+              })
         ],
       ),
     );
