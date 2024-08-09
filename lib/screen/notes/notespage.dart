@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:provider/provider.dart';
 import 'package:rongo/firestore.dart';
+import 'package:rongo/provider/stt_provider.dart';
 import 'package:rongo/utils/text_formatter.dart';
 import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/widgets/button.dart';
@@ -30,13 +32,9 @@ class _NotesPageState extends State<NotesPage> {
   // Controllers
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _listController = TextEditingController();
-  final SpeechToText _speechController = SpeechToText();
-  bool _speechAvailable = false;
-  bool _doneListening = false;
-  String _speechText = 'Listening...';
+
   bool _isLoading = false;
   late StateSetter _setState;
-  late StateSetter _setListeningState;
 
   // Functions
   void openNoteBox() {
@@ -99,161 +97,137 @@ class _NotesPageState extends State<NotesPage> {
       builder: (context) => StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
         _setState = setState;
-        return AlertDialog(
-          content: SizedBox(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Label
-                Text('Grocery items:', style: AppTheme.greenAppBarText),
-                // TextField
-                Stack(children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: TextField(
-                      inputFormatters: [CustomTextEditingFormatter()],
-                      controller: _listController,
-                      maxLines: null,
-                      minLines: 5,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.newline,
-                      decoration: InputDecoration(
-                        hintText: 'Enter your item here...',
-                        border: OutlineInputBorder(),
+        print(_isLoading);
+        return Consumer<SttProvider>(
+          builder: (context, sttProvider, child) {
+            return AlertDialog(
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Label
+                    Text('Grocery items:', style: AppTheme.greenAppBarText),
+                    // TextField
+                    Stack(children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: TextField(
+                          inputFormatters: [CustomTextEditingFormatter()],
+                          controller: _listController,
+                          maxLines: null,
+                          minLines: 5,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your item here...',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: _isLoading
-                          ? Padding(
-                              padding: const EdgeInsets.all(13.0),
-                              child: SizedBox(
-                                  height: 15,
-                                  width: 15,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  )),
-                            )
-                          : IconButton(
-                              onPressed: () {
-                                if (_speechAvailable) {
-                                  _startListening();
-                                } else {
-                                  _askSpeechPermission();
-                                }
-                              },
-                              icon: Icon(Icons.mic))),
-                ]),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _listController.text = "";
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                firestoreService.addNote(
-                  _listController.text,
-                  widget.currentUser?['uid'],
-                  widget.currentUser?['firstName'],
-                );
+                      Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: _isLoading
+                              ? Padding(
+                                  padding: const EdgeInsets.all(13.0),
+                                  child: SizedBox(
+                                      height: 15,
+                                      width: 15,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      )),
+                                )
+                              : IconButton(
+                                  onPressed: () {
+                                    if (sttProvider.speechAvailable) {
+                                      sttProvider.startListening();
+                                      _startListening();
+                                    } else {
+                                      sttProvider.initialize();
+                                    }
+                                  },
+                                  icon: Icon(Icons.mic))),
+                    ]),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    _listController.text = "";
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    firestoreService.addNote(
+                      _listController.text,
+                      widget.currentUser?['uid'],
+                      widget.currentUser?['firstName'],
+                    );
 
-                _messageController.clear();
-                Navigator.pop(context);
-              },
-              child: Text("Save"),
-            ),
-          ],
+                    _messageController.clear();
+                    Navigator.pop(context);
+                  },
+                  child: Text("Save"),
+                ),
+              ],
+            );
+          },
         );
       }),
     );
   }
 
-  Future<void> _askSpeechPermission() async {
-    if (!_speechAvailable) {
-      _speechAvailable = await _speechController.initialize(
-        onStatus: (val) => {
-          if (val == "done")
-            {
-              _setListeningState(() {
-                _doneListening = true;
-              })
-            }
-        },
-        onError: (val) => print('onError: $val'),
-      );
-    }
-  }
-
   void _startListening() {
-    _doneListening = false;
-    if (_speechAvailable) {
-      _speechController.listen(
-        onResult: (val) {
-          _setListeningState(() {
-            _speechText = val.recognizedWords;
-          });
-        },
-      );
-    }
     showDialog(
       barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            _setListeningState = setState;
-            return AlertDialog(
-              content: Text(_speechText),
-              actions: [
-                if (_doneListening) ...[
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _speechController.stop();
-                        Navigator.pop(context);
-                        _speechText = 'Listening...';
-                      });
-                    },
-                    child: Text("Cancel"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _speechController.stop();
-                        Navigator.pop(context);
-                        _compileList();
-                        _speechText = 'Listening...';
-                      });
-                    },
-                    child: Text("Done"),
-                  ),
-                ],
+        return Consumer<SttProvider>(builder: (context, sttProvider, child) {
+          return AlertDialog(
+            content: Text(sttProvider.speechText),
+            actions: [
+              if (sttProvider.doneListening) ...[
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      sttProvider.stopListening();
+                      Navigator.pop(context);
+                    });
+                  },
+                  child: Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      sttProvider.stopListening();
+                      Navigator.pop(context);
+                      print(sttProvider.speechText);
+                      _compileList(sttProvider.speechText);
+                    });
+                  },
+                  child: Text("Done"),
+                ),
               ],
-            );
-          },
-        );
+            ],
+          );
+        });
       },
     );
   }
 
-  Future<String?> _compileList() async {
+  Future<String?> _compileList(String speechText) async {
     try {
       _setState(() {
         _isLoading = true;
       });
 
       final prompt =
-          'Given this prompt: $_speechText, compile a groceries item list with quantities and units in numeric form. Extract both the item (including any unit) and numeric quantity from the text. The response should be in JSON format like this: { "response": [{"item": "packets of blueberries", "quantity": 3}] }. Do not include markdown formatting.';
+          'Given this prompt: $speechText, compile a groceries item list with quantities and units in numeric form. Extract both the item (including any unit) and numeric quantity from the text. The response should be in JSON format like this: { "response": [{"item": "packets of blueberries", "quantity": 3}] }. Do not include markdown formatting.';
 
       var response = await model.generateContent([Content.text(prompt)]);
       var result =
@@ -268,7 +242,7 @@ class _NotesPageState extends State<NotesPage> {
         return "$index. ${item['quantity']} ${item['item']}";
       }).join("\n");
 
-      setState(() {
+      _setState(() {
         _listController.text = formattedList;
         _isLoading = false;
       });

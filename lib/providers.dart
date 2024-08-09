@@ -1,6 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:rongo/provider/Item_provider.dart';
 import 'package:rongo/provider/onboarding_provider.dart';
+import 'package:rongo/provider/stt_provider.dart';
 import 'package:rongo/screen/home/homepage.dart';
 
 class Providers {
@@ -15,6 +16,9 @@ class Providers {
     ),
     ChangeNotifierProvider<IndexProvider>(
       create: (_) => IndexProvider(),
+    ),
+    ChangeNotifierProvider<SttProvider>(
+      create: (_) => SttProvider(),
     ),
   ].toList();
 }
