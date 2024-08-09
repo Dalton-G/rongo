@@ -38,8 +38,6 @@ class _ScannerState extends State<Scanner> {
 
   get currentUser => widget.currentUser;
 
-
-
   Future<GenerateContentResponse> validateImage(Uint8List image) async {
     setState(() {
       _isLoading = true;
@@ -191,7 +189,8 @@ class _ScannerState extends State<Scanner> {
 
   Future<void> remove() async {
     bool? delete = await showBackDialog(
-        "Are you sure you want to clear this item result?", context, close: true);
+        "Are you sure you want to clear this item result?", context,
+        close: true);
     setState(() {
       if (delete!) {
         result = {};
@@ -201,7 +200,7 @@ class _ScannerState extends State<Scanner> {
   }
 
   Future<void> receipt() async {
-    Navigator.pushNamed(context, '/scanned-item-list',arguments: currentUser );
+    Navigator.pushNamed(context, '/scanned-item-list', arguments: currentUser);
   }
 
   @override
