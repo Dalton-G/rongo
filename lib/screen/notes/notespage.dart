@@ -42,54 +42,53 @@ class _NotesPageState extends State<NotesPage> {
   void openNoteBox() {
     showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Label
-                  Text('Note:', style: AppTheme.greenAppBarText),
-                  SizedBox(height: 8),
-                  // TextField
-                  TextField(
-                    controller: _messageController,
-                    maxLines: null,
-                    minLines: 5,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.newline,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your note here...',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  firestoreService.addNote(
-                    _messageController.text,
-                    widget.currentUser?['uid'],
-                    widget.currentUser?['firstName'],
-                  );
-
-                  _messageController.clear();
-                  Navigator.pop(context);
-                },
-                child: Text("Save"),
+      builder: (context) => AlertDialog(
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Label
+              Text('Note:', style: AppTheme.greenAppBarText),
+              SizedBox(height: 8),
+              // TextField
+              TextField(
+                controller: _messageController,
+                maxLines: null,
+                minLines: 5,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                decoration: InputDecoration(
+                  hintText: 'Enter your note here...',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ],
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              firestoreService.addNote(
+                _messageController.text,
+                widget.currentUser?['uid'],
+                widget.currentUser?['firstName'],
+              );
+
+              _messageController.clear();
+              Navigator.pop(context);
+            },
+            child: Text("Save"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -97,147 +96,154 @@ class _NotesPageState extends State<NotesPage> {
     _listController.text = "1. ";
     showDialog(
       context: context,
-      builder: (context) =>
-          StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                _setState = setState;
-                return AlertDialog(
-                  content: SizedBox(
-                    width: double.maxFinite,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Label
-                        Text('Grocery items:', style: AppTheme.greenAppBarText),
-                        // TextField
-                        Stack(children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 20.0),
-                            child: TextField(
-                              inputFormatters: [CustomTextEditingFormatter()],
-                              controller: _listController,
-                              maxLines: null,
-                              minLines: 5,
-                              keyboardType: TextInputType.multiline,
-                              textInputAction: TextInputAction.newline,
-                              decoration: InputDecoration(
-                                hintText: 'Enter your item here...',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: _isLoading
-                                  ? Padding(
-                                padding: const EdgeInsets.all(13.0),
-                                child: SizedBox(
-                                    height: 15,
-                                    width: 15,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    )),
-                              )
-                                  : IconButton(
-                                  onPressed: () {
-                                    if (_speechAvailable) {
-                                      _startListening();
-                                    } else {
-                                      _askSpeechPermission();
-                                    }
-                                  },
-                                  icon: Icon(Icons.mic))),
-                        ]),
-                      ],
+      builder: (context) => StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+        _setState = setState;
+        return AlertDialog(
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Label
+                Text('Grocery items:', style: AppTheme.greenAppBarText),
+                // TextField
+                Stack(children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: TextField(
+                      inputFormatters: [CustomTextEditingFormatter()],
+                      controller: _listController,
+                      maxLines: null,
+                      minLines: 5,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your item here...',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        _listController.text = "";
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        firestoreService.addNote(
-                          _listController.text,
-                          widget.currentUser?['uid'],
-                          widget.currentUser?['firstName'],
-                        );
-
-                        _messageController.clear();
-                        Navigator.pop(context);
-                      },
-                      child: Text("Save"),
-                    ),
-                  ],
+                  Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: _isLoading
+                          ? Padding(
+                              padding: const EdgeInsets.all(13.0),
+                              child: SizedBox(
+                                  height: 15,
+                                  width: 15,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  )),
+                            )
+                          : IconButton(
+                              onPressed: () {
+                                if (_speechAvailable) {
+                                  _startListening();
+                                } else {
+                                  _askSpeechPermission();
+                                }
+                              },
+                              icon: Icon(Icons.mic))),
+                ]),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _listController.text = "";
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                firestoreService.addNote(
+                  _listController.text,
+                  widget.currentUser?['uid'],
+                  widget.currentUser?['firstName'],
                 );
-              }),
+
+                _messageController.clear();
+                Navigator.pop(context);
+              },
+              child: Text("Save"),
+            ),
+          ],
+        );
+      }),
     );
   }
 
   Future<void> _askSpeechPermission() async {
     if (!_speechAvailable) {
       _speechAvailable = await _speechController.initialize(
-          onStatus: (val) => {
-          if (val == "done") {
-          _setListeningState(()
-      {
-        _doneListening = true;
-      })}
-    },
-    onError: (val) => print('onError: $val'),
-    );
-  }
+        onStatus: (val) => {
+          if (val == "done")
+            {
+              _setListeningState(() {
+                _doneListening = true;
+              })
+            }
+        },
+        onError: (val) => print('onError: $val'),
+      );
+    }
   }
 
   void _startListening() {
     _doneListening = false;
     if (_speechAvailable) {
       _speechController.listen(
-          onResult: (val) => {_setListeningState(() {
+        onResult: (val) {
+          _setListeningState(() {
             _speechText = val.recognizedWords;
-          })});
+          });
+        },
+      );
     }
-    ;
     showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                _setListeningState = setState;
-                return AlertDialog(
-                  content: Text(_speechText),
-                  actions: _doneListening ? [
-                    TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _speechController.stop();
-                            Navigator.pop(context);
-                            _speechText = 'Listening...';
-                          });
-                        },
-                        child: Text("Cancel")),
-                    TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _speechController.stop();
-                            Navigator.pop(context);
-                            _compileList();
-                            _speechText = 'Listening...';
-                          });
-                        },
-                        child: Text("Done"))
-                  ] : [],
-                );
-              }
-          );
-        });
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            _setListeningState = setState;
+            return AlertDialog(
+              content: Text(_speechText),
+              actions: [
+                if (_doneListening) ...[
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _speechController.stop();
+                        Navigator.pop(context);
+                        _speechText = 'Listening...';
+                      });
+                    },
+                    child: Text("Cancel"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _speechController.stop();
+                        Navigator.pop(context);
+                        _compileList();
+                        _speechText = 'Listening...';
+                      });
+                    },
+                    child: Text("Done"),
+                  ),
+                ],
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<String?> _compileList() async {
@@ -247,8 +253,7 @@ class _NotesPageState extends State<NotesPage> {
       });
 
       final prompt =
-          'Given this prompt: $_speechText,compile a groceries item list, you only need the name, there might be only one item or comma missing so split the item accordingly.'
-          'Do not return in markdown, return in json like this{ response: ["A","b"]}';
+          'Given this prompt: $_speechText, compile a groceries item list with quantities in numeric form. Extract both the item and numeric quantity from the text. The response should be in JSON format like this: { "response": [{"item": "mangoes", "quantity": 3}] }. Do not include markdown formatting.';
 
       var response = await model.generateContent([Content.text(prompt)]);
       print(
@@ -257,18 +262,20 @@ class _NotesPageState extends State<NotesPage> {
       print(
           "=========================================================================================");
       var result =
-      response.text!.replaceAll("```json", "").replaceAll("```", "");
-      List list = json.decode(result)["response"];
+          response.text!.replaceAll("```json", "").replaceAll("```", "");
+      Map<String, dynamic> map = json.decode(result);
+      List<dynamic> items = map["response"];
+
+      // Format items with numbering
+      String formattedList = items.asMap().entries.map((entry) {
+        int index = entry.key + 1;
+        var item = entry.value;
+        return "$index. ${item['quantity']} ${item['item']}";
+      }).join("\n");
 
       setState(() {
-        list = list
-            .mapIndexed((index, value) =>
-        "${index + 1}. ${value[0].toUpperCase() + value.substring(1)}")
-            .toList();
-        _listController.text = list.join("\n");
-        _setState(() {
-          _isLoading = false;
-        });
+        _listController.text = formattedList;
+        _isLoading = false;
       });
     } catch (exc) {
       print(exc);
@@ -286,14 +293,8 @@ class _NotesPageState extends State<NotesPage> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-    double screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: Stack(
@@ -367,8 +368,8 @@ class _NotesPageState extends State<NotesPage> {
                         final backgroundColor = isCompleted
                             ? Colors.grey[300]
                             : (uid == widget.currentUser?['uid']
-                            ? Colors.white
-                            : Colors.yellow[100]);
+                                ? Colors.white
+                                : Colors.yellow[100]);
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(
@@ -386,7 +387,7 @@ class _NotesPageState extends State<NotesPage> {
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(noteMessage,
                                           style: TextStyle(fontSize: 16)),
@@ -412,18 +413,18 @@ class _NotesPageState extends State<NotesPage> {
                                       icon: Icon(Icons.check_rounded,
                                           color: isCompleted
                                               ? Color.fromARGB(
-                                              255, 101, 101, 101)
+                                                  255, 101, 101, 101)
                                               : AppTheme.mainGreen),
                                       onPressed: isCompleted
                                           ? null
                                           : () async {
-                                        await firestoreService
-                                            .completeNote(notesId);
-                                      },
+                                              await firestoreService
+                                                  .completeNote(notesId);
+                                            },
                                     ),
                                     IconButton(
                                       icon:
-                                      Icon(Icons.delete, color: Colors.red),
+                                          Icon(Icons.delete, color: Colors.red),
                                       onPressed: () async {
                                         await firestoreService
                                             .deleteNote(notesId);
@@ -450,7 +451,7 @@ class _NotesPageState extends State<NotesPage> {
             child: CustomizedButton(
               isRoundButton: true,
               color: AppTheme.mainGreen,
-              icon: Icons.list_alt_rounded,
+              icon: Icons.mic_none_rounded,
               func: openGroceriesBox,
             ),
           ),
