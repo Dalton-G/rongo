@@ -5,6 +5,7 @@ class SttProvider extends ChangeNotifier {
   final SpeechToText _speechController = SpeechToText();
   bool _speechAvailable = false;
   bool _doneListening = false;
+  bool _isListening = false;
   String _speechText = "Listening...";
 
   SpeechToText get speechController => _speechController;
@@ -12,6 +13,8 @@ class SttProvider extends ChangeNotifier {
   bool get speechAvailable => _speechAvailable;
 
   bool get doneListening => _doneListening;
+
+  bool get isListening => _isListening;
 
   String get speechText => _speechText;
 
@@ -28,6 +31,7 @@ class SttProvider extends ChangeNotifier {
   startListening() {
     _speechText = 'Listening...';
     _doneListening = false;
+    _isListening = true;
     print(_doneListening);
     if (_speechAvailable) {
       _speechController.listen(
@@ -42,6 +46,7 @@ class SttProvider extends ChangeNotifier {
 
   stopListening() {
     _doneListening = true;
+    _isListening = false;
     _speechController.stop();
   }
 }
