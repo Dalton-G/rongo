@@ -184,7 +184,7 @@ class _ScannerState extends State<Scanner> {
           image: img));
       result = {};
     });
-    showSnackBar("added to list", context);
+    showSnackBar("Item added to list", context);
   }
 
   Future<void> remove() async {
@@ -194,7 +194,7 @@ class _ScannerState extends State<Scanner> {
     setState(() {
       if (delete!) {
         result = {};
-        showSnackBar("remove", context);
+        showSnackBar("Item remove", context);
       }
     });
   }
