@@ -25,7 +25,7 @@ class RecipeHomePage extends StatefulWidget {
 class _RecipeHomePageState extends State<RecipeHomePage> {
   get currentUser => widget.currentUser;
   final List<Map<String, dynamic>> _inventory = [];
-  //bool _isLoading = false;
+  bool _isLoading = false;
   final List<Recipe> _recipes = [];
 
   @override
@@ -73,6 +73,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     // Clear the existing recipes
     setState(() {
       _recipes.clear();
+      _isLoading = true;
     });
 
     String category = mealType.name;
@@ -89,11 +90,12 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     try {
       final response = await model.generateContent(content);
       if (response.text == null || response.text!.isEmpty) {
-        throw FormatException('Empty response from the model');
+        throw FormatException('Empty response from the model - recipe');
       }
 
       final map = jsonDecode(response.text!) as Map<String, dynamic>;
 
+      // Fetch image from Unsplash API
       String foodName = map['name'];
       final imageUrl = await http.get(Uri.parse(
           'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
@@ -104,7 +106,27 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         map['imageUrl'] = image;
       } else {
         print('Unsplash API error: ${imageUrl.statusCode}');
+        map['imageUrl'] =
+            'https://cdn-icons-png.flaticon.com/512/6478/6478111.png';
       }
+
+      // Fetch Ingredients from Gemini API (seperately due to token limit)
+      var ingredientPrompt =
+          "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
+          "You may generate the ingredients list based on items in the inventory and additional items that are needed but isn't present in the user's inventory."
+          "The recipe you have recommended is $foodName. As such, you must generate the ingredients needed for this dish"
+          "The JSON for ingredients must strictly follow this data schema: {\"ingredients\": Map<String, String>, \"missingIngredients\": Map<String, String>}"
+          "The first String is the ingredient name and the second String is the quantity. You may include measurements unit in the quantity"
+          "Do not reply any additional information other than the ingredients JSON."
+          "Do not include the formatting in the JSON response.";
+      final ingredientContent = [Content.text(ingredientPrompt)];
+      final ingredientResponse = await model.generateContent(ingredientContent);
+      if (ingredientResponse.text == null || ingredientResponse.text!.isEmpty) {
+        throw FormatException('Empty response from the model - ingredients');
+      }
+
+      final ingredientMap =
+          jsonDecode(ingredientResponse.text!) as Map<String, dynamic>;
 
       final recipe = Recipe(
         name: map['name'],
@@ -112,10 +134,14 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         description: map['description'],
         cookingTime: map['cookingTime'],
         tags: List<String>.from(map['tags']),
+        ingredients: Map<String, String>.from(ingredientMap['ingredients']),
+        missingIngredients:
+            Map<String, String>.from(ingredientMap['missingIngredients']),
       );
 
       // Add the new recipe to the list
       setState(() {
+        _isLoading = false;
         _recipes.add(recipe);
       });
     } catch (e) {
@@ -158,89 +184,99 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(top: 30.0, bottom: 50.0),
-                  child: ListView.builder(
-                    itemCount: _recipes.length,
-                    itemBuilder: (context, index) {
-                      final Recipe recipe = _recipes[index];
-                      return ListTile(
-                        title: Container(
-                          decoration: BoxDecoration(
-                              color: AppTheme.backgroundWhite,
-                              borderRadius: BorderRadius.circular(25),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.30),
-                                  spreadRadius: 2,
-                                  blurRadius: 3,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ]),
-                          margin: const EdgeInsets.all(12),
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            children: [
-                              Image.network(recipe.imageUrl),
-                              const SizedBox(height: 15),
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  recipe.name,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                  child: _isLoading
+                      ? Container(
+                          alignment: Alignment.center,
+                          child: const CircularProgressIndicator(),
+                          width: 10,
+                          height: 10,
+                        )
+                      : ListView.builder(
+                          itemCount: _recipes.length,
+                          itemBuilder: (context, index) {
+                            final Recipe recipe = _recipes[index];
+                            return ListTile(
+                              title: Container(
+                                decoration: BoxDecoration(
+                                    color: AppTheme.backgroundWhite,
+                                    borderRadius: BorderRadius.circular(25),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.30),
+                                        spreadRadius: 2,
+                                        blurRadius: 3,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ]),
+                                margin: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  children: [
+                                    Image.network(recipe.imageUrl),
+                                    const SizedBox(height: 15),
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Text(
+                                        recipe.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 15),
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Text(recipe.description,
+                                            style: AppTheme.blackBodyText)),
+                                    const SizedBox(height: 15),
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Wrap(
+                                        spacing: 5,
+                                        runSpacing: 5,
+                                        children: recipe.tags
+                                            .map((tag) => _buildTag(tag))
+                                            .toList(),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Text(
+                                        "Cooking time: ${recipe.cookingTime}",
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600]),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    GestureDetector(
+                                      onTap: () =>
+                                          _navigateToRecipeDetails(index),
+                                      child: Container(
+                                        margin: const EdgeInsets.all(10),
+                                        padding: const EdgeInsets.all(10),
+                                        alignment: Alignment.center,
+                                        width: width * 0.4,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(32),
+                                          color: AppTheme.mainGreen,
+                                        ),
+                                        child: const Text(
+                                          "Get Started",
+                                          style: TextStyle(
+                                              color: AppTheme.backgroundWhite),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 15),
-                              Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Text(recipe.description,
-                                      style: AppTheme.blackBodyText)),
-                              const SizedBox(height: 15),
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Wrap(
-                                  spacing: 5,
-                                  runSpacing: 5,
-                                  children: recipe.tags
-                                      .map((tag) => _buildTag(tag))
-                                      .toList(),
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  "Cooking time: ${recipe.cookingTime}",
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.grey[600]),
-                                  textAlign: TextAlign.left,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              GestureDetector(
-                                onTap: () => _navigateToRecipeDetails(index),
-                                child: Container(
-                                  margin: const EdgeInsets.all(10),
-                                  padding: const EdgeInsets.all(10),
-                                  alignment: Alignment.center,
-                                  width: width * 0.4,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(32),
-                                    color: AppTheme.mainGreen,
-                                  ),
-                                  child: const Text(
-                                    "Get Started",
-                                    style: TextStyle(
-                                        color: AppTheme.backgroundWhite),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
               ),
             ),
