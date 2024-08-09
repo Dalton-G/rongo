@@ -45,6 +45,7 @@ class _ModifyQuantityState extends State<ModifyQuantity> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         IconButton(
           icon: const Icon(Icons.remove),
