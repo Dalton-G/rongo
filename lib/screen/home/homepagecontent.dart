@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/widgets/containers.dart';
 import 'package:rongo/widgets/stats.dart';
@@ -18,16 +16,12 @@ class HomePageContent extends StatefulWidget {
 }
 
 class _HomePageContentState extends State<HomePageContent> {
-  final CollectionReference _fridgesCollection =
-      FirebaseFirestore.instance.collection('fridges');
+  get fridgeId => widget.currentUser['fridgeId'];
 
   @override
   Widget build(BuildContext context) {
     //page dimensions
     final Map currentUserMap = Map<String, dynamic>.from((widget.currentUser));
-
-    print(currentUserMap);
-    print(widget.currentUser.runtimeType);
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -185,7 +179,7 @@ class _HomePageContentState extends State<HomePageContent> {
           StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('fridges')
-                  .doc(currentUserMap['fridgeId'])
+                  .doc(fridgeId)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -209,42 +203,22 @@ class _HomePageContentState extends State<HomePageContent> {
                 int expiringSoonCount = 0;
                 int expiredCount = 0;
 
-                List addedThisMonthList = [];
-                List expiringSoonCountList = [];
-                List expiredCountList = [];
-
                 DateTime now = DateTime.now();
                 int currentMonth = now.month;
                 int currentYear = now.year;
 
                 for (var item in inventory) {
-                  // Convert the addedDate string to a DateTime object
                   DateTime addedDate = DateTime.parse(item['addedDate']);
                   DateTime? expiryDate;
 
                   if (item['expiryDate'] != null) {
-                    if (item['expiryDate']?.endsWith("day") ||
-                        item['expiryDate']?.endsWith("days")) {
-                      int expiredDayLeft = extractNumber(item['expiryDate']);
-                      expiryDate = addedDate.add(Duration(
-                          days: expiredDayLeft)); //Convert Day left to DateTime
-                    } else {
-                      try {
-                        expiryDate = DateTime.parse(item['expiryDate']);
-                      } catch (e) {
-                        // If parsing fails, set expiryDate to null
-                        expiryDate = null;
-                      }
-                    }
-                    item['expiryDate'] = expiryDate?.toIso8601String();
+                    expiryDate = DateTime.parse(item['expiryDate']);
                   }
-
                   if (item['currentQuantity'] > 0) {
                     // Check if the year and month match the current year and month
                     if (addedDate.year == currentYear &&
                         addedDate.month == currentMonth) {
                       addedThisMonth++;
-                      addedThisMonthList.add(item);
                     }
                     if (expiryDate != null) {
                       // Check if the expiryDate is within the next 7 days
@@ -253,19 +227,16 @@ class _HomePageContentState extends State<HomePageContent> {
                       if (expiryDate.isAfter(now) &&
                           expiryDate.isBefore(oneWeekFromNow)) {
                         expiringSoonCount++;
-                        expiringSoonCountList.add(item);
                       }
 
                       // Check if the expiryDate has already passed
                       if (expiryDate.isBefore(now)) {
                         expiredCount++;
-                        expiredCountList.add(item);
                       }
                     }
                   }
                 }
 
-                // return Text('Field value: ${data['field_name']}');
                 return Positioned(
                   left: screenWidth * 0.07,
                   right: screenWidth * 0.07,
@@ -278,14 +249,10 @@ class _HomePageContentState extends State<HomePageContent> {
                         children: [
                           GestureDetector(
                             onTap: (() {
-                              print(inventory);
-                              print(currentUserMap['fridgeId']);
-                              Navigator.pushNamed(
-                                  context, '/inventory-category',
+                              Navigator.pushNamed(context, '/inventory-tabs',
                                   arguments: {
-                                    'inventory': inventory,
-                                    'type': 'total',
-                                    'fridgeId': currentUserMap['fridgeId'],
+                                    'InventoryFilter': InventoryFilter.total,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
                                   });
                             }),
                             child: SquareContainer(
@@ -302,12 +269,10 @@ class _HomePageContentState extends State<HomePageContent> {
                           ),
                           GestureDetector(
                             onTap: (() {
-                              Navigator.pushNamed(
-                                  context, '/inventory-listview',
+                              Navigator.pushNamed(context, '/inventory-tabs',
                                   arguments: {
-                                    'inventory': addedThisMonthList,
-                                    'type': 'new',
-                                    'fridgeId': currentUserMap['fridgeId'],
+                                    'InventoryFilter': InventoryFilter.newAdded,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
                                   });
                             }),
                             child: SquareContainer(
@@ -330,12 +295,11 @@ class _HomePageContentState extends State<HomePageContent> {
                         children: [
                           GestureDetector(
                             onTap: (() {
-                              Navigator.pushNamed(
-                                  context, '/inventory-listview',
+                              Navigator.pushNamed(context, '/inventory-tabs',
                                   arguments: {
-                                    'inventory': expiringSoonCountList,
-                                    'type': 'soon',
-                                    'fridgeId': currentUserMap['fridgeId'],
+                                    'InventoryFilter':
+                                        InventoryFilter.expiredSoon,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
                                   });
                             }),
                             child: SquareContainer(
@@ -352,12 +316,10 @@ class _HomePageContentState extends State<HomePageContent> {
                           ),
                           GestureDetector(
                             onTap: (() {
-                              Navigator.pushNamed(
-                                  context, '/inventory-listview',
+                              Navigator.pushNamed(context, '/inventory-tabs',
                                   arguments: {
-                                    'inventory': expiredCountList,
-                                    'type': 'expired',
-                                    'fridgeId': currentUserMap['fridgeId'],
+                                    'InventoryFilter': InventoryFilter.expired,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
                                   });
                             }),
                             child: SquareContainer(
