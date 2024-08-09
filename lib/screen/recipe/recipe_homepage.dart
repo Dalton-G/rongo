@@ -77,13 +77,15 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
 
     String category = mealType.name;
     String unsplashKey = dotenv.env['UNSPLASH_ACCESS_KEY']!;
+
+    // Updated prompt to request multiple recipes with varying difficulty levels
     var prompt =
-        "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
-        "Please suggest an appropriate recipe and return it in a JSON format."
-        "The JSON for recipe must strictly follow this data schema: {name: string, description: string, cookingTime: string, tags: List<String>}"
-        "Make sure to add the origin of food in the tags."
-        "Do not reply any additional information other than the recipe JSON."
-        "Do not include the formatting in the JSON response.";
+        "The user $currentUser is requesting $category recipes based on their inventory which includes $_inventory."
+        "Please suggest 2-3 recipes of varying difficulty levels and return them in a JSON format."
+        "The JSON for each recipe must strictly follow this data schema: {name: string, description: string, cookingTime: string, tags: List<String>}"
+        "Include the origin of food in the tags."
+        "Do not reply with any additional information other than the recipes in JSON format."
+        "Do not include formatting in the JSON response.";
     final content = [Content.text(prompt)];
 
     try {
@@ -92,32 +94,36 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         throw FormatException('Empty response from the model');
       }
 
-      final map = jsonDecode(response.text!) as Map<String, dynamic>;
+      final List<dynamic> recipesList =
+          jsonDecode(response.text!) as List<dynamic>;
+      for (final recipeData in recipesList) {
+        final map = recipeData as Map<String, dynamic>;
 
-      String foodName = map['name'];
-      final imageUrl = await http.get(Uri.parse(
-          'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
+        String foodName = map['name'];
+        final imageUrl = await http.get(Uri.parse(
+            'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
 
-      if (imageUrl.statusCode == 200) {
-        final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
-        final image = imageMap['results'][0]['urls']['regular'];
-        map['imageUrl'] = image;
-      } else {
-        print('Unsplash API error: ${imageUrl.statusCode}');
+        if (imageUrl.statusCode == 200) {
+          final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
+          final image = imageMap['results'][0]['urls']['regular'];
+          map['imageUrl'] = image;
+        } else {
+          print('Unsplash API error: ${imageUrl.statusCode}');
+        }
+
+        final recipe = Recipe(
+          name: map['name'],
+          imageUrl: map['imageUrl'],
+          description: map['description'],
+          cookingTime: map['cookingTime'],
+          tags: List<String>.from(map['tags']),
+        );
+
+        // Add the new recipe to the list
+        setState(() {
+          _recipes.add(recipe);
+        });
       }
-
-      final recipe = Recipe(
-        name: map['name'],
-        imageUrl: map['imageUrl'],
-        description: map['description'],
-        cookingTime: map['cookingTime'],
-        tags: List<String>.from(map['tags']),
-      );
-
-      // Add the new recipe to the list
-      setState(() {
-        _recipes.add(recipe);
-      });
     } catch (e) {
       print('Error: $e');
     }
