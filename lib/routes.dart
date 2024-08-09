@@ -3,6 +3,7 @@ import 'package:rongo/screen/chatbot/chat.dart';
 import 'package:rongo/screen/home/homepage.dart';
 import 'package:rongo/screen/inventory/inventory_category.dart';
 import 'package:rongo/screen/inventory/inventory_listview.dart';
+import 'package:rongo/screen/inventory/inventory_tabs.dart';
 import 'package:rongo/screen/onboarding/onboarding.dart';
 import 'package:rongo/screen/recipe/recipe_homepage.dart';
 import 'package:rongo/screen/scan_and_add/scanned_item_list.dart';
@@ -19,6 +20,7 @@ class Routes {
   static const String notespage = '/notespage';
   static const String scannedItemList = '/scanned-item-list';
   static const String inventoryCategory = '/inventory-category';
+  static const String inventoryTabs = '/inventory-tabs';
   static const String inventoryListView = '/inventory-listview';
   static const String chat = '/chat';
 
@@ -30,6 +32,7 @@ class Routes {
     notespage: (BuildContext context) => const NotesPage(),
     scannedItemList: (BuildContext context) => const ScannedItemList(),
     inventoryCategory: (BuildContext context) => const InventoryCategory(),
+    inventoryTabs: (BuildContext context) => const InventoryTabs(),
     inventoryListView: (BuildContext context) => const InventoryListview(),
     chat: (BuildContext context) => const ChatPage(),
   };
