@@ -133,7 +133,6 @@ class _InventoryListviewState extends State<InventoryListview> {
                   if (item['expiryDate'] != null) {
                     expiryDate = DateTime.parse(item['expiryDate']);
                   }
-
                   if (item['currentQuantity'] <= 0) {
                     return const SizedBox(
                       width: 1,
@@ -310,7 +309,6 @@ class _InventoryListviewState extends State<InventoryListview> {
                             _isCancelSpeech = false;
                             _showCancelSpeech = false;
                           }
-
                           /// Call Gemini
                           else {
                             setState(() {
@@ -496,6 +494,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                                     vertical: 10),
                                 decoration: AppTheme.widgetDeco(),
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
@@ -521,7 +520,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                                       ),
                                     ),
                                     if (editingWidgetIndex == index) Expanded(
-                                      flex: 3,
+                                      flex: 5,
                                       child: ModifyQuantity(
                                         currentQuantity:
                                         _geminiModificationList[index]
@@ -538,12 +537,14 @@ class _InventoryListviewState extends State<InventoryListview> {
                                       ),
                                     ) else
                                       Expanded(
-                                        flex: 3,
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 45),
-                                          child: Text(
-                                              "${_geminiModificationList[index]['afterConsumptionQuantity']}"),
+                                        flex: 5,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                                "${_geminiModificationList[index]['afterConsumptionQuantity']}"),
+                                          ],
                                         ),
                                       ),
                                   ],
