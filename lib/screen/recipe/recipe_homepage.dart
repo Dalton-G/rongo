@@ -7,8 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:provider/provider.dart';
 import 'package:rongo/model/recipe.dart';
 import 'package:rongo/model/recipe_meal_type.dart';
+import 'package:rongo/provider/meal_type_provider.dart';
+import 'package:rongo/provider/recipe_provider.dart';
 import 'package:rongo/screen/chatbot/chat.dart';
 import 'package:rongo/screen/recipe/recipe_details_page.dart';
 import 'package:rongo/utils/theme/theme.dart';
@@ -26,7 +29,6 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
   get currentUser => widget.currentUser;
   final List<Map<String, dynamic>> _inventory = [];
   bool _isLoading = false;
-  final List<Recipe> _recipes = [];
 
   @override
   void initState() {
@@ -60,7 +62,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
   }
 
   void _navigateToRecipeDetails(int index) {
-    final Recipe recipe = _recipes[index];
+    final Recipe recipe = RecipeProvider().recipeList[index];
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -75,11 +77,13 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     super.dispose();
   }
 
-  Future<void> generateRecipe(MealType mealType) async {
+  Future<void> generateRecipe(
+      MealType mealType, BuildContext buildContext) async {
+    final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
     // Clear the existing recipes
     setState(() {
-      _recipes.clear();
       _isLoading = true;
+      recipeProvider.recipeList.clear();
     });
 
     String category = mealType.name;
@@ -179,7 +183,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         // Add the new recipe to the list
         setState(() {
           _isLoading = false;
-          _recipes.add(recipe);
+          recipeProvider.recipeList.add(recipe);
         });
       }
     } catch (e) {
@@ -192,6 +196,10 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     final Size size = MediaQuery.of(context).size;
     final double width = size.width;
     final double height = size.height;
+    final RecipeProvider recipeProvider =
+        Provider.of<RecipeProvider>(context, listen: false);
+    final MealTypeProvider mealTypeProvider =
+        Provider.of<MealTypeProvider>(context, listen: false);
 
     return Scaffold(
       body: Stack(
@@ -230,9 +238,10 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                           height: 10,
                         )
                       : ListView.builder(
-                          itemCount: _recipes.length,
+                          itemCount: recipeProvider.recipeList.length,
                           itemBuilder: (context, index) {
-                            final Recipe recipe = _recipes[index];
+                            final Recipe recipe =
+                                recipeProvider.recipeList[index];
                             return ListTile(
                               title: Container(
                                 decoration: BoxDecoration(
@@ -339,7 +348,10 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                 ],
               ),
               child: DropdownButtonFormField<MealType>(
-                hint: const Text("What meal are you cooking?"),
+                hint: mealTypeProvider.isEmpty()
+                    ? Text("What meal are you cooking?")
+                    : Text(
+                        mealTypeProvider.mealType.toString().split('.').last),
                 iconSize: 0,
                 decoration: AppTheme.recipeDropdownMenu,
                 items: MealType.values.map((MealType type) {
@@ -349,7 +361,8 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                   );
                 }).toList(),
                 onChanged: (MealType? newValue) {
-                  generateRecipe(newValue!);
+                  generateRecipe(newValue!, context);
+                  mealTypeProvider.setMealType(newValue);
                 },
               ),
             ),
