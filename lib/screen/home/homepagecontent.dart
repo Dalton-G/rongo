@@ -28,7 +28,6 @@ class _HomePageContentState extends State<HomePageContent> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body:
-
       StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
               .collection('fridges')
@@ -99,8 +98,6 @@ class _HomePageContentState extends State<HomePageContent> {
             }
 
             return Stack(
-          //whatever code is written first is on the bottom most
-
             //background image
           children: [
             Image.asset(
