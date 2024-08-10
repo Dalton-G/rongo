@@ -8,6 +8,7 @@ class CustomizedButton extends StatelessWidget {
   final void Function() func;
   final Color color;
   final String tooltip;
+  final double width;
 
   const CustomizedButton(
       {super.key,
@@ -16,6 +17,7 @@ class CustomizedButton extends StatelessWidget {
       this.icon = Icons.add,
       this.color = AppTheme.mainGreen,
       this.tooltip = "",
+        this.width = 200,
       required this.func});
 
   @override
@@ -31,7 +33,7 @@ class CustomizedButton extends StatelessWidget {
           onTap: func,
           child: Container(
             alignment: Alignment.center,
-            width: isRoundButton ? 50 : 200,
+            width: isRoundButton ? 50 : width,
             height: 50,
             decoration: BoxDecoration(
               color: color,
@@ -88,6 +90,41 @@ class DefaultButton extends StatelessWidget {
           child: Text(
             buttonText,
             style: AppTheme.whiteButtonText,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class RoundButton extends StatelessWidget {
+  final Color color;
+  final Color iconColor;
+  final IconData icon;
+  final void Function() func;
+  const RoundButton({
+    Key? key,
+    required this.color,
+    required this.iconColor,
+    required this.icon,
+    required this.func,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: func,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            boxShadow: AppTheme.bottomLightShadow),
+        child: Center(
+          child: Icon(
+            icon,
+            color: iconColor,
           ),
         ),
       ),

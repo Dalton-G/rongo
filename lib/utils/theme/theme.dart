@@ -76,9 +76,27 @@ class AppTheme {
   //   textTheme: _lightTextTheme,
   // );
 
+  // DG
+  static InputDecoration recipeDropdownMenu = InputDecoration(
+    fillColor: AppTheme.backgroundWhite,
+    filled: true,
+    prefixIcon: const Icon(Icons.soup_kitchen, color: mainGreen),
+    suffixIcon: const Icon(Icons.keyboard_arrow_down, color: mainGreen),
+    enabledBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: backgroundWhite),
+      borderRadius: BorderRadius.circular(15),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: backgroundWhite),
+      borderRadius: BorderRadius.circular(15),
+    ),
+  );
+
   // JL
   static const mainGreen = Color(0xff25995C);
   static const backgroundWhite = Color(0xffFAFAFA);
+  static const lightOrange = Color(0XFFFFDEBF);
+  static const lightGrey = Color(0XFFEAEAEA);
 
   static BoxDecoration widgetDeco({Color color = Colors.white}) {
     return BoxDecoration(
@@ -98,10 +116,55 @@ class AppTheme {
 
 //suzanne
 
+  static const lighterGreen = Color.fromARGB(255, 206, 244, 215);
+
+  static List<BoxShadow> bottomLightShadow = [
+    BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 10,
+        offset: Offset(0, 4))
+  ];
+
+  static List<BoxShadow> topLightShadow = [
+    BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 10,
+        offset: Offset(0, -4))
+  ];
+
   static TextStyle blackBodyText = GoogleFonts.nunito(
     textStyle: TextStyle(
       fontSize: 16,
       color: Colors.grey[900],
+    ),
+  );
+
+  static TextStyle whiteBodyText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 16,
+      color: Colors.white,
+    ),
+  );
+
+  static TextStyle whiteSubtitleText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 12,
+      color: Colors.white,
+      height: 1.2,
+    ),
+  );
+
+  static TextStyle blackAppBarText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 18,
+      color: Colors.grey[900],
+    ),
+  );
+
+  static TextStyle greenAppBarText = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 18,
+      color: mainGreen,
     ),
   );
 

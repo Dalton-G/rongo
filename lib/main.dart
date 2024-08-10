@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:rongo/firebase_options.dart';
+import 'package:rongo/provider/stt_provider.dart';
 import 'package:rongo/providers.dart';
 import 'package:rongo/routes.dart';
 import 'package:rongo/screen/onboarding/onboarding.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MultiProvider(
       providers: Providers.providers,
       child: MaterialApp(
@@ -31,7 +33,6 @@ class MyApp extends StatelessWidget {
         home: const OnboardingPage(),
         theme: AppTheme.lightTheme,
         routes: Routes.routes,
-
       ),
     );
   }
