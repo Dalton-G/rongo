@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class ModifyQuantity extends StatefulWidget {
   int currentQuantity;
   String name;
-
+  MainAxisAlignment mainAxisAlignment_;
   var onQuantityChanged;
 
   @override
@@ -14,7 +14,9 @@ class ModifyQuantity extends StatefulWidget {
       {super.key,
       required this.currentQuantity,
       required this.name,
-      required this.onQuantityChanged});
+      required this.onQuantityChanged,
+      this.mainAxisAlignment_ = MainAxisAlignment.center,
+      });
 }
 
 class _ModifyQuantityState extends State<ModifyQuantity> {
@@ -44,7 +46,7 @@ class _ModifyQuantityState extends State<ModifyQuantity> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: widget.mainAxisAlignment_,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Container(
