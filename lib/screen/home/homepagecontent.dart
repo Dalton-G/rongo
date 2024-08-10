@@ -28,7 +28,6 @@ class _HomePageContentState extends State<HomePageContent> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body:
-
       StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
               .collection('fridges')

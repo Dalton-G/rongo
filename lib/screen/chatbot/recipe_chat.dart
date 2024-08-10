@@ -3,8 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:provider/provider.dart';
 import 'package:rongo/model/message.dart';
 import 'package:rongo/model/recipe.dart';
+import 'package:rongo/provider/recipe_chat_provider.dart';
 import 'package:rongo/utils/theme/theme.dart';
 
 class RecipeChatPage extends StatefulWidget {
@@ -21,7 +23,6 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
   get recipe => widget.recipe;
   final date = DateTime.now();
   final TextEditingController _controller = TextEditingController();
-  final List<Message> _messages = [];
   final model = GenerativeModel(
       model: 'gemini-1.5-flash', apiKey: dotenv.env['GEMINI_API_KEY']!);
   bool _isLoading = false;
@@ -29,20 +30,30 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
   @override
   void initState() {
     super.initState();
-    initialResponse(recipe);
+    Future.delayed(const Duration(milliseconds: 1), () {
+      initialResponse(recipe, context);
+    });
   }
 
-  Future<void> initialResponse(Recipe recipe) async {
+  Future<void> initialResponse(Recipe recipe, BuildContext context) async {
     String foodName = recipe.name;
-    _messages.add(
-      Message(
+
+    final chatProvider =
+        Provider.of<RecipeChatProvider>(context, listen: false);
+    final messages = chatProvider.messages;
+
+    final messageExists = messages.any((message) =>
+        message.text ==
+        "I see that you're currently cooking $foodName! Do you have any questions regarding that? Or are you seeking assistance with something else?");
+    if (!messageExists) {
+      chatProvider.addMessage(Message(
           text:
               "I see that you're currently cooking $foodName! Do you have any questions regarding that? Or are you seeking assistance with something else?",
-          isUser: false),
-    );
+          isUser: false));
+    }
   }
 
-  callGeminiModel() async {
+  callGeminiModel(BuildContext buildContext) async {
     String context = """
         Your name is Rongie. You are a friendly and helpful assistant that is always ready to help users with their cooking needs
         Your friend, $currentUser is asking you a question about a recipe, please provide a helpful answer in a short and conversational manner.
@@ -77,7 +88,8 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
       """);
     try {
       setState(() {
-        _messages.add(Message(text: _controller.text, isUser: true));
+        Provider.of<RecipeChatProvider>(buildContext, listen: false)
+            .addMessage(Message(text: _controller.text, isUser: true));
         _isLoading = true;
       });
 
@@ -86,7 +98,8 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
       final response = await model.generateContent(content);
 
       setState(() {
-        _messages.add(Message(text: response.text!, isUser: false));
+        Provider.of<RecipeChatProvider>(buildContext, listen: false)
+            .addMessage(Message(text: response.text!, isUser: false));
         _isLoading = false;
       });
     } catch (e) {
@@ -96,6 +109,8 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final recipeChatProvider = Provider.of<RecipeChatProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -121,9 +136,9 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _messages.length,
+              itemCount: recipeChatProvider.messages.length,
               itemBuilder: (context, index) {
-                final Message message = _messages[index];
+                final Message message = recipeChatProvider.messages[index];
                 return ListTile(
                   title: Align(
                     alignment: message.isUser
@@ -196,7 +211,7 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
                           icon: const Icon(Icons.send),
                           onPressed: () {
                             if (_controller.text.isEmpty) return;
-                            callGeminiModel();
+                            callGeminiModel(context);
                             _controller.clear();
                             FocusScope.of(context).unfocus();
                           },
