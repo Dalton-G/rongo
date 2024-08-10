@@ -106,78 +106,82 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
       for (final recipeData in recipesList) {
         final map = recipeData as Map<String, dynamic>;
 
-      // Fetch image from Unsplash API
-      String foodName = map['name'];
-      final imageUrl = await http.get(Uri.parse(
-          'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
+        // Fetch image from Unsplash API
+        String foodName = map['name'];
+        final imageUrl = await http.get(Uri.parse(
+            'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
 
-      if (imageUrl.statusCode == 200) {
-        final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
-        final image = imageMap['results'][0]['urls']['regular'];
-        map['imageUrl'] = image;
-      } else {
-        print('Unsplash API error: ${imageUrl.statusCode}');
-        map['imageUrl'] =
-            'https://cdn-icons-png.flaticon.com/512/6478/6478111.png';
+        if (imageUrl.statusCode == 200) {
+          final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
+          final image = imageMap['results'][0]['urls']['regular'];
+          map['imageUrl'] = image;
+        } else {
+          print('Unsplash API error: ${imageUrl.statusCode}');
+          map['imageUrl'] =
+              'https://cdn-icons-png.flaticon.com/512/6478/6478111.png';
+        }
+
+        // Fetch Ingredients from Gemini API (seperately due to token limit)
+        var ingredientPrompt =
+            "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
+            "You may generate the ingredients list based on items in the inventory and additional items that are needed but isn't present in the user's inventory."
+            "The recipe you have recommended is $foodName. As such, you must generate the ingredients needed for this dish"
+            "The JSON for ingredients must strictly follow this data schema: {\"ingredients\": Map<String, String>, \"nutrition\": Map<String, String>}, \"allergens\": List<String>}"
+            "The first String is the ingredient name and the second String is the quantity. You may include measurements unit in the quantity"
+            "The nutrition is the nutritional information of the recipe. The key is the nutritional information and the value is the quantity."
+            "The allergens is the list of allergens in the recipe."
+            "Do not reply any additional information other than purely the JSON."
+            "Do not include the formatting in the JSON response.";
+        final ingredientContent = [Content.text(ingredientPrompt)];
+        final ingredientResponse =
+            await model.generateContent(ingredientContent);
+        if (ingredientResponse.text == null ||
+            ingredientResponse.text!.isEmpty) {
+          throw FormatException('Empty response from the model - ingredients');
+        }
+        final ingredientMap =
+            jsonDecode(ingredientResponse.text!) as Map<String, dynamic>;
+
+        // Fetch Instructions from Gemini API (seperately due to token limit)
+        var instructionPrompt =
+            "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
+            "You need to generate the instructions based on the recipe you have recommended."
+            "The recipe you have recommended is $foodName. As such, you must generate the instructions needed for this dish"
+            "The ingredients you have recommended are $ingredientMap, so follow these ingredients strictly."
+            "However, your instruction strictly must never involve the ingredients that are not listed in the ingredients JSON"
+            "The JSON for instructions must strictly follow this data schema: {\"instructions\": Map<String, String>}"
+            "The key is the step number in this format (Step 1, Step 2, Step 3, etc) and the value is the instruction for that step."
+            "Do not reply any additional information other than the instructions JSON."
+            "Do not include the formatting in the JSON response.";
+        final instructionContent = [Content.text(instructionPrompt)];
+        final instructionResponse =
+            await model.generateContent(instructionContent);
+        if (instructionResponse.text == null ||
+            instructionResponse.text!.isEmpty) {
+          throw FormatException('Empty response from the model - instructions');
+        }
+        final instructionMap =
+            jsonDecode(instructionResponse.text!) as Map<String, dynamic>;
+
+        final recipe = Recipe(
+          name: map['name'],
+          imageUrl: map['imageUrl'],
+          description: map['description'],
+          cookingTime: map['cookingTime'],
+          tags: List<String>.from(map['tags']),
+          ingredients: Map<String, String>.from(ingredientMap['ingredients']),
+          instructions:
+              Map<String, String>.from(instructionMap['instructions']),
+          nutritions: Map<String, String>.from(ingredientMap['nutrition']),
+          allergens: List<String>.from(ingredientMap['allergens']),
+        );
+
+        // Add the new recipe to the list
+        setState(() {
+          _isLoading = false;
+          _recipes.add(recipe);
+        });
       }
-
-      // Fetch Ingredients from Gemini API (seperately due to token limit)
-      var ingredientPrompt =
-          "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
-          "You may generate the ingredients list based on items in the inventory and additional items that are needed but isn't present in the user's inventory."
-          "The recipe you have recommended is $foodName. As such, you must generate the ingredients needed for this dish"
-          "The JSON for ingredients must strictly follow this data schema: {\"ingredients\": Map<String, String>, \"nutrition\": Map<String, String>}, \"allergens\": List<String>}"
-          "The first String is the ingredient name and the second String is the quantity. You may include measurements unit in the quantity"
-          "The nutrition is the nutritional information of the recipe. The key is the nutritional information and the value is the quantity."
-          "The allergens is the list of allergens in the recipe."
-          "Do not reply any additional information other than purely the JSON."
-          "Do not include the formatting in the JSON response.";
-      final ingredientContent = [Content.text(ingredientPrompt)];
-      final ingredientResponse = await model.generateContent(ingredientContent);
-      if (ingredientResponse.text == null || ingredientResponse.text!.isEmpty) {
-        throw FormatException('Empty response from the model - ingredients');
-      }
-      final ingredientMap =
-          jsonDecode(ingredientResponse.text!) as Map<String, dynamic>;
-
-      // Fetch Instructions from Gemini API (seperately due to token limit)
-      var instructionPrompt =
-          "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
-          "You need to generate the instructions based on the recipe you have recommended."
-          "The recipe you have recommended is $foodName. As such, you must generate the instructions needed for this dish"
-          "The ingredients you have recommended are $ingredientMap, so follow these ingredients strictly."
-          "However, your instruction strictly must never involve the ingredients that are not listed in the ingredients JSON"
-          "The JSON for instructions must strictly follow this data schema: {\"instructions\": Map<String, String>}"
-          "The key is the step number in this format (Step 1, Step 2, Step 3, etc) and the value is the instruction for that step."
-          "Do not reply any additional information other than the instructions JSON."
-          "Do not include the formatting in the JSON response.";
-      final instructionContent = [Content.text(instructionPrompt)];
-      final instructionResponse =
-          await model.generateContent(instructionContent);
-      if (instructionResponse.text == null ||
-          instructionResponse.text!.isEmpty) {
-        throw FormatException('Empty response from the model - instructions');
-      }
-      final instructionMap =
-          jsonDecode(instructionResponse.text!) as Map<String, dynamic>;
-
-      final recipe = Recipe(
-        name: map['name'],
-        imageUrl: map['imageUrl'],
-        description: map['description'],
-        cookingTime: map['cookingTime'],
-        tags: List<String>.from(map['tags']),
-        ingredients: Map<String, String>.from(ingredientMap['ingredients']),
-        instructions: Map<String, String>.from(instructionMap['instructions']),
-        nutritions: Map<String, String>.from(ingredientMap['nutrition']),
-        allergens: List<String>.from(ingredientMap['allergens']),
-      );
-
-      // Add the new recipe to the list
-      setState(() {
-        _isLoading = false;
-        _recipes.add(recipe);
-      });
     } catch (e) {
       print('Error: $e');
     }
