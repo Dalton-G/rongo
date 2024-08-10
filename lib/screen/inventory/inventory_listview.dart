@@ -36,9 +36,7 @@ class _InventoryListviewState extends State<InventoryListview> {
   bool recording = false;
   int editingWidgetIndex = -1;
 
-  final stt.SpeechToText _speech = stt.SpeechToText();
   bool _updatingInventory = false;
-  double _confidence = 1.0;
   bool _showCancelSpeech = false;
   bool _isCancelSpeech = false;
   bool _waitingGemini = false;
@@ -46,8 +44,11 @@ class _InventoryListviewState extends State<InventoryListview> {
   List _geminiModificationList = [];
 
   get inventoryFilter => widget.inventoryFilter;
+
   get fridgeId => widget.fridgeId;
+
   get inventory => widget.inventory;
+
   get currentCategory => widget.currentCategory;
 
   @override
@@ -115,153 +116,148 @@ class _InventoryListviewState extends State<InventoryListview> {
             return Stack(children: [
               desiredCategory!.isNotEmpty
                   ? ListView.builder(
-                itemCount: desiredCategory.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == (desiredCategory!.length)) {
-                    if (inventoryListNotEmpty) {
-                      return const AddItemWidget();
-                    } else {
-                      return AddItemWidgetWithPrompt(
-                          nullPrompting: nullPrompting!);
-                    }
-                  }
+                      itemCount: desiredCategory.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == (desiredCategory!.length)) {
+                          if (inventoryListNotEmpty) {
+                            return const AddItemWidget();
+                          } else {
+                            return AddItemWidgetWithPrompt(
+                                nullPrompting: nullPrompting!);
+                          }
+                        }
 
-                  var item = desiredCategory[index];
-                  DateFormat format = DateFormat("yyyy-MM-dd");
-                  DateTime addDate = format.parse(item['addedDate']);
-                  DateTime? expiryDate;
-                  if (item['expiryDate'] != null) {
-                    expiryDate = DateTime.parse(item['expiryDate']);
-                  }
-                  if (item['currentQuantity'] <= 0) {
-                    return const SizedBox(
-                      width: 1,
-                    );
-                  }
-
-                  if (item['currentQuantity'] > 0) {
-                    inventoryListNotEmpty = true;
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0, vertical: 10),
-                    child: Slidable(
-                      endActionPane: ActionPane(
-                        motion: const DrawerMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) {
-                              setState(() {
-                                item['currentQuantity'] = 0;
-                                updateInventoryItem(
-                                    fridgeId, item['addedDate'], item);
-                                showSnackBar(
-                                    "Consumption Updated Successfully. No more ${item['name']}.",
-                                    context);
-                              });
-                            },
-                            icon: Icons.delete,
-                            foregroundColor: Colors.redAccent,
-                            backgroundColor: Colors.transparent,
-                          ),
-                        ],
-                      ),
-                      child: GestureDetector(
-                        onTap: (() {
-                          _showModifyQuantityDialog(
-                            context,
-                            item,
-                            fridgeId,
+                        var item = desiredCategory[index];
+                        DateFormat format = DateFormat("yyyy-MM-dd");
+                        DateTime addDate = format.parse(item['addedDate']);
+                        DateTime? expiryDate;
+                        if (item['expiryDate'] != null) {
+                          expiryDate = DateTime.parse(item['expiryDate']);
+                        }
+                        if (item['currentQuantity'] <= 0) {
+                          return const SizedBox(
+                            width: 1,
                           );
-                        }),
-                        child: Container(
-                          decoration: AppTheme.widgetDeco(),
-                          padding: const EdgeInsets.all(15),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 100,
-                                height: 80,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: item['imageDownloadURL'] == null
-                                      ? Image.asset(
-                                      "lib/images/avocado.png")
-                                      : Image.network(
-                                    item['imageDownloadURL'],
-                                    fit: BoxFit.cover,
-                                  ),
+                        }
+
+                        if (item['currentQuantity'] > 0) {
+                          inventoryListNotEmpty = true;
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0, vertical: 10),
+                          child: Slidable(
+                            endActionPane: ActionPane(
+                              motion: const DrawerMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed: (context) {
+                                    setState(() {
+                                      item['currentQuantity'] = 0;
+                                      updateInventoryItem(
+                                          fridgeId, item['addedDate'], item);
+                                      showSnackBar(
+                                          "Consumption Updated Successfully. No more ${item['name']}.",
+                                          context);
+                                    });
+                                  },
+                                  icon: Icons.delete,
+                                  foregroundColor: Colors.redAccent,
+                                  backgroundColor: Colors.transparent,
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 15,
-                              ),
-                              Expanded(
+                              ],
+                            ),
+                            child: GestureDetector(
+                              onTap: (() {
+                                _showModifyQuantityDialog(
+                                  context,
+                                  item,
+                                  fridgeId,
+                                );
+                              }),
+                              child: Container(
+                                decoration: AppTheme.widgetDeco(),
+                                padding: const EdgeInsets.all(15),
                                 child: Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
                                   children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          width: MediaQuery
-                                              .of(context)
-                                              .size
-                                              .width -
-                                              230,
-                                          child: Text(
-                                            item['name'] ?? 'Unknown',
-                                            style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight:
-                                                FontWeight.w600),
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 8,
-                                        ),
-                                        expiryDate == null
-                                            ? Text(
-                                          'Added: ${DateFormat("d MMM y (E)")
-                                              .format(addDate)}\n'
-                                              'Expiry: - ',
-                                          style: const TextStyle(
-                                              fontSize: 11,
-                                              height: 2),
-                                        )
-                                            : Text(
-                                          'Added: ${DateFormat("d MMM y (E)")
-                                              .format(addDate)}\n'
-                                              'Expiry: ${DateFormat(
-                                              "d MMM y (E)").format(
-                                              expiryDate)}',
-                                          style: const TextStyle(
-                                              fontSize: 11,
-                                              height: 2),
-                                        ),
-                                      ],
+                                    SizedBox(
+                                      width: 100,
+                                      height: 80,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: item['imageDownloadURL'] == null
+                                            ? Image.asset(
+                                                "lib/images/avocado.png")
+                                            : Image.network(
+                                                item['imageDownloadURL'],
+                                                fit: BoxFit.cover,
+                                              ),
+                                      ),
                                     ),
-                                    Text(
-                                      "x${item['currentQuantity']}",
-                                    )
+                                    const SizedBox(
+                                      width: 15,
+                                    ),
+                                    Expanded(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width -
+                                                    230,
+                                                child: Text(
+                                                  item['name'] ?? 'Unknown',
+                                                  style: const TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w600),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 8,
+                                              ),
+                                              expiryDate == null
+                                                  ? Text(
+                                                      'Added: ${DateFormat("d MMM y (E)").format(addDate)}\n'
+                                                      'Expiry: - ',
+                                                      style: const TextStyle(
+                                                          fontSize: 11,
+                                                          height: 2),
+                                                    )
+                                                  : Text(
+                                                      'Added: ${DateFormat("d MMM y (E)").format(addDate)}\n'
+                                                      'Expiry: ${DateFormat("d MMM y (E)").format(expiryDate)}',
+                                                      style: const TextStyle(
+                                                          fontSize: 11,
+                                                          height: 2),
+                                                    ),
+                                            ],
+                                          ),
+                                          Text(
+                                            "x${item['currentQuantity']}",
+                                          )
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              )
+                        );
+                      },
+                    )
                   : AddItemWidgetWithPrompt(nullPrompting: nullPrompting!),
 
               /// Speech Button
@@ -271,13 +267,13 @@ class _InventoryListviewState extends State<InventoryListview> {
                   child: GestureDetector(
                       onTap: (() {
                         setState(() {
-                          _waitingGemini ?
-                          showSnackBar(
-                              "Rongie is crafting something wonderful for you!.",
-                              context) :
-                          showSnackBar(
-                              "Press and Hold to use Rongie voice assistant.",
-                              context);
+                          _waitingGemini
+                              ? showSnackBar(
+                                  "Rongie is crafting something wonderful for you!.",
+                                  context)
+                              : showSnackBar(
+                                  "Press and Hold to use Rongie voice assistant.",
+                                  context);
                           if (!sttProvider.speechAvailable) {
                             sttProvider.initialize();
                           }
@@ -288,8 +284,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                           showSnackBar(
                               "Rongie is crafting something wonderful for you!.",
                               context);
-                        }
-                        else if (sttProvider.speechAvailable) {
+                        } else if (sttProvider.speechAvailable) {
                           {
                             if (sttProvider.speechAvailable) {
                               sttProvider.startListening();
@@ -302,13 +297,13 @@ class _InventoryListviewState extends State<InventoryListview> {
                       }),
                       onLongPressUp: (() async {
                         if (_waitingGemini) {
-                        }
-                        else if (sttProvider.speechAvailable) {
+                        } else if (sttProvider.speechAvailable) {
                           /// Not calling Gemini if Use cancel (swipe up)
                           if (_isCancelSpeech) {
                             _isCancelSpeech = false;
                             _showCancelSpeech = false;
                           }
+
                           /// Call Gemini
                           else {
                             setState(() {
@@ -318,7 +313,6 @@ class _InventoryListviewState extends State<InventoryListview> {
                               _waitingGemini = true;
                               showSnackBar("Finished Recording.", context);
                             });
-
 
                             final systemPrompt =
                                 ' Given this list of item: $inventory.'
@@ -330,7 +324,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                             var response = await model
                                 .generateContent([Content.text(systemPrompt)]);
                             final match =
-                            extractJsonContent.firstMatch(response.text!);
+                                extractJsonContent.firstMatch(response.text!);
                             print(response.text!);
                             setState(() {
                               _waitingGemini = false;
@@ -339,9 +333,9 @@ class _InventoryListviewState extends State<InventoryListview> {
                             if (match != null) {
                               final jsonContent = match.group(1)?.trim();
                               final List<dynamic> jsonResponse =
-                              jsonDecode(jsonContent!);
+                                  jsonDecode(jsonContent!);
                               final List<Map<String, dynamic>> items =
-                              jsonResponse.cast<Map<String, dynamic>>();
+                                  jsonResponse.cast<Map<String, dynamic>>();
 
                               if (items.isNotEmpty) {
                                 setState(() {
@@ -366,7 +360,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                         if (sttProvider.speechAvailable) {
                           /// Show Delete location
                           if (longPressMoveUpdateDetails_
-                              .localOffsetFromOrigin !=
+                                  .localOffsetFromOrigin !=
                               const Offset(0, 0)) {
                             if (_isCancelSpeech != true) {
                               setState(() {
@@ -377,7 +371,7 @@ class _InventoryListviewState extends State<InventoryListview> {
 
                           /// Cancel Speech to text without calling gemini
                           if (longPressMoveUpdateDetails_
-                              .localOffsetFromOrigin <
+                                  .localOffsetFromOrigin <
                               const Offset(100, -180)) {
                             if (_isCancelSpeech == false) {
                               setState(() {
@@ -393,21 +387,17 @@ class _InventoryListviewState extends State<InventoryListview> {
                       }),
                       child: Container(
                         decoration: AppTheme.widgetDeco(color: Colors.white),
-                        child: _waitingGemini ?
-                        const CircularProgressIndicator() :
-                        const Icon(
-                            size: 80, Icons.fiber_manual_record_outlined),
-                      ))
-              ),
+                        child: _waitingGemini
+                            ? const CircularProgressIndicator()
+                            : const Icon(
+                                size: 80, Icons.fiber_manual_record_outlined),
+                      ))),
 
               /// Speech Text Display Area
               if (sttProvider.isListening)
                 Positioned(
                   bottom: 100,
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width,
+                  width: MediaQuery.of(context).size.width,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Container(
@@ -486,12 +476,11 @@ class _InventoryListviewState extends State<InventoryListview> {
                                 editingWidgetIndex = index;
                               });
                             }),
-                            child:
-                            Padding(
+                            child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
                                 decoration: AppTheme.widgetDeco(),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -505,40 +494,53 @@ class _InventoryListviewState extends State<InventoryListview> {
                                           "${_geminiModificationList[index]['name']}"),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.only(left: 15.0,top: 10),
-                                      child: Row(children: [Text(
-                                          "Original: ${_geminiModificationList[index]['currentQuantity']}"),
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 10, right: 10),
-                                          child: const Icon(
-                                            Icons.arrow_forward_ios_rounded,
-                                            size: 10,
+                                      padding: const EdgeInsets.only(
+                                          left: 15.0, top: 10),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                              "Original: ${_geminiModificationList[index]['currentQuantity']}"),
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                left: 10, right: 10),
+                                            child: const Icon(
+                                              Icons.arrow_forward_ios_rounded,
+                                              size: 10,
+                                            ),
                                           ),
-                                        ),
-                                        if (editingWidgetIndex == index) ModifyQuantity(
-                                          currentQuantity:
-                                          _geminiModificationList[index]
-                                          ['afterConsumptionQuantity'],
-                                          name: _geminiModificationList[index]
-                                          ['name'],
-                                          onQuantityChanged: (int newCounter) {
-                                            setState(() {
-                                              _geminiModificationList[index]
-                                              ['afterConsumptionQuantity'] =
-                                                  newCounter;
-                                            });
-                                          },
-                                        ) else
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                  "Current: ${_geminiModificationList[index]['afterConsumptionQuantity']}"),
-                                            ],
-                                          )],),
-                                    )
-                                    ,
+                                          if (editingWidgetIndex == index)
+                                            ModifyQuantity(
+                                              currentQuantity:
+                                                  _geminiModificationList[index]
+                                                      [
+                                                      'afterConsumptionQuantity'],
+                                              name:
+                                                  _geminiModificationList[index]
+                                                      ['name'],
+                                              onQuantityChanged:
+                                                  (int newCounter) {
+                                                setState(() {
+                                                  _geminiModificationList[index]
+                                                          [
+                                                          'afterConsumptionQuantity'] =
+                                                      newCounter;
+                                                });
+                                              },
+                                            )
+                                          else
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                    "Current: ${_geminiModificationList[index]['afterConsumptionQuantity']}"),
+                                              ],
+                                            )
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -557,9 +559,9 @@ class _InventoryListviewState extends State<InventoryListview> {
 
                             for (var geminiItem in _geminiModificationList) {
                               int index = inventory.indexWhere((item) =>
-                              item['addedDate'] == geminiItem['addedDate']);
+                                  item['addedDate'] == geminiItem['addedDate']);
                               inventory[index]['currentQuantity'] =
-                              geminiItem['afterConsumptionQuantity'];
+                                  geminiItem['afterConsumptionQuantity'];
                               await updateInventoryItem(fridgeId,
                                   geminiItem['addedDate'], inventory[index]);
                             }
@@ -587,7 +589,8 @@ class _InventoryListviewState extends State<InventoryListview> {
                     ],
                   ),
                 ),
-            ]);})),
+            ]);
+          })),
     );
   }
 
@@ -621,16 +624,16 @@ class _InventoryListviewState extends State<InventoryListview> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                      flex: 6,
-                      child: Text("Quantity left:\t")),
+                  Expanded(flex: 6, child: Text("Quantity left:\t")),
                   Expanded(
                       flex: 1,
-                      child: SizedBox(width: 1,)),
+                      child: SizedBox(
+                        width: 1,
+                      )),
                   Expanded(
-                      flex: 8,
-                      child: ModifyQuantity(
-                        mainAxisAlignment_: MainAxisAlignment.start,
+                    flex: 8,
+                    child: ModifyQuantity(
+                      mainAxisAlignment_: MainAxisAlignment.start,
                       onQuantityChanged: (int newQuantity) {
                         _counter = newQuantity;
                       },
@@ -649,15 +652,13 @@ class _InventoryListviewState extends State<InventoryListview> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                      flex: 6,
-                      child: Text("Net price:\t")),
+                  Expanded(flex: 6, child: Text("Net price:\t")),
                   Expanded(
                       flex: 1,
-                      child: SizedBox(width: 1,)),
-                  Expanded(
-                      flex: 8,
-                      child: Text("Rm ${item['netPrice']} each")),
+                      child: SizedBox(
+                        width: 1,
+                      )),
+                  Expanded(flex: 8, child: Text("Rm ${item['netPrice']} each")),
                 ],
               ),
 
@@ -665,20 +666,22 @@ class _InventoryListviewState extends State<InventoryListview> {
                 height: 5,
               ),
 
-              if (item['allergen'] != "Unknown")...[
+              if (item['allergen'] != "Unknown") ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                        flex: 6,
-                        child: Text("Allergen:\t")),
+                    Expanded(flex: 6, child: Text("Allergen:\t")),
                     Expanded(
                         flex: 1,
-                        child: SizedBox(width: 1,)),
+                        child: SizedBox(
+                          width: 1,
+                        )),
                     Expanded(
                         flex: 8,
-                        child: Text("${item['allergen']}".replaceAll('[', '').replaceAll(']', ''))),
+                        child: Text("${item['allergen']}"
+                            .replaceAll('[', '')
+                            .replaceAll(']', ''))),
                   ],
                 ),
                 const SizedBox(
@@ -690,15 +693,17 @@ class _InventoryListviewState extends State<InventoryListview> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                      flex: 6,
-                      child: Text("Ingredients:\t")),
+                  Expanded(flex: 6, child: Text("Ingredients:\t")),
                   Expanded(
                       flex: 1,
-                      child: SizedBox(width: 1,)),
+                      child: SizedBox(
+                        width: 1,
+                      )),
                   Expanded(
                       flex: 8,
-                      child: Text("${item['ingredients']}".replaceAll('[', '').replaceAll(']', ''))),
+                      child: Text("${item['ingredients']}"
+                          .replaceAll('[', '')
+                          .replaceAll(']', ''))),
                 ],
               ),
 
@@ -710,18 +715,15 @@ class _InventoryListviewState extends State<InventoryListview> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                      flex: 6,
-                      child: Text("Storage method:\t")),
+                  Expanded(flex: 6, child: Text("Storage method:\t")),
                   Expanded(
                       flex: 1,
-                      child: SizedBox(width: 1,)),
-                  Expanded(
-                      flex: 8,
-                      child: Text("${item['storageMethod']}")),
+                      child: SizedBox(
+                        width: 1,
+                      )),
+                  Expanded(flex: 8, child: Text("${item['storageMethod']}")),
                 ],
               ),
-
             ],
           ),
           actions: <Widget>[
@@ -730,15 +732,15 @@ class _InventoryListviewState extends State<InventoryListview> {
                 setState(() {
                   item['currentQuantity'] = _counter;
                 });
-                  item['currentQuantity'] == 0
-                      ? showSnackBar(
-                          "Inventory Updated Successfully. ${item['name']} removed.",
-                          context)
-                      : showSnackBar(
-                          "Inventory Updated Successfully. ${item['currentQuantity']} ${item['name']} left.",
-                          context);
-                  await updateInventoryItem(fridgeId, item['addedDate'], item);
-                  Navigator.of(context).pop();
+                item['currentQuantity'] == 0
+                    ? showSnackBar(
+                        "Inventory Updated Successfully. ${item['name']} removed.",
+                        context)
+                    : showSnackBar(
+                        "Inventory Updated Successfully. ${item['currentQuantity']} ${item['name']} left.",
+                        context);
+                await updateInventoryItem(fridgeId, item['addedDate'], item);
+                Navigator.of(context).pop();
               },
               child: const Text('Save'),
             ),
@@ -747,7 +749,6 @@ class _InventoryListviewState extends State<InventoryListview> {
       },
     );
   }
-
 }
 
 class AddItemWidget extends StatelessWidget {
