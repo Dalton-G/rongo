@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:provider/provider.dart';
 import 'package:rongo/model/message.dart';
 import 'package:rongo/utils/theme/theme.dart';
+import 'package:rongo/provider/chat_provider.dart';
 
 class ChatPage extends StatefulWidget {
   final Object? currentUser;
@@ -19,7 +21,6 @@ class _ChatPageState extends State<ChatPage> {
   get currentUser => widget.currentUser;
   final date = DateTime.now();
   final TextEditingController _controller = TextEditingController();
-  final List<Message> _messages = [];
   final List<Map<String, dynamic>> _inventory = [];
   final model = GenerativeModel(
       model: 'gemini-1.5-flash', apiKey: dotenv.env['GEMINI_API_KEY']!);
@@ -56,7 +57,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  callGeminiModel() async {
+  callGeminiModel(BuildContext buildContext) async {
     var context =
         "Your name is Rongie. You are a friendly and helpful assistant that is always ready to help users with their cooking needs"
         "Your friend, $currentUser is asking you a question about cooking and recipe, please provide a helpful answer in a short and conversational manner."
@@ -71,17 +72,21 @@ class _ChatPageState extends State<ChatPage> {
         "Answer the user's prompt in the most simple and concise way possible, minimal word count is preferred while maintaining personality"
         "Your timezone is in Malaysia, and today's date is $date";
     try {
-      setState(() {
-        _messages.add(Message(text: _controller.text, isUser: true));
-        _isLoading = true;
-      });
+      setState(
+        () {
+          Provider.of<ChatProvider>(buildContext, listen: false)
+              .addMessage(Message(text: _controller.text.trim(), isUser: true));
+          _isLoading = true;
+        },
+      );
 
       final prompt = context + _controller.text.trim();
       final content = [Content.text(prompt)];
       final response = await model.generateContent(content);
 
       setState(() {
-        _messages.add(Message(text: response.text!, isUser: false));
+        Provider.of<ChatProvider>(buildContext, listen: false)
+            .addMessage(Message(text: response.text!, isUser: false));
         _isLoading = false;
       });
     } catch (e) {
@@ -91,6 +96,8 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final chatProvider = Provider.of<ChatProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -116,9 +123,9 @@ class _ChatPageState extends State<ChatPage> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _messages.length,
+              itemCount: chatProvider.messages.length,
               itemBuilder: (context, index) {
-                final Message message = _messages[index];
+                final Message message = chatProvider.messages[index];
                 return ListTile(
                   title: Align(
                     alignment: message.isUser
@@ -191,7 +198,7 @@ class _ChatPageState extends State<ChatPage> {
                           icon: const Icon(Icons.send),
                           onPressed: () {
                             if (_controller.text.isEmpty) return;
-                            callGeminiModel();
+                            callGeminiModel(context);
                             _controller.clear();
                             FocusScope.of(context).unfocus();
                           },
