@@ -191,7 +191,7 @@ class _NotesPageState extends State<NotesPage> {
           return AlertDialog(
             content: Text(sttProvider.speechText),
             actions: [
-              if (sttProvider.doneListening) ...[
+              if (sttProvider.doneListening & (sttProvider.speechText != "Failed to capture input, Please try again...")) ...[
                 TextButton(
                   onPressed: () {
                     setState(() {
@@ -212,7 +212,17 @@ class _NotesPageState extends State<NotesPage> {
                   },
                   child: Text("Done"),
                 ),
-              ],
+              ] else if (sttProvider.doneListening & (sttProvider.speechText == "Failed to capture input, Please try again..."))...[
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      sttProvider.stopListening();
+                      Navigator.pop(context);
+                    });
+                  },
+                  child: Text("Cancel"),
+                )
+                ]
             ],
           );
         });
@@ -248,6 +258,7 @@ class _NotesPageState extends State<NotesPage> {
       });
     } catch (exc) {
       print(exc);
+
       _setState(() {
         _isLoading = false;
       });

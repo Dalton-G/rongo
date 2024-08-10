@@ -23,21 +23,25 @@ class SttProvider extends ChangeNotifier {
       onStatus: (val) => {
         if (val == "done") {_doneListening = true, notifyListeners()}
       },
-      onError: (val) => {print('onError: $val'), stopListening()},
+      onError: (val) => {
+        print('onError: $val'),
+
+        _speechText = 'Failed to capture input, Please try again...',
+        print(_speechText),
+        notifyListeners(),
+        stopListening(),
+      },
     );
-    print(_speechAvailable);
   }
 
   startListening() {
     _speechText = 'Listening...';
     _doneListening = false;
     _isListening = true;
-    print(_doneListening);
     if (_speechAvailable) {
       _speechController.listen(
         onResult: (val) {
           _speechText = val.recognizedWords;
-          print(_speechText);
           notifyListeners();
         },
       );
