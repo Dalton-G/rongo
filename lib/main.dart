@@ -9,11 +9,9 @@ import 'package:rongo/routes.dart';
 import 'package:rongo/screen/onboarding/onboarding.dart';
 import 'package:rongo/utils/theme/theme.dart';
 
-import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
