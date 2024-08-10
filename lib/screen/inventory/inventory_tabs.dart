@@ -8,7 +8,10 @@ import 'inventory_category.dart';
 import 'inventory_listview.dart';
 
 class InventoryTabs extends StatefulWidget {
-  const InventoryTabs({super.key});
+  final InventoryFilter inventoryFilter;
+  final String fridgeId;
+
+  const InventoryTabs({super.key,required this.inventoryFilter,required this.fridgeId});
 
   @override
   State<InventoryTabs> createState() => _InventoryTabsState();
@@ -17,12 +20,9 @@ class InventoryTabs extends StatefulWidget {
 class _InventoryTabsState extends State<InventoryTabs> {
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as Map;
-    InventoryFilter inventoryFilter = args['InventoryFilter'];
-    String fridgeId = args['fridgeId'];
 
     return DefaultTabController(
-      initialIndex: inventoryFilter.index,
+      initialIndex: widget.inventoryFilter.index,
       length: InventoryFilter.values.length,
       child: Scaffold(
         appBar: AppBar(
@@ -51,7 +51,7 @@ class _InventoryTabsState extends State<InventoryTabs> {
         body: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
               .collection('fridges')
-              .doc(fridgeId)
+              .doc(widget.fridgeId)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -74,19 +74,19 @@ class _InventoryTabsState extends State<InventoryTabs> {
               children: [
                 InventoryCategory(
                     inventory: inventory,
-                    fridgeId: fridgeId,
+                    fridgeId: widget.fridgeId,
                     inventoryFilter: InventoryFilter.total),
                 InventoryListview(
                     inventory: inventory,
-                    fridgeId: fridgeId,
+                    fridgeId: widget.fridgeId,
                     inventoryFilter: InventoryFilter.newAdded),
                 InventoryListview(
                     inventory: inventory,
-                    fridgeId: fridgeId,
+                    fridgeId: widget.fridgeId,
                     inventoryFilter: InventoryFilter.expiredSoon),
                 InventoryListview(
                     inventory: inventory,
-                    fridgeId: fridgeId,
+                    fridgeId: widget.fridgeId,
                     inventoryFilter: InventoryFilter.expired),
               ],
             );
