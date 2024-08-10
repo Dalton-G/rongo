@@ -92,6 +92,52 @@ class AppTheme {
     ),
   );
 
+  static TextStyle recipePageH1 = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 24,
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  static TextStyle recipePageMiniText1 = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 12,
+      color: Colors.grey[600],
+    ),
+  );
+
+  static TextStyle recipePageH2 = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 18,
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  static TextStyle recipePageH3 = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 16,
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  static TextStyle recipePageB1 = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 14,
+      color: Colors.black,
+    ),
+  );
+
+  static TextStyle recipePageB1Bold = GoogleFonts.nunito(
+    textStyle: TextStyle(
+      fontSize: 14,
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
   // JL
   static const mainGreen = Color(0xff25995C);
   static const backgroundWhite = Color(0xffFAFAFA);
