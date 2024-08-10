@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rongo/screen/onboarding/onboardingpage1.dart';
 import 'package:rongo/screen/onboarding/onboardingpage2.dart';
 import 'package:rongo/screen/onboarding/onboardingpage3.dart';
 import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/routes.dart';
 import 'package:rongo/widgets/button.dart';
+
+import '../../provider/stt_provider.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -37,6 +40,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
     //page dimensions
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    Provider.of<SttProvider>(context, listen: false)
+        .initialize();
 
     return Scaffold(
       body: Stack(

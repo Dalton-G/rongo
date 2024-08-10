@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class ModifyQuantity extends StatefulWidget {
   int currentQuantity;
   String name;
-
+  MainAxisAlignment mainAxisAlignment_;
   var onQuantityChanged;
 
   @override
@@ -14,7 +14,9 @@ class ModifyQuantity extends StatefulWidget {
       {super.key,
       required this.currentQuantity,
       required this.name,
-      required this.onQuantityChanged});
+      required this.onQuantityChanged,
+      this.mainAxisAlignment_ = MainAxisAlignment.center,
+      });
 }
 
 class _ModifyQuantityState extends State<ModifyQuantity> {
@@ -44,18 +46,31 @@ class _ModifyQuantityState extends State<ModifyQuantity> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: widget.mainAxisAlignment_,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        IconButton(
-          icon: const Icon(Icons.remove),
-          onPressed: _decrementCounter,
+        Container(
+          width: 35,
+          height: 20,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(),
+            icon: const Icon(Icons.remove, size: 20,),
+            onPressed: _decrementCounter,
+          ),
         ),
         Text('$_counter',
             // style: TextStyle(fontSize: 20)
         ),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: _incrementCounter,
+        Container(
+          width: 35,
+          height: 20,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(),
+            icon: const Icon(Icons.add, size: 20,),
+            onPressed: _incrementCounter,
+          ),
         ),
       ],
     );

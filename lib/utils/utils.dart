@@ -17,8 +17,32 @@ Map<String, IconData> variableIcon = {
   "Halal": Icons.restaurant,
 };
 
-enum InventoryCategories { Fruits, Vegetables, Meat, Fish, Condiments, Leftovers, Others }
+enum InventoryCategories {
+  Fruits,
+  Vegetables,
+  Meat,
+  Fish,
+  Condiments,
+  Leftovers,
+  Others
+}
+
 enum InventoryFilter { total, newAdded, expiredSoon, expired }
+
+extension InventoryFilterExtension on InventoryFilter {
+  String get displayName {
+    switch (this) {
+      case InventoryFilter.total:
+        return 'All';
+      case InventoryFilter.newAdded:
+        return 'New';
+      case InventoryFilter.expiredSoon:
+        return 'Expiring';
+      case InventoryFilter.expired:
+        return 'Expired';
+    }
+  }
+}
 
 final model = GenerativeModel(
   model: 'gemini-1.5-flash-001',
@@ -36,7 +60,8 @@ showSnackBar(String message, context, {durationSeconds = 1}) {
   ScaffoldMessenger.of(context).showSnackBar(snackbar);
 }
 
-Future<bool> showBackDialog(String confirmation, context, {yes = "Leave", no = "Nevermind", close = true}) async {
+Future<bool> showBackDialog(String confirmation, context,
+    {yes = "Leave", no = "Nevermind", close = true}) async {
   Completer<bool> completer = Completer<bool>();
 
   showDialog(

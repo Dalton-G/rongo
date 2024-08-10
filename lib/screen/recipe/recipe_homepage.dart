@@ -84,13 +84,15 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
 
     String category = mealType.name;
     String unsplashKey = dotenv.env['UNSPLASH_ACCESS_KEY']!;
+
+    // Updated prompt to request multiple recipes with varying difficulty levels
     var prompt =
-        "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
-        "Please suggest an appropriate recipe and return it in a JSON format."
-        "The JSON for recipe must strictly follow this data schema: {name: string, description: string, cookingTime: string, tags: List<String>}"
-        "Make sure to add the origin of food in the tags."
-        "Do not reply any additional information other than the recipe JSON."
-        "Do not include the formatting in the JSON response.";
+        "The user $currentUser is requesting $category recipes based on their inventory which includes $_inventory."
+        "Please suggest 2-3 recipes of varying difficulty levels and return them in a JSON format."
+        "The JSON for each recipe must strictly follow this data schema: {name: string, description: string, cookingTime: string, tags: List<String>}"
+        "Include the origin of food in the tags."
+        "Do not reply with any additional information other than the recipes in JSON format."
+        "Do not include formatting in the JSON response.";
     final content = [Content.text(prompt)];
 
     try {
@@ -99,7 +101,10 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         throw FormatException('Empty response from the model - recipe');
       }
 
-      final map = jsonDecode(response.text!) as Map<String, dynamic>;
+      final List<dynamic> recipesList =
+          jsonDecode(response.text!) as List<dynamic>;
+      for (final recipeData in recipesList) {
+        final map = recipeData as Map<String, dynamic>;
 
       // Fetch image from Unsplash API
       String foodName = map['name'];
