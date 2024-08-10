@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:rongo/firestore.dart';
 import 'package:rongo/utils/theme/theme.dart';
 
+import '../../routes.dart';
 import '../../utils/utils.dart';
 
 class FridgePage extends StatefulWidget {
@@ -103,7 +104,7 @@ class _FridgePageState extends State<FridgePage> {
               Positioned.fill(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/inventory-tabs',
+                    Navigator.pushNamed(context, Routes.inventoryTabs,
                         arguments: {
                           'InventoryFilter' : InventoryFilter.total,
                           'fridgeId' : widget.currentUser?['fridgeId'],

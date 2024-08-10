@@ -4,6 +4,7 @@ import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/widgets/containers.dart';
 import 'package:rongo/widgets/stats.dart';
 
+import '../../routes.dart';
 import '../../utils/utils.dart';
 
 class HomePageContent extends StatefulWidget {
@@ -27,7 +28,6 @@ class _HomePageContentState extends State<HomePageContent> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body:
-
       StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
               .collection('fridges')
@@ -100,7 +100,7 @@ class _HomePageContentState extends State<HomePageContent> {
             return Stack(
           //whatever code is written first is on the bottom most
 
-//background image
+            //background image
           children: [
             Image.asset(
               'lib/images/homepagebackground.png',
@@ -179,7 +179,16 @@ class _HomePageContentState extends State<HomePageContent> {
                             'lib/images/tomato.png',
                             fit: BoxFit.contain,
                           ),
-                        ),
+                            onTap: () {
+                              Navigator.pushNamed(
+                                  context, Routes.inventoryTabs,
+                                  arguments: {
+                                    'InventoryFilter':
+                                    InventoryFilter.expiredSoon,
+                                    'fridgeId':
+                                    widget.currentUser?['fridgeId'],
+                                  });
+                            }),
 
                         //second for fruits
                         SquareContainer(
@@ -191,7 +200,16 @@ class _HomePageContentState extends State<HomePageContent> {
                             'lib/images/avocado.png',
                             fit: BoxFit.contain,
                           ),
-                        ),
+                            onTap: () {
+                              Navigator.pushNamed(
+                                  context, Routes.inventoryTabs,
+                                  arguments: {
+                                    'InventoryFilter':
+                                    InventoryFilter.expiredSoon,
+                                    'fridgeId':
+                                    widget.currentUser?['fridgeId'],
+                                  });
+                            }),
 
                         //second for fruits
                         SquareContainer(
@@ -203,7 +221,16 @@ class _HomePageContentState extends State<HomePageContent> {
                             'lib/images/food.png',
                             fit: BoxFit.contain,
                           ),
-                        ),
+                          onTap: () {
+                                  Navigator.pushNamed(
+                                      context, Routes.inventoryTabs,
+                                      arguments: {
+                                        'InventoryFilter':
+                                            InventoryFilter.expiredSoon,
+                                        'fridgeId':
+                                            widget.currentUser?['fridgeId'],
+                                      });
+                                }),
                       ],
                     ),
 
@@ -257,7 +284,7 @@ class _HomePageContentState extends State<HomePageContent> {
                     children: [
                       GestureDetector(
                         onTap: (() {
-                          Navigator.pushNamed(context, '/inventory-tabs',
+                          Navigator.pushNamed(context, Routes.inventoryTabs,
                               arguments: {
                                 'InventoryFilter': InventoryFilter.total,
                                 'fridgeId': widget.currentUser?['fridgeId'],
@@ -277,7 +304,7 @@ class _HomePageContentState extends State<HomePageContent> {
                       ),
                       GestureDetector(
                         onTap: (() {
-                          Navigator.pushNamed(context, '/inventory-tabs',
+                          Navigator.pushNamed(context, Routes.inventoryTabs,
                               arguments: {
                                 'InventoryFilter': InventoryFilter.newAdded,
                                 'fridgeId': widget.currentUser?['fridgeId'],
@@ -303,7 +330,7 @@ class _HomePageContentState extends State<HomePageContent> {
                     children: [
                       GestureDetector(
                         onTap: (() {
-                          Navigator.pushNamed(context, '/inventory-tabs',
+                          Navigator.pushNamed(context, Routes.inventoryTabs,
                               arguments: {
                                 'InventoryFilter': InventoryFilter.expiredSoon,
                                 'fridgeId': widget.currentUser?['fridgeId'],
@@ -323,7 +350,7 @@ class _HomePageContentState extends State<HomePageContent> {
                       ),
                       GestureDetector(
                         onTap: (() {
-                          Navigator.pushNamed(context, '/inventory-tabs',
+                          Navigator.pushNamed(context, Routes.inventoryTabs,
                               arguments: {
                                 'InventoryFilter': InventoryFilter.expired,
                                 'fridgeId': widget.currentUser?['fridgeId'],

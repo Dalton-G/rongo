@@ -22,9 +22,9 @@ class InventoryListview extends StatefulWidget {
 
   const InventoryListview(
       {super.key,
-      this.inventory,
-      this.inventoryFilter,
-      this.fridgeId,
+      required this.inventory,
+      required this.inventoryFilter,
+      required this.fridgeId,
       this.currentCategory});
 
   @override

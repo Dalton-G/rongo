@@ -9,6 +9,7 @@ import 'package:rongo/screen/recipe/recipe_homepage.dart';
 import 'package:rongo/screen/scan_and_add/scanned_item_list.dart';
 import 'package:rongo/screen/scan_and_add/scanner.dart';
 import 'package:rongo/screen/notes/notespage.dart';
+import 'package:rongo/utils/utils.dart';
 
 class Routes {
   Routes._();
@@ -32,8 +33,35 @@ class Routes {
     notespage: (BuildContext context) => const NotesPage(),
     scannedItemList: (BuildContext context) => const ScannedItemList(),
     inventoryCategory: (BuildContext context) => const InventoryCategory(),
-    inventoryTabs: (BuildContext context) => const InventoryTabs(),
-    inventoryListView: (BuildContext context) => const InventoryListview(),
     chat: (BuildContext context) => const ChatPage(),
   };
+
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case inventoryListView:
+        var args = settings.arguments as Map;
+        List inventory = args['inventory'];
+        String fridgeId = args['fridgeId'];
+        InventoryFilter inventoryFilter = args['inventoryFilter'];
+        String? currentCategory = args['currentCategory'];
+        return MaterialPageRoute(builder: (_) => InventoryListview(
+          inventory: inventory,
+          fridgeId: fridgeId,
+          inventoryFilter: inventoryFilter,
+          currentCategory:currentCategory,
+        ));
+      case inventoryTabs:
+        var args = settings.arguments as Map;
+        InventoryFilter inventoryFilter = args['InventoryFilter'];
+        String fridgeId = args['fridgeId'];
+        return MaterialPageRoute(builder: (_) => InventoryTabs(inventoryFilter:inventoryFilter,fridgeId:fridgeId));
+      default:
+        return MaterialPageRoute(
+            builder: (_) => Scaffold(
+              body: Center(
+                  child: Text('No route defined for ${settings.name}')),
+            ));
+    }
+  }
+
 }
