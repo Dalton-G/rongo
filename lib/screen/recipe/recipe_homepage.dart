@@ -64,9 +64,15 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RecipeDetailsPage(recipe: recipe),
+        builder: (context) =>
+            RecipeDetailsPage(recipe: recipe, currentUser: currentUser),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   Future<void> generateRecipe(MealType mealType) async {
@@ -115,18 +121,40 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
           "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
           "You may generate the ingredients list based on items in the inventory and additional items that are needed but isn't present in the user's inventory."
           "The recipe you have recommended is $foodName. As such, you must generate the ingredients needed for this dish"
-          "The JSON for ingredients must strictly follow this data schema: {\"ingredients\": Map<String, String>, \"missingIngredients\": Map<String, String>}"
+          "The JSON for ingredients must strictly follow this data schema: {\"ingredients\": Map<String, String>, \"nutrition\": Map<String, String>}, \"allergens\": List<String>}"
           "The first String is the ingredient name and the second String is the quantity. You may include measurements unit in the quantity"
-          "Do not reply any additional information other than the ingredients JSON."
+          "The nutrition is the nutritional information of the recipe. The key is the nutritional information and the value is the quantity."
+          "The allergens is the list of allergens in the recipe."
+          "Do not reply any additional information other than purely the JSON."
           "Do not include the formatting in the JSON response.";
       final ingredientContent = [Content.text(ingredientPrompt)];
       final ingredientResponse = await model.generateContent(ingredientContent);
       if (ingredientResponse.text == null || ingredientResponse.text!.isEmpty) {
         throw FormatException('Empty response from the model - ingredients');
       }
-
       final ingredientMap =
           jsonDecode(ingredientResponse.text!) as Map<String, dynamic>;
+
+      // Fetch Instructions from Gemini API (seperately due to token limit)
+      var instructionPrompt =
+          "The user $currentUser is requesting for a $category recipe based on their inventory which includes $_inventory."
+          "You need to generate the instructions based on the recipe you have recommended."
+          "The recipe you have recommended is $foodName. As such, you must generate the instructions needed for this dish"
+          "The ingredients you have recommended are $ingredientMap, so follow these ingredients strictly."
+          "However, your instruction strictly must never involve the ingredients that are not listed in the ingredients JSON"
+          "The JSON for instructions must strictly follow this data schema: {\"instructions\": Map<String, String>}"
+          "The key is the step number in this format (Step 1, Step 2, Step 3, etc) and the value is the instruction for that step."
+          "Do not reply any additional information other than the instructions JSON."
+          "Do not include the formatting in the JSON response.";
+      final instructionContent = [Content.text(instructionPrompt)];
+      final instructionResponse =
+          await model.generateContent(instructionContent);
+      if (instructionResponse.text == null ||
+          instructionResponse.text!.isEmpty) {
+        throw FormatException('Empty response from the model - instructions');
+      }
+      final instructionMap =
+          jsonDecode(instructionResponse.text!) as Map<String, dynamic>;
 
       final recipe = Recipe(
         name: map['name'],
@@ -135,8 +163,9 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         cookingTime: map['cookingTime'],
         tags: List<String>.from(map['tags']),
         ingredients: Map<String, String>.from(ingredientMap['ingredients']),
-        missingIngredients:
-            Map<String, String>.from(ingredientMap['missingIngredients']),
+        instructions: Map<String, String>.from(instructionMap['instructions']),
+        nutritions: Map<String, String>.from(ingredientMap['nutrition']),
+        allergens: List<String>.from(ingredientMap['allergens']),
       );
 
       // Add the new recipe to the list
