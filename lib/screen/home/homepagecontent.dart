@@ -22,13 +22,11 @@ class _HomePageContentState extends State<HomePageContent> {
   @override
   Widget build(BuildContext context) {
     //page dimensions
-
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body:
-      StreamBuilder<DocumentSnapshot>(
+      body: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
               .collection('fridges')
               .doc(fridgeId)
@@ -73,9 +71,13 @@ class _HomePageContentState extends State<HomePageContent> {
 
                 // Check if the expiryDate is within the next 24 hours
                 if (expiryDate.isAfter(now) && expiryDate.isBefore(tomorrow)) {
-                  if (item['category'] == 'Vegetables') vegetableBestConsumeByToday += item['currentQuantity'] as int;
-                  if (item['category'] == 'Fruits') fruitBestConsumeByToday += item['currentQuantity'] as int;
-                  if (item['category'] == 'Meat') MeatBestConsumeByToday += item['currentQuantity'] as int;
+                  if (item['category'] == 'Vegetables')
+                    vegetableBestConsumeByToday +=
+                        item['currentQuantity'] as int;
+                  if (item['category'] == 'Fruits')
+                    fruitBestConsumeByToday += item['currentQuantity'] as int;
+                  if (item['category'] == 'Meat')
+                    MeatBestConsumeByToday += item['currentQuantity'] as int;
                 }
 
                 // Check if the expiryDate is within the next 7 days
@@ -91,137 +93,93 @@ class _HomePageContentState extends State<HomePageContent> {
               }
 
               // Check if the year and month match the current year and month
-                if (addedDate.year == currentYear &&
-                    addedDate.month == currentMonth) {
-                  addedThisMonth++;
-                }
+              if (addedDate.year == currentYear &&
+                  addedDate.month == currentMonth) {
+                addedThisMonth++;
+              }
             }
 
             return Stack(
-          //whatever code is written first is on the bottom most
-
-            //background image
-          children: [
-            Image.asset(
-              'lib/images/homepagebackground.png',
-            ),
-
-            //white overlay
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                height: screenHeight * 0.55,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(25),
-                    topLeft: Radius.circular(25),
-                  ),
+              //background image
+              children: [
+                Image.asset(
+                  'lib/images/homepagebackground.png',
                 ),
-              ),
-            ),
 
-            //search bar
-
-            Positioned(
-              right: screenWidth * 0.07,
-              left: screenWidth * 0.07,
-              top: screenHeight * 0.05,
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: AppTheme.bottomLightShadow),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search...',
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: AppTheme.mainGreen,
+                //white overlay
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    height: screenHeight * 0.55,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(25),
+                        topLeft: Radius.circular(25),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
 
-            //green container
-            Positioned(
-              left: screenWidth * 0.07,
-              top: screenHeight * 0.15,
-              right: screenWidth * 0.07,
-              child: Container(
-                height: 180,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color: AppTheme.mainGreen,
+                //search bar
+
+                Positioned(
+                  right: screenWidth * 0.07,
+                  left: screenWidth * 0.07,
+                  top: screenHeight * 0.05,
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: AppTheme.bottomLightShadow),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search...',
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppTheme.mainGreen,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+                //green container
+                Positioned(
+                  left: screenWidth * 0.07,
+                  top: screenHeight * 0.15,
+                  right: screenWidth * 0.07,
+                  child: Container(
+                    height: 180,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      color: AppTheme.mainGreen,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        //three boxes inside
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            //three boxes inside
 
-                        //first for vegetables
-                        SquareContainer(
-                          height: 80,
-                          width: 80,
-                          backgroundColor: Colors.white,
-                          roundedCorner: 25.0,
-                          child: Image.asset(
-                            'lib/images/tomato.png',
-                            fit: BoxFit.contain,
-                          ),
-                            onTap: () {
-                              Navigator.pushNamed(
-                                  context, Routes.inventoryTabs,
-                                  arguments: {
-                                    'InventoryFilter':
-                                    InventoryFilter.expiredSoon,
-                                    'fridgeId':
-                                    widget.currentUser?['fridgeId'],
-                                  });
-                            }),
-
-                        //second for fruits
-                        SquareContainer(
-                          height: 80,
-                          width: 80,
-                          backgroundColor: Colors.white,
-                          roundedCorner: 25.0,
-                          child: Image.asset(
-                            'lib/images/avocado.png',
-                            fit: BoxFit.contain,
-                          ),
-                            onTap: () {
-                              Navigator.pushNamed(
-                                  context, Routes.inventoryTabs,
-                                  arguments: {
-                                    'InventoryFilter':
-                                    InventoryFilter.expiredSoon,
-                                    'fridgeId':
-                                    widget.currentUser?['fridgeId'],
-                                  });
-                            }),
-
-                        //second for fruits
-                        SquareContainer(
-                          height: 80,
-                          width: 80,
-                          backgroundColor: Colors.white,
-                          roundedCorner: 25.0,
-                          child: Image.asset(
-                            'lib/images/food.png',
-                            fit: BoxFit.contain,
-                          ),
-                          onTap: () {
+                            //first for vegetables
+                            SquareContainer(
+                                height: 80,
+                                width: 80,
+                                backgroundColor: Colors.white,
+                                roundedCorner: 25.0,
+                                child: Image.asset(
+                                  'lib/images/tomato.png',
+                                  fit: BoxFit.contain,
+                                ),
+                                onTap: () {
                                   Navigator.pushNamed(
                                       context, Routes.inventoryTabs,
                                       arguments: {
@@ -231,151 +189,194 @@ class _HomePageContentState extends State<HomePageContent> {
                                             widget.currentUser?['fridgeId'],
                                       });
                                 }),
+
+                            //second for fruits
+                            SquareContainer(
+                                height: 80,
+                                width: 80,
+                                backgroundColor: Colors.white,
+                                roundedCorner: 25.0,
+                                child: Image.asset(
+                                  'lib/images/avocado.png',
+                                  fit: BoxFit.contain,
+                                ),
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                      context, Routes.inventoryTabs,
+                                      arguments: {
+                                        'InventoryFilter':
+                                            InventoryFilter.expiredSoon,
+                                        'fridgeId':
+                                            widget.currentUser?['fridgeId'],
+                                      });
+                                }),
+
+                            //second for fruits
+                            SquareContainer(
+                                height: 80,
+                                width: 80,
+                                backgroundColor: Colors.white,
+                                roundedCorner: 25.0,
+                                child: Image.asset(
+                                  'lib/images/food.png',
+                                  fit: BoxFit.contain,
+                                ),
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                      context, Routes.inventoryTabs,
+                                      arguments: {
+                                        'InventoryFilter':
+                                            InventoryFilter.expiredSoon,
+                                        'fridgeId':
+                                            widget.currentUser?['fridgeId'],
+                                      });
+                                }),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10),
+                        //Text Row
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            SizedBox(
+                              width: 80,
+                              child: Text(
+                                "$vegetableBestConsumeByToday vegetables best used today",
+                                style: AppTheme.whiteSubtitleText,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 80,
+                              child: Text(
+                                "$fruitBestConsumeByToday fruits best eaten today",
+                                style: AppTheme.whiteSubtitleText,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 80,
+                              child: Text(
+                                "$MeatBestConsumeByToday Meats best consumed today",
+                                style: AppTheme.whiteSubtitleText,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
-
-                    const SizedBox(height: 10),
-                    //Text Row
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SizedBox(
-                          width: 80,
-                          child: Text(
-                            "$vegetableBestConsumeByToday vegetables best used today",
-                            style: AppTheme.whiteSubtitleText,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 80,
-                          child: Text(
-                            "$fruitBestConsumeByToday fruits best eaten today",
-                            style: AppTheme.whiteSubtitleText,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 80,
-                          child: Text(
-                            "$MeatBestConsumeByToday Meats best consumed today",
-                            style: AppTheme.whiteSubtitleText,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            // Analysis squares (2x2 grid)
-            Positioned(
-              left: screenWidth * 0.07,
-              right: screenWidth * 0.07,
-              bottom: screenHeight * 0.06,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Row(
+                // Analysis squares (2x2 grid)
+                Positioned(
+                  left: screenWidth * 0.07,
+                  right: screenWidth * 0.07,
+                  bottom: screenHeight * 0.06,
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      GestureDetector(
-                        onTap: (() {
-                          Navigator.pushNamed(context, Routes.inventoryTabs,
-                              arguments: {
-                                'InventoryFilter': InventoryFilter.total,
-                                'fridgeId': widget.currentUser?['fridgeId'],
-                              });
-                        }),
-                        child: SquareContainer(
-                          withPadding: false,
-                          backgroundColor: Colors.white,
-                          height: 130,
-                          width: 130,
-                          roundedCorner: 25,
-                          child: Stats(
-                            stats: "total",
-                            num: totalInventory,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, Routes.inventoryTabs,
+                                  arguments: {
+                                    'InventoryFilter': InventoryFilter.total,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
+                                  });
+                            }),
+                            child: SquareContainer(
+                              withPadding: false,
+                              backgroundColor: Colors.white,
+                              height: 130,
+                              width: 130,
+                              roundedCorner: 25,
+                              child: Stats(
+                                stats: "total",
+                                num: totalInventory,
+                              ),
+                            ),
                           ),
-                        ),
+                          GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, Routes.inventoryTabs,
+                                  arguments: {
+                                    'InventoryFilter': InventoryFilter.newAdded,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
+                                  });
+                            }),
+                            child: SquareContainer(
+                              withPadding: false,
+                              backgroundColor: Colors.white,
+                              height: 130,
+                              width: 130,
+                              roundedCorner: 25,
+                              child: Stats(
+                                stats: "new",
+                                num: addedThisMonth,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      GestureDetector(
-                        onTap: (() {
-                          Navigator.pushNamed(context, Routes.inventoryTabs,
-                              arguments: {
-                                'InventoryFilter': InventoryFilter.newAdded,
-                                'fridgeId': widget.currentUser?['fridgeId'],
-                              });
-                        }),
-                        child: SquareContainer(
-                          withPadding: false,
-                          backgroundColor: Colors.white,
-                          height: 130,
-                          width: 130,
-                          roundedCorner: 25,
-                          child: Stats(
-                            stats: "new",
-                            num: addedThisMonth,
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, Routes.inventoryTabs,
+                                  arguments: {
+                                    'InventoryFilter':
+                                        InventoryFilter.expiredSoon,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
+                                  });
+                            }),
+                            child: SquareContainer(
+                              withPadding: false,
+                              backgroundColor: Colors.white,
+                              height: 130,
+                              width: 130,
+                              roundedCorner: 25,
+                              child: Stats(
+                                stats: "soon",
+                                num: expiringSoonCount,
+                              ),
+                            ),
                           ),
-                        ),
+                          GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, Routes.inventoryTabs,
+                                  arguments: {
+                                    'InventoryFilter': InventoryFilter.expired,
+                                    'fridgeId': widget.currentUser?['fridgeId'],
+                                  });
+                            }),
+                            child: SquareContainer(
+                              withPadding: false,
+                              backgroundColor: Colors.white,
+                              height: 130,
+                              width: 130,
+                              roundedCorner: 25,
+                              child: Stats(
+                                stats: "expired",
+                                num: expiredCount,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      GestureDetector(
-                        onTap: (() {
-                          Navigator.pushNamed(context, Routes.inventoryTabs,
-                              arguments: {
-                                'InventoryFilter': InventoryFilter.expiredSoon,
-                                'fridgeId': widget.currentUser?['fridgeId'],
-                              });
-                        }),
-                        child: SquareContainer(
-                          withPadding: false,
-                          backgroundColor: Colors.white,
-                          height: 130,
-                          width: 130,
-                          roundedCorner: 25,
-                          child: Stats(
-                            stats: "soon",
-                            num: expiringSoonCount,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: (() {
-                          Navigator.pushNamed(context, Routes.inventoryTabs,
-                              arguments: {
-                                'InventoryFilter': InventoryFilter.expired,
-                                'fridgeId': widget.currentUser?['fridgeId'],
-                              });
-                        }),
-                        child: SquareContainer(
-                          withPadding: false,
-                          backgroundColor: Colors.white,
-                          height: 130,
-                          width: 130,
-                          roundedCorner: 25,
-                          child: Stats(
-                            stats: "expired",
-                            num: expiredCount,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      }),
+                ),
+              ],
+            );
+          }),
     );
   }
 }
