@@ -9,6 +9,7 @@ import 'package:rongo/routes.dart';
 import 'package:rongo/screen/onboarding/onboarding.dart';
 import 'package:rongo/utils/theme/theme.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");

@@ -596,22 +596,132 @@ class _InventoryListviewState extends State<InventoryListview> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Modify Quantity'),
+          scrollable: true,
+          title: Text(item['name']),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("How many ${item['name']} left after consumed."),
+              // Text("How many ${item['name']} left after consumed."),
+              // const SizedBox(
+              //   height: 30,
+              // ),
+              // ModifyQuantity(
+              //   onQuantityChanged: (int newQuantity) {
+              //     _counter = newQuantity;
+              //   },
+              //   currentQuantity: item['currentQuantity'],
+              //   name: item['name'],
+              // ),
+
               const SizedBox(
-                height: 30,
+                height: 10,
               ),
-              ModifyQuantity(
-                onQuantityChanged: (int newQuantity) {
-                  _counter = newQuantity;
-                },
-                currentQuantity: item['currentQuantity'],
-                name: item['name'],
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                      flex: 6,
+                      child: Text("Quantity left:\t")),
+                  Expanded(
+                      flex: 1,
+                      child: SizedBox(width: 1,)),
+                  Expanded(
+                      flex: 8,
+                      child: ModifyQuantity(
+                        mainAxisAlignment_: MainAxisAlignment.start,
+                      onQuantityChanged: (int newQuantity) {
+                        _counter = newQuantity;
+                      },
+                      currentQuantity: item['currentQuantity'],
+                      name: item['name'],
+                    ),
+                  ),
+                ],
               ),
+
+              const SizedBox(
+                height: 5,
+              ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                      flex: 6,
+                      child: Text("Net price:\t")),
+                  Expanded(
+                      flex: 1,
+                      child: SizedBox(width: 1,)),
+                  Expanded(
+                      flex: 8,
+                      child: Text("Rm ${item['netPrice']} each")),
+                ],
+              ),
+
+              const SizedBox(
+                height: 5,
+              ),
+
+              if (item['allergen'] != "Unknown")...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                        flex: 6,
+                        child: Text("Allergen:\t")),
+                    Expanded(
+                        flex: 1,
+                        child: SizedBox(width: 1,)),
+                    Expanded(
+                        flex: 8,
+                        child: Text("${item['allergen']}".replaceAll('[', '').replaceAll(']', ''))),
+                  ],
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+              ],
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                      flex: 6,
+                      child: Text("Ingredients:\t")),
+                  Expanded(
+                      flex: 1,
+                      child: SizedBox(width: 1,)),
+                  Expanded(
+                      flex: 8,
+                      child: Text("${item['ingredients']}".replaceAll('[', '').replaceAll(']', ''))),
+                ],
+              ),
+
+              const SizedBox(
+                height: 5,
+              ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                      flex: 6,
+                      child: Text("Storage method:\t")),
+                  Expanded(
+                      flex: 1,
+                      child: SizedBox(width: 1,)),
+                  Expanded(
+                      flex: 8,
+                      child: Text("${item['storageMethod']}")),
+                ],
+              ),
+
             ],
           ),
           actions: <Widget>[
