@@ -622,7 +622,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
-                      flex: 4,
+                      flex: 6,
                       child: Text("Quantity left:\t")),
                   Expanded(
                       flex: 1,
@@ -650,7 +650,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                      flex: 4,
+                      flex: 6,
                       child: Text("Net price:\t")),
                   Expanded(
                       flex: 1,
@@ -671,7 +671,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                        flex: 4,
+                        flex: 6,
                         child: Text("Allergen:\t")),
                     Expanded(
                         flex: 1,
@@ -691,7 +691,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                      flex: 4,
+                      flex: 6,
                       child: Text("Ingredients:\t")),
                   Expanded(
                       flex: 1,
@@ -711,7 +711,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                      flex: 4,
+                      flex: 6,
                       child: Text("Storage method:\t")),
                   Expanded(
                       flex: 1,
