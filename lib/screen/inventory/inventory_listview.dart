@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../provider/stt_provider.dart';
 import '../../resources/CRUD/fridge.dart';
 import '../../utils/theme/theme.dart';
 import '../../utils/utils.dart';
-import 'modify_quantity.dart';
-import '../home/homepage.dart';
+import '../../widgets/add_item.dart';
+import '../../widgets/cancel_speech_icon.dart';
+import '../../widgets/modify_quantity.dart';
 
 class InventoryListview extends StatefulWidget {
   final List? inventory;
@@ -33,7 +33,6 @@ class InventoryListview extends StatefulWidget {
 
 class _InventoryListviewState extends State<InventoryListview> {
   int _counter = 0;
-  bool recording = false;
   int editingWidgetIndex = -1;
 
   bool _updatingInventory = false;
@@ -51,11 +50,21 @@ class _InventoryListviewState extends State<InventoryListview> {
 
   get currentCategory => widget.currentCategory;
 
+
+  void _deleteItem(Map<String,dynamic> item){
+    item['currentQuantity'] = 0;
+    updateInventoryItem(
+        fridgeId, item['addedDate'], item);
+    showSnackBar(
+        "Consumption Updated Successfully. No more ${item['name']}.",
+        context);
+  }
+
   @override
   Widget build(BuildContext context) {
     List? desiredCategory = [];
     String? nullPrompting;
-    bool inventoryListNotEmpty = false;
+    bool inventoryNotEmpty = false;
     bool needAppBar = false;
 
     DateTime now = DateTime.now();
@@ -119,12 +128,11 @@ class _InventoryListviewState extends State<InventoryListview> {
                       itemCount: desiredCategory.length + 1,
                       itemBuilder: (context, index) {
                         if (index == (desiredCategory!.length)) {
-                          if (inventoryListNotEmpty) {
+                          if (inventoryNotEmpty)
                             return const AddItemWidget();
-                          } else {
+                          else
                             return AddItemWidgetWithPrompt(
                                 nullPrompting: nullPrompting!);
-                          }
                         }
 
                         var item = desiredCategory[index];
@@ -141,7 +149,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                         }
 
                         if (item['currentQuantity'] > 0) {
-                          inventoryListNotEmpty = true;
+                          inventoryNotEmpty = true;
                         }
 
                         return Padding(
@@ -154,12 +162,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                                 SlidableAction(
                                   onPressed: (context) {
                                     setState(() {
-                                      item['currentQuantity'] = 0;
-                                      updateInventoryItem(
-                                          fridgeId, item['addedDate'], item);
-                                      showSnackBar(
-                                          "Consumption Updated Successfully. No more ${item['name']}.",
-                                          context);
+                                      _deleteItem(item);
                                     });
                                   },
                                   icon: Icons.delete,
@@ -398,23 +401,14 @@ class _InventoryListviewState extends State<InventoryListview> {
                 Positioned(
                   bottom: 100,
                   width: MediaQuery.of(context).size.width,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Container(
-                      decoration: AppTheme.widgetDeco(),
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            sttProvider.speechText,
-                            style: const TextStyle(fontSize: 22.0),
-                          ),
-                          // Text(
-                          //   'Confidence: ${(_confidence * 100.0).toStringAsFixed(1)}%',
-                          //   style: TextStyle(fontSize: 14.0),
-                          // ),
-                        ],
+                  child: Container(
+                    decoration: AppTheme.widgetDeco(),
+                    padding: const EdgeInsets.all(20),
+                    margin: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Center(
+                      child: Text(
+                        sttProvider.speechText,
+                        style: const TextStyle(fontSize: 22.0),
                       ),
                     ),
                   ),
@@ -422,37 +416,7 @@ class _InventoryListviewState extends State<InventoryListview> {
 
               /// Show cancel speech garbage bin
               if (_showCancelSpeech)
-                Positioned(
-                    bottom: 150,
-                    right: 55,
-                    child: Column(
-                      children: [
-                        const Icon(Icons.delete_forever),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Icon(
-                          Icons.arrow_drop_up_rounded,
-                          color: AppTheme.mainGreen.withAlpha(30),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_up_rounded,
-                          color: AppTheme.mainGreen.withAlpha(60),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_up_rounded,
-                          color: AppTheme.mainGreen.withAlpha(120),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_up_rounded,
-                          color: AppTheme.mainGreen.withAlpha(180),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_up_rounded,
-                          color: AppTheme.mainGreen.withAlpha(250),
-                        ),
-                      ],
-                    )),
+                Positioned(bottom: 150, right: 55, child: CancelSpeechIcon()),
 
               /// Display dialog for user to confirm gemini modification
               if (_geminiResponse && _geminiModificationList.length >= 1)
@@ -552,6 +516,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                     actions: <Widget>[
                       TextButton(
                         onPressed: () async {
+                          /// Update all Gemini Modification
                           if (!_updatingInventory) {
                             setState(() {
                               _updatingInventory = true;
@@ -577,6 +542,7 @@ class _InventoryListviewState extends State<InventoryListview> {
                       ),
                       TextButton(
                         onPressed: () {
+                          /// User cancel updating, Do not update anything
                           setState(() {
                             // Close Dialog
                             _geminiResponse = false;
@@ -605,17 +571,6 @@ class _InventoryListviewState extends State<InventoryListview> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Text("How many ${item['name']} left after consumed."),
-              // const SizedBox(
-              //   height: 30,
-              // ),
-              // ModifyQuantity(
-              //   onQuantityChanged: (int newQuantity) {
-              //     _counter = newQuantity;
-              //   },
-              //   currentQuantity: item['currentQuantity'],
-              //   name: item['name'],
-              // ),
 
               const SizedBox(
                 height: 10,
@@ -747,58 +702,6 @@ class _InventoryListviewState extends State<InventoryListview> {
           ],
         );
       },
-    );
-  }
-}
-
-class AddItemWidget extends StatelessWidget {
-  const AddItemWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 40),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-        child: GestureDetector(
-          onTap: (() {
-            Navigator.popUntil(context, ModalRoute.withName('/homepage'));
-            Provider.of<IndexProvider>(context, listen: false)
-                .setSelectedIndex(3);
-          }),
-          child: Container(
-            decoration: AppTheme.widgetDeco(),
-            padding: const EdgeInsets.all(15),
-            child: const SizedBox(
-              height: 80,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Icon(Icons.add_outlined), Text("Add new item")],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class AddItemWidgetWithPrompt extends StatelessWidget {
-  final String nullPrompting;
-
-  const AddItemWidgetWithPrompt({super.key, required this.nullPrompting});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const AddItemWidget(),
-        Padding(
-          padding: EdgeInsets.only(
-              top: (MediaQuery.of(context).size.height * 0.48) - 135),
-          child: Center(child: Text(nullPrompting ?? "")),
-        ),
-      ],
     );
   }
 }
