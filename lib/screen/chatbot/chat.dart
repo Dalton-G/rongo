@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:rongo/model/message.dart';
 import 'package:rongo/utils/theme/theme.dart';
 import 'package:rongo/provider/chat_provider.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class ChatPage extends StatefulWidget {
   final Object? currentUser;
@@ -20,11 +21,13 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   get currentUser => widget.currentUser;
   final date = DateTime.now();
+  final speech = SpeechToText();
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, dynamic>> _inventory = [];
   final model = GenerativeModel(
       model: 'gemini-1.5-flash', apiKey: dotenv.env['GEMINI_API_KEY']!);
   bool _isLoading = false;
+  bool _isListening = false;
 
   @override
   void initState() {
@@ -55,6 +58,24 @@ class _ChatPageState extends State<ChatPage> {
     } catch (e) {
       print('Error: $e');
     }
+  }
+
+  Future<void> _startListening() async {
+    await speech.initialize();
+
+    speech.listen(
+      onResult: (result) {
+        if (result.recognizedWords.isNotEmpty) {
+          setState(() {
+            _controller.text = result.recognizedWords;
+          });
+        }
+      },
+    );
+
+    setState(() {
+      _isListening = true;
+    });
   }
 
   callGeminiModel(BuildContext buildContext) async {
@@ -181,8 +202,14 @@ class _ChatPageState extends State<ChatPage> {
                   hintText: "Type a message",
                   prefixIcon: IconButton(
                     color: AppTheme.mainGreen,
-                    icon: const Icon(Icons.image),
-                    onPressed: () {},
+                    icon: const Icon(Icons.mic),
+                    onPressed: () async {
+                      if (!_isListening) {
+                        await _startListening();
+                      } else {
+                        await speech.stop();
+                      }
+                    },
                   ),
                   suffixIcon: _isLoading
                       ? const Padding(

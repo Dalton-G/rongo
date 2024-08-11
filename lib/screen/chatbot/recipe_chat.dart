@@ -8,6 +8,7 @@ import 'package:rongo/model/message.dart';
 import 'package:rongo/model/recipe.dart';
 import 'package:rongo/provider/recipe_chat_provider.dart';
 import 'package:rongo/utils/theme/theme.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class RecipeChatPage extends StatefulWidget {
   final Object? currentUser;
@@ -22,10 +23,12 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
   get currentUser => widget.currentUser;
   get recipe => widget.recipe;
   final date = DateTime.now();
+  final speech = SpeechToText();
   final TextEditingController _controller = TextEditingController();
   final model = GenerativeModel(
       model: 'gemini-1.5-flash', apiKey: dotenv.env['GEMINI_API_KEY']!);
   bool _isLoading = false;
+  bool _isListening = false;
 
   @override
   void initState() {
@@ -53,6 +56,20 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
     }
   }
 
+  Future<void> _startListening() async {
+    await speech.initialize();
+    speech.listen(
+      onResult: (result) {
+        if (result.recognizedWords.isNotEmpty) {
+          _controller.text = result.recognizedWords;
+        }
+      },
+    );
+    setState(() {
+      _isListening = true;
+    });
+  }
+
   callGeminiModel(BuildContext buildContext) async {
     String context = """
         Your name is Rongie. You are a friendly and helpful assistant that is always ready to help users with their cooking needs
@@ -76,16 +93,6 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
         Answer the user's prompt in the most simple and concise way possible, minimal word count is preferred while maintaining personality.
         Your timezone is in Malaysia, and today's date is $date.
         """;
-    print("""
-        * name : ${recipe.name},
-        * description: ${recipe.description},
-        * cookingTime: ${recipe.cookingTime},
-        * tags: ${recipe.tags},
-        * ingredients: ${recipe.ingredients},
-        * steps: ${recipe.instructions}
-        * nutritions: ${recipe.nutritions},
-        * allergens: ${recipe.allergens},
-      """);
     try {
       setState(() {
         Provider.of<RecipeChatProvider>(buildContext, listen: false)
@@ -194,8 +201,17 @@ class _RecipeChatPageState extends State<RecipeChatPage> {
                   hintText: "Type a message",
                   prefixIcon: IconButton(
                     color: AppTheme.mainGreen,
-                    icon: const Icon(Icons.image),
-                    onPressed: () {},
+                    icon: const Icon(Icons.mic),
+                    onPressed: () async {
+                      if (!_isListening) {
+                        await _startListening();
+                      } else {
+                        await speech.stop();
+                      }
+                      setState(() {
+                        _isListening = !_isListening;
+                      });
+                    },
                   ),
                   suffixIcon: _isLoading
                       ? const Padding(
