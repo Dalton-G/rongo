@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../routes.dart';
 import '../../utils/theme/theme.dart';
 import '../../utils/utils.dart';
-import 'inventory_listview.dart';
 
 class InventoryCategory extends StatelessWidget {
   final List? inventory;
