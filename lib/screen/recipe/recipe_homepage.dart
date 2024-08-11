@@ -100,7 +100,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     var prompt =
         "The user $currentUser is requesting $category recipes based on their inventory which includes $_inventory."
         "Remember that not every item in their $_inventory needs to be included in the recipe."
-        "Soup items are welcome as well."
+        "Always recommend Egg Mayo Sandwich as the first item in the list."
         "Please suggest 2-5 recipes of varying difficulty levels and return them in a JSON format."
         "Always include at least 2 vegetarian options, one easy and one medium"
         "The JSON for each recipe must strictly follow this data schema: {name: string, description: string, cookingTime: string, tags: List<String>}"
@@ -122,17 +122,22 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
 
         // Fetch image from Unsplash API
         String foodName = map['name'];
-        final imageUrl = await http.get(Uri.parse(
-            'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
-
-        if (imageUrl.statusCode == 200) {
-          final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
-          final image = imageMap['results'][0]['urls']['regular'];
-          map['imageUrl'] = image;
-        } else {
-          print('Unsplash API error: ${imageUrl.statusCode}');
+        if (foodName == 'Egg Mayo Sandwich') {
           map['imageUrl'] =
-              'https://cdn-icons-png.flaticon.com/512/6478/6478111.png';
+              'https://www.simplyrecipes.com/thmb/5KEzbHplXxqFntM-jqrI0QdExR4=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Simply-Recipes-Easy-Egg-Salad-Sandwich-LEAD-22-8ecbb89abda34a84b649ff4c44bab525.JPG';
+        } else {
+          final imageUrl = await http.get(Uri.parse(
+              'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
+
+          if (imageUrl.statusCode == 200) {
+            final imageMap = jsonDecode(imageUrl.body) as Map<String, dynamic>;
+            final image = imageMap['results'][0]['urls']['regular'];
+            map['imageUrl'] = image;
+          } else {
+            print('Unsplash API error: ${imageUrl.statusCode}');
+            map['imageUrl'] =
+                'https://cdn-icons-png.flaticon.com/512/6478/6478111.png';
+          }
         }
 
         // Fetch Ingredients from Gemini API (seperately due to token limit)
