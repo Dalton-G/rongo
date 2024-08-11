@@ -62,14 +62,21 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
   }
 
   void _navigateToRecipeDetails(int index) {
-    final Recipe recipe = RecipeProvider().recipeList[index];
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            RecipeDetailsPage(recipe: recipe, currentUser: currentUser),
-      ),
-    );
+    final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
+    if (recipeProvider.recipeList
+            .isNotEmpty && //i think problem is here the list isn't populated
+        index < recipeProvider.recipeList.length) {
+      final Recipe recipe = recipeProvider.recipeList[index]; //get the list
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              RecipeDetailsPage(recipe: recipe, currentUser: currentUser),
+        ),
+      );
+    } else {
+      print("Error: Recipe list is empty or index is out of range.");
+    }
   }
 
   @override
