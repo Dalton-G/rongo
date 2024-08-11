@@ -52,7 +52,7 @@ class _ScannerState extends State<Scanner> {
         'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Unknown"'
         'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, the return the expected expiry date'
         'Also recommend storage method to keep the food fresh for longer time.'
-        'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
+        'Recommend the possible allergens(example: eggs, fish, milk, peanuts, nuts, sesame, crustacean, soya) in the food and whether the food is halal to make sure people eat carefully'
         '**For allergens, storage method, and halal, if you cannot find the information, use "Unknown" as the value.**'
         'Provide your response as a JSON object with the following keys: {"isFood": bool , "Item name": string, "Categories": string, "Ingredients": List of strings, "Expiry date": string(DD/MM/YYYY) or string(days to keep), "Storage method": string, "Allergens": List of strings, "Halal": String}.'
         'Do not return your result as Markdown.';
