@@ -1,5 +1,4 @@
 import 'package:provider/provider.dart';
-import 'package:rongo/model/recipe_meal_type.dart';
 import 'package:rongo/provider/Item_provider.dart';
 import 'package:rongo/provider/chat_provider.dart';
 import 'package:rongo/provider/meal_type_provider.dart';

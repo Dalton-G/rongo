@@ -62,14 +62,21 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
   }
 
   void _navigateToRecipeDetails(int index) {
-    final Recipe recipe = RecipeProvider().recipeList[index];
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            RecipeDetailsPage(recipe: recipe, currentUser: currentUser),
-      ),
-    );
+    final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
+    if (recipeProvider.recipeList
+            .isNotEmpty && //i think problem is here the list isn't populated
+        index < recipeProvider.recipeList.length) {
+      final Recipe recipe = recipeProvider.recipeList[index]; //get the list
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              RecipeDetailsPage(recipe: recipe, currentUser: currentUser),
+        ),
+      );
+    } else {
+      print("Error: Recipe list is empty or index is out of range.");
+    }
   }
 
   @override
@@ -92,7 +99,10 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     // Updated prompt to request multiple recipes with varying difficulty levels
     var prompt =
         "The user $currentUser is requesting $category recipes based on their inventory which includes $_inventory."
-        "Please suggest 2-3 recipes of varying difficulty levels and return them in a JSON format."
+        "Remember that not every item in their $_inventory needs to be included in the recipe."
+        "Soup items are welcome as well."
+        "Please suggest 2-5 recipes of varying difficulty levels and return them in a JSON format."
+        "Always include at least 2 vegetarian options, one easy and one medium"
         "The JSON for each recipe must strictly follow this data schema: {name: string, description: string, cookingTime: string, tags: List<String>}"
         "Include the origin of food in the tags."
         "Do not reply with any additional information other than the recipes in JSON format."

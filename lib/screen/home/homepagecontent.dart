@@ -218,7 +218,7 @@ class _HomePageContentState extends State<HomePageContent> {
                                 backgroundColor: Colors.white,
                                 roundedCorner: 25.0,
                                 child: Image.asset(
-                                  'lib/images/food.png',
+                                  'lib/images/homepagemeat.png',
                                   fit: BoxFit.contain,
                                 ),
                                 onTap: () {
@@ -259,7 +259,7 @@ class _HomePageContentState extends State<HomePageContent> {
                             SizedBox(
                               width: 80,
                               child: Text(
-                                "$MeatBestConsumeByToday Meats best consumed today",
+                                "$MeatBestConsumeByToday meats best consumed today",
                                 style: AppTheme.whiteSubtitleText,
                                 textAlign: TextAlign.center,
                               ),
