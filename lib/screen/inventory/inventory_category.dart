@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../routes.dart';
 import '../../utils/theme/theme.dart';
 import '../../utils/utils.dart';
-import 'inventory_listview.dart';
 
 class InventoryCategory extends StatelessWidget {
   final List? inventory;
@@ -26,16 +26,13 @@ class InventoryCategory extends StatelessWidget {
               padding: const EdgeInsets.all(10.0),
               child: GestureDetector(
                 onTap: (() {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => InventoryListview(
-                                inventory: inventory,
-                                fridgeId: fridgeId,
-                                inventoryFilter: InventoryFilter.total,
-                                currentCategory:
-                                    InventoryCategories.values[index].name,
-                              )));
+                  Navigator.pushNamed(context, Routes.inventoryListView,
+                      arguments: {
+                        'inventory': inventory,
+                        'fridgeId': fridgeId,
+                        'inventoryFilter': InventoryFilter.total,
+                        'currentCategory':InventoryCategories.values[index].name,
+                      });
                 }),
                 child: Container(
                   decoration: AppTheme.widgetDeco(),

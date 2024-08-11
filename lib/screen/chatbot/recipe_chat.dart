@@ -1,29 +1,30 @@
 // ignore_for_file: avoid_print
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:provider/provider.dart';
 import 'package:rongo/model/message.dart';
+import 'package:rongo/model/recipe.dart';
+import 'package:rongo/provider/recipe_chat_provider.dart';
 import 'package:rongo/utils/theme/theme.dart';
-import 'package:rongo/provider/chat_provider.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-class ChatPage extends StatefulWidget {
+class RecipeChatPage extends StatefulWidget {
   final Object? currentUser;
-  const ChatPage({super.key, this.currentUser});
+  final Recipe recipe;
+  const RecipeChatPage({super.key, this.currentUser, required this.recipe});
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<RecipeChatPage> createState() => _RecipeChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _RecipeChatPageState extends State<RecipeChatPage> {
   get currentUser => widget.currentUser;
+  get recipe => widget.recipe;
   final date = DateTime.now();
   final speech = SpeechToText();
   final TextEditingController _controller = TextEditingController();
-  final List<Map<String, dynamic>> _inventory = [];
   final model = GenerativeModel(
       model: 'gemini-1.5-flash', apiKey: dotenv.env['GEMINI_API_KEY']!);
   bool _isLoading = false;
@@ -32,81 +33,79 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    pullContextFromFirebase();
+    Future.delayed(const Duration(milliseconds: 1), () {
+      initialResponse(recipe, context);
+    });
   }
 
-  Future<void> pullContextFromFirebase() async {
-    final db = FirebaseFirestore.instance;
-    final docRef = db.collection('fridges').doc(currentUser["fridgeId"]);
-    try {
-      final docSnapshot = await docRef.get();
-      if (docSnapshot.exists) {
-        final inventory = docSnapshot.data()!['inventory'] as List<dynamic>;
-        final filteredInventory = inventory
-            .map((item) => {
-                  'name': item['name'],
-                  'currentQuantity': item['currentQuantity'],
-                  'expiryDate': item['expiryDate'],
-                })
-            .toList();
-        for (final item in filteredInventory) {
-          _inventory.add(item);
-        }
-      } else {
-        print("document does not exist");
-      }
-    } catch (e) {
-      print('Error: $e');
+  Future<void> initialResponse(Recipe recipe, BuildContext context) async {
+    String foodName = recipe.name;
+
+    final chatProvider =
+        Provider.of<RecipeChatProvider>(context, listen: false);
+    final messages = chatProvider.messages;
+
+    final messageExists = messages.any((message) =>
+        message.text ==
+        "I see that you're currently cooking $foodName! Do you have any questions regarding that? Or are you seeking assistance with something else?");
+    if (!messageExists) {
+      chatProvider.addMessage(Message(
+          text:
+              "I see that you're currently cooking $foodName! Do you have any questions regarding that? Or are you seeking assistance with something else?",
+          isUser: false));
     }
   }
 
   Future<void> _startListening() async {
     await speech.initialize();
-
     speech.listen(
       onResult: (result) {
         if (result.recognizedWords.isNotEmpty) {
-          setState(() {
-            _controller.text = result.recognizedWords;
-          });
+          _controller.text = result.recognizedWords;
         }
       },
     );
-
     setState(() {
       _isListening = true;
     });
   }
 
   callGeminiModel(BuildContext buildContext) async {
-    var context =
-        "Your name is Rongie. You are a friendly and helpful assistant that is always ready to help users with their cooking needs"
-        "Your friend, $currentUser is asking you a question about cooking and recipe, please provide a helpful answer in a short and conversational manner."
-        "You are prohibited to reply in a markdown format, and you should not provide any code snippets or programming-related answers."
-        "You may use any many emojis as you like to make the conversation more engaging and fun!"
-        "Don't use any formatting as it is not supported in this chat interface. Plain text will do"
-        "Avoid using any technical jargon or terms that are too complex for a general audience to understand."
-        "Avoid using point-form or bullet points. Write in full sentences or short paragraphs."
-        "If instruction requires steps, you may format it in a step-by-step manner using numbers, such as 1., 2., 3., etc."
-        "The user currently have these items in their inventory $_inventory, so you can suggest recipes based on these items if they asked."
-        "You do not have to introduce yourself unless explicitly stated by the user."
-        "Answer the user's prompt in the most simple and concise way possible, minimal word count is preferred while maintaining personality"
-        "Your timezone is in Malaysia, and today's date is $date";
+    String context = """
+        Your name is Rongie. You are a friendly and helpful assistant that is always ready to help users with their cooking needs
+        Your friend, $currentUser is asking you a question about a recipe, please provide a helpful answer in a short and conversational manner.
+        Full Context of the recipe:
+        * name : ${recipe.name},
+        * description: ${recipe.description},
+        * cookingTime: ${recipe.cookingTime},
+        * tags: ${recipe.tags},
+        * ingredients: ${recipe.ingredients},
+        * steps: ${recipe.instructions}
+        * nutritions: ${recipe.nutritions},
+        * allergens: ${recipe.allergens},
+        You are prohibited to reply in a markdown format, and you should not provide any code snippets or programming-related answers.
+        You may use any many emojis as you like to make the conversation more engaging and fun!
+        Don't use any formatting as it is not supported in this chat interface. Plain text will do
+        Avoid using any technical jargon or terms that are too complex for a general audience to understand.
+        Avoid using point-form or bullet points. Write in full sentences or short paragraphs.
+        If instruction requires steps, you may format it in a step-by-step manner using numbers, such as 1., 2., 3., etc.
+        You do not have to introduce yourself unless explicitly stated by the user."
+        Answer the user's prompt in the most simple and concise way possible, minimal word count is preferred while maintaining personality.
+        Your timezone is in Malaysia, and today's date is $date.
+        """;
     try {
-      setState(
-        () {
-          Provider.of<ChatProvider>(buildContext, listen: false)
-              .addMessage(Message(text: _controller.text.trim(), isUser: true));
-          _isLoading = true;
-        },
-      );
+      setState(() {
+        Provider.of<RecipeChatProvider>(buildContext, listen: false)
+            .addMessage(Message(text: _controller.text, isUser: true));
+        _isLoading = true;
+      });
 
       final prompt = context + _controller.text.trim();
       final content = [Content.text(prompt)];
       final response = await model.generateContent(content);
 
       setState(() {
-        Provider.of<ChatProvider>(buildContext, listen: false)
+        Provider.of<RecipeChatProvider>(buildContext, listen: false)
             .addMessage(Message(text: response.text!, isUser: false));
         _isLoading = false;
       });
@@ -117,7 +116,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final chatProvider = Provider.of<ChatProvider>(context);
+    final recipeChatProvider = Provider.of<RecipeChatProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -144,9 +143,9 @@ class _ChatPageState extends State<ChatPage> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: chatProvider.messages.length,
+              itemCount: recipeChatProvider.messages.length,
               itemBuilder: (context, index) {
-                final Message message = chatProvider.messages[index];
+                final Message message = recipeChatProvider.messages[index];
                 return ListTile(
                   title: Align(
                     alignment: message.isUser
@@ -209,6 +208,9 @@ class _ChatPageState extends State<ChatPage> {
                       } else {
                         await speech.stop();
                       }
+                      setState(() {
+                        _isListening = !_isListening;
+                      });
                     },
                   ),
                   suffixIcon: _isLoading
