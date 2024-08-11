@@ -23,7 +23,6 @@ class _ItemVariableWidgetState extends State<ItemVariableWidget> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     widget.controller.text = toBeginningOfSentenceCase(widget.output);
 
