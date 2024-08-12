@@ -274,7 +274,7 @@ class _ScannerState extends State<Scanner> {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 10.0, bottom: 100),
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 70),
                       child: result.isEmpty
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
