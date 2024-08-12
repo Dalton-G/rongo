@@ -49,10 +49,10 @@ class _ScannerState extends State<Scanner> {
         'Determine the item name in the photo and decide which category are they belong to with the provided choices including Fruits, Vegetables, Meat, Fish, Condiments, Leftovers or Others.'
         'All the cooked food shall be considered as leftovers'
         'If the item scanned is not a food, simply return false for the isFood column in the response and leave the other columns as none'
-        'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Not visible"'
+        'If no ingredient table is found, try to get the ingredients from online resources, make sure the item name matches with the ingredient table, or else just return "Unknown"'
         'If the food is vegetable or fruits, identify how many days can the food be kept to be consumed safely, the return the expected expiry date'
         'Also recommend storage method to keep the food fresh for longer time.'
-        'Recommend the possible allergens in the food and whether the food is halal to make sure people eat carefully'
+        'Recommend the possible allergens(example: eggs, fish, milk, peanuts, nuts, sesame, crustacean, soya) in the food and whether the food is halal to make sure people eat carefully'
         '**For allergens, storage method, and halal, if you cannot find the information, use "Unknown" as the value.**'
         'Provide your response as a JSON object with the following keys: {"isFood": bool , "Item name": string, "Categories": string, "Ingredients": List of strings, "Expiry date": string(DD/MM/YYYY) or string(days to keep), "Storage method": string, "Allergens": List of strings, "Halal": String}.'
         'Do not return your result as Markdown.';
@@ -89,6 +89,11 @@ class _ScannerState extends State<Scanner> {
   Future<String?> _onItemFound() async {
     try {
       final image = await photoPicker.takePhoto();
+      if (image == null || image.isEmpty) {
+        // No photo was taken, return without doing anything
+        return null;
+      }
+
       _isFollowUp = result.isNotEmpty;
       final itemFound = await validateImage(image);
       final response =
@@ -97,14 +102,13 @@ class _ScannerState extends State<Scanner> {
       var tempResult = _isFollowUp
           ? result.map((key, value) => value == tempResponse[key]
               ? MapEntry(key, value)
-              : value == "Not visible"
+              : value == "Unknown"
                   ? MapEntry(key, tempResponse[key])
                   : MapEntry(key, value))
           : tempResponse;
 
       setState(() {
         img = image;
-
         result = tempResult;
       });
     } on PhotoPickerException {

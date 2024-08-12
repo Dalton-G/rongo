@@ -100,7 +100,6 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     var prompt =
         "The user $currentUser is requesting $category recipes based on their inventory which includes $_inventory."
         "Remember that not every item in their $_inventory needs to be included in the recipe."
-        "Soup items are welcome as well."
         "Please suggest 2-5 recipes of varying difficulty levels and return them in a JSON format."
         "Always include at least 2 vegetarian options, one easy and one medium"
         "The JSON for each recipe must strictly follow this data schema: {name: string, description: string, cookingTime: string, tags: List<String>}"
@@ -122,6 +121,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
 
         // Fetch image from Unsplash API
         String foodName = map['name'];
+
         final imageUrl = await http.get(Uri.parse(
             'https://api.unsplash.com/search/photos/?client_id=$unsplashKey&query=$foodName'));
 
