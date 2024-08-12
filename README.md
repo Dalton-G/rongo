@@ -1,26 +1,27 @@
 # Rongo
 ![rongobanner](https://github.com/Dalton-G/rongo/blob/master/screenshots/rongobanner.png)
-## Reduce waste, make cooking easy, and keep it fresh <3
 
+## Reduce waste, make cooking easy, and keep it fresh <3
+Rongo is a smart app designed to minimize food waste and simplify cooking while promoting sustainability. With an intuitive homepage overview, Rongo tracks new, expiring, and expired items in your fridge. Use speech-to-text to log consumed items effortlessly, and share your fridge with family members, allowing them to add notes and photos. The app's scanning feature, powered by the Gemini API, provides detailed information on items, including expiry dates, allergens, and storage tips. You can also use OCR to manage grocery receipts and automatically update your fridge inventory. Rongo generates recipe suggestions based on your fridge's contents and features a chatbot for cooking assistance. By integrating the Gemini API, Rongo enhances user experience through accurate speech-to-text, advanced scanning, and interactive chatbot capabilities, aligning with UN Sustainable Development Goals by promoting resource efficiency and reducing food waste.
 
 ## Features
-### Care for your virtual pet via the completion of goals:
-- Cosmetics are available for purchase, further motivating users to complete their goals.
-- Users can add personal goals both financial/non-financial as a means to earn in-game currency, free-of-charge.
-### Get a centralized debt tracking and overview:
-- Gain a clear overview of your entire debt situation with categorized breakdowns and progress visualizations.
-- Link your cards and gain access to an 'autopay' feature to deduct monthly installments easily.
-### Apply and sync your AKPK DMP:
-- Users can now apply for AKPK's DMP program via a streamlined digital system.
-### Budgeting, planning, and expenses tracking:
-- Track all your expenses in one place.
-- Get data visualizations on your spendings, either broken down to each and every category or as a whole!
-### Equip yourselves with knowledge on our financial literacy hub:
-- Get a feed of curated articles tailored to your preferences, likings, and recent activities.
-- Subscribe and follow specific authors to further personalize your feed.
-### Connect with other users on the community exchange forum:
-- Access a social media feed from within the application and interact with other users.
-- Share your thoughts and feelings with the world instantaneously.
+### 🌱 Revolutionize Your Kitchen
+With Rongo, you’ll never forget what’s in your fridge again. The homepage provides a clear, at-a-glance overview of all your groceries—whether they’re new, expiring, or past their prime. Say goodbye to food waste with smart reminders and intuitive tracking.
+
+### 🎙️ Talk to Your Fridge
+Consumed an item? Just tell your fridge! Use speech-to-text (STT) to effortlessly update your inventory. For example, simply say, "I ate one green coral today," and watch your stock levels adjust in real-time.
+
+### 👨‍👩‍👧‍👦 Share Your Fridge, Share Your Life
+Rongo makes it easy to manage your household’s food inventory. Share a virtual fridge with family members, and let everyone stick photos or leave notes for each other—perfect for reminders, recipes, or just a little love
+
+### 📝 Heartwarming Notes & Handy Lists
+The notes page is your go-to for leaving messages for family members or jotting down reminders. Whether it’s reminding Mom to pick up milk or leaving a heartwarming note for a loved one, Rongo keeps everyone connected. Plus, dictate your grocery list aloud, and Rongo will turn it into a neatly written list—shopping made simple!
+
+### 📸 Smart Scanning for Smarter Shopping
+Scan your groceries to get all the details you need—expiry dates, allergens, storage tips, and more. Add items directly to your temporary grocery basket, and let our receipt OCR automatically update quantities. With Rongo, grocery management is seamless and efficient.
+
+### 🍲 Recipe Generator & Cooking Assistant
+Need meal inspiration? Rongo generates recipes based on what’s in your fridge, complete with allergen information. And if you need help in the kitchen, our friendly chatbot, Rongie, is there to guide you with adjustments, tips, and answers to all your cooking questions.
 
 ## Screenshots
 ![firstpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/2.png?raw=true)
