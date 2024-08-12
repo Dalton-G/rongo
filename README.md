@@ -55,5 +55,6 @@
 - loading_indicator: ^3.1.1
 - collection: ^1.18.0
 - http: ^1.2.2
+
 ## License
 - [MIT License](https://github.com/Dalton-G/rongo/blob/main/LICENSE)
