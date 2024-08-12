@@ -89,6 +89,11 @@ class _ScannerState extends State<Scanner> {
   Future<String?> _onItemFound() async {
     try {
       final image = await photoPicker.takePhoto();
+      if (image == null || image.isEmpty) {
+        // No photo was taken, return without doing anything
+        return null;
+      }
+
       _isFollowUp = result.isNotEmpty;
       final itemFound = await validateImage(image);
       final response =
@@ -104,7 +109,6 @@ class _ScannerState extends State<Scanner> {
 
       setState(() {
         img = image;
-
         result = tempResult;
       });
     } on PhotoPickerException {
@@ -270,7 +274,7 @@ class _ScannerState extends State<Scanner> {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 10.0, bottom: 70),
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 100),
                       child: result.isEmpty
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
