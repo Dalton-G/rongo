@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:rongo/model/item.dart';
 import 'package:rongo/firestore.dart';
 
@@ -27,15 +27,29 @@ Future<bool> addItemToFridge(Item item, fridgeID) async {
         int expiredDayLeft = extractNumber(item.expiryDate!);
         expiryDate = addedDate
             .add(Duration(days: expiredDayLeft)); //Convert Day left to DateTime
-        item.expiryDate = expiryDate!.toIso8601String();
+        item.expiryDate = expiryDate.toIso8601String();
       } else if (item.expiryDate == 'Unknown') {
         item.expiryDate = null;
       } else {
-        try {
-          expiryDate = DateTime.parse(item.expiryDate!);
-          item.expiryDate = expiryDate!.toIso8601String();
-        } catch (e) {
-          // If parsing fails, set expiryDate to null
+
+        List<String> formats = ["yyyy-MM-dd", "dd MMM yyyy", "dd/MM/yyyy"];
+        DateTime? expiryDate;
+
+        for (String format in formats) {
+          try {
+            DateFormat dateFormat = DateFormat(format);
+            expiryDate = dateFormat.parse(item.expiryDate!);
+            item.expiryDate = expiryDate.toIso8601String();
+            break;
+          } catch (e) {
+            // Continue to the next format if parsing fails
+            continue;
+          }
+        }
+
+        if (expiryDate == null) {
+          // If all formats fail, set expiryDate to null
+          print('Parsing failed, setting expiryDate to null');
           item.expiryDate = null;
         }
       }
