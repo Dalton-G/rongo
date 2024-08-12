@@ -27,6 +27,7 @@ class _ModifyQuantityState extends State<ModifyQuantity> {
     super.initState();
     _counter =
         widget.currentQuantity; // Initialize _counter with currentQuantity
+    widget.onQuantityChanged(_counter);
   }
 
   void _incrementCounter() {
