@@ -22,15 +22,15 @@
 - Share your thoughts and feelings with the world instantaneously.
 
 ## Screenshots
-![firstpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/2.png?raw=true)
-![secondpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/3.png?raw=true)
-![thirdpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/4.png?raw=true)
-![fourthpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/5.png?raw=true)
-![fifthpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/6.png?raw=true)
-![sixthpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/7.png?raw=true)
-![seventhpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/8.png?raw=true)
-![eighthpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/9.png?raw=true)
-![ninthpage](https://github.com/Dalton-G/rongo/blob/main/screenshots/10.png?raw=true)
+![firstpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/2.png?raw=true)
+![secondpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/3.png?raw=true)
+![thirdpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/4.png?raw=true)
+![fourthpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/5.png?raw=true)
+![fifthpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/6.png?raw=true)
+![sixthpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/7.png?raw=true)
+![seventhpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/8.png?raw=true)
+![eighthpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/9.png?raw=true)
+![ninthpage](https://github.com/Dalton-G/rongo/blob/master/screenshots/10.png)
 
 ## Dependencies used
 - cupertino_icons: ^1.0.6
