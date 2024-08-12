@@ -33,9 +33,9 @@ class Item {
       this.category = "Others",
       this.image})
       : addedDate = dateTime ?? DateTime.now() {
-    expiryDate = expiryDate == "Not visible" ? "Unknown" : expiryDate;
-    ingredients = ingredients == "Not visible" ? ["Unknown"] : ingredients;
-    allergen = allergen == "Not visible" ? ["Unknown"] : allergen;
+    expiryDate = expiryDate == "Unknown" ? "Unknown" : expiryDate;
+    ingredients = ingredients == "Unknown" ? ["Unknown"] : ingredients;
+    allergen = allergen == "Unknown" ? ["Unknown"] : allergen;
   }
 
   Map<String, dynamic> toMap() {
